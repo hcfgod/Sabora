@@ -3,7 +3,7 @@ project "Engine"
     kind "StaticLib"
     language "C++"
     cppdialect "C++20"
-    staticruntime "On"
+    staticruntime "Off"
 
     targetdir ("%{wks.location}/bin/%{cfg.buildcfg}_%{cfg.platform}/%{prj.name}")
     objdir    ("%{wks.location}/obj/%{cfg.buildcfg}_%{cfg.platform}/%{prj.name}")
@@ -25,6 +25,8 @@ project "Engine"
         "Vendor/SDL/include",
     }
 
+    libdirs { "%{wks.basedir}/Engine/Vendor/SDL/lib" }
+
     -- spdlog as header-only library
     defines { "SPDLOG_HEADER_ONLY", "SPDLOG_NO_EXCEPTIONS" }
 
@@ -35,7 +37,6 @@ project "Engine"
         links { "setupapi", "winmm", "imm32", "version", "ole32", "oleaut32", "uuid" }
         buildoptions { "/utf-8" }
         defines { "_CRT_SECURE_NO_WARNINGS", "NOMINMAX" }
-        libdirs { "../Engine/Vendor/SDL/lib" }
 
     filter { "system:windows", "configurations:Debug" }
         links { "SDL3-static-debug.lib" }
@@ -46,11 +47,19 @@ project "Engine"
         runtime "Release"
 
     filter "system:macosx"
-        libdirs { "../Engine/Vendor/SDL/lib" }
-        links { "SDL3-static.a" }
+        links { "libSDL3.a" }
+        -- macOS system libraries needed by SDL3
+        links { "CoreAudio.framework", 
+                "CoreVideo.framework", 
+                "IOKit.framework", 
+                "Cocoa.framework", 
+                "Carbon.framework", 
+                "ForceFeedback.framework",
+                "AVFoundation.framework", 
+                "Metal.framework", 
+                "QuartzCore.framework" }
 
     filter "system:linux"
-        libdirs { "../Engine/Vendor/SDL/lib" }
-        links { "SDL3-static.a" }
+        links { "libSDL3.a" }
 
     filter {}

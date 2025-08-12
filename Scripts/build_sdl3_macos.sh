@@ -69,35 +69,77 @@ mkdir -p "$BUILD_DIR"
 
 echo "Building SDL3 with CMake..."
 
-# Configure SDL3 with CMake
+# Configure SDL3 with CMake (unified with Windows options, tuned for macOS)
 cmake_args=(
-    -S "$SDL_DIR"
-    -B "$BUILD_DIR"
-    -DSDL_STATIC=ON
-    -DSDL_SHARED=OFF
-    -DSDL_TEST=OFF
-    -DSDL_EXAMPLES=OFF
-    -DSDL_INSTALL_TESTS=OFF
-    -DSDL_VIDEO_OPENGL=ON
-    -DSDL_VIDEO_VULKAN=ON
-    -DSDL_VIDEO_METAL=ON
-    -DSDL_AUDIO=ON
-    -DSDL_JOYSTICK=ON
-    -DSDL_HAPTIC=ON
-    -DSDL_POWER=ON
-    -DSDL_FILE=ON
-    -DSDL_LOADSO=ON
-    -DSDL_THREADS=ON
-    -DSDL_TIMERS=ON
-    -DSDL_ATOMIC=ON
-    -DSDL_CPUINFO=ON
-    -DSDL_EVENTS=ON
-    -DSDL_VIDEO=ON
-    -DSDL_RENDER=ON
-    -DSDL_SENSOR=ON
-    -DSDL_LOCALE=ON
-    -DSDL_MISC=ON
-    -DSDL_HIDAPI=ON
+        "-S", "$sdlDir"
+    "-B", "$buildDir"
+
+    # Build configuration
+    "-DCMAKE_BUILD_TYPE=Release"
+    "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+
+    # Build static, not shared, and avoid installing extras
+    "-DSDL_STATIC=ON"
+    "-DSDL_SHARED=OFF"
+    "-DSDL_INSTALL=OFF"
+    "-DSDL_TESTS=OFF"
+    "-DSDL_EXAMPLES=OFF"
+    "-DSDL_INSTALL_TESTS=OFF"
+    "-DSDL_DEPS_SHARED=OFF"
+    "-DSDL_RPATH=OFF"
+
+    # Subsystems (Windows-specific)
+    "-DSDL_AUDIO=ON"
+    "-DSDL_VIDEO=ON"
+    "-DSDL_GPU=ON"
+    "-DSDL_RENDER=ON"
+    "-DSDL_CAMERA=ON"
+    "-DSDL_JOYSTICK=ON"
+    "-DSDL_HAPTIC=ON"
+    "-DSDL_HIDAPI=ON"
+    "-DSDL_POWER=ON"
+    "-DSDL_SENSOR=ON"
+    "-DSDL_DIALOG=ON"
+
+    # Windows backends
+    "-DSDL_DIRECTX=ON"
+    "-DSDL_RENDER_D3D=ON"
+    "-DSDL_RENDER_D3D11=ON"
+    "-DSDL_RENDER_D3D12=ON"
+    "-DSDL_RENDER_GPU=ON"
+    "-DSDL_RENDER_VULKAN=ON"
+    "-DSDL_WASAPI=ON"
+    "-DSDL_XINPUT=ON"
+
+    # Graphics APIs
+    "-DSDL_OPENGL=ON"
+    "-DSDL_OPENGLES=ON"
+    "-DSDL_VULKAN=ON"
+
+    # Audio backends
+    "-DSDL_DISKAUDIO=ON"
+    "-DSDL_DUMMYAUDIO=ON"
+
+    # Video backends
+    "-DSDL_DUMMYVIDEO=ON"
+    "-DSDL_OFFSCREEN=ON"
+
+    # Camera backends
+    "-DSDL_DUMMYCAMERA=ON"
+
+    # Input backends
+    "-DSDL_VIRTUAL_JOYSTICK=ON"
+
+    # CPU optimizations
+    "-DSDL_ASSEMBLY=ON"
+    "-DSDL_AVX=ON"
+    "-DSDL_AVX2=ON"
+    "-DSDL_AVX512F=ON"
+    "-DSDL_SSE=ON"
+    "-DSDL_SSE2=ON"
+    "-DSDL_SSE3=ON"
+    "-DSDL_SSE4_1=ON"
+    "-DSDL_SSE4_2=ON"
 )
 
 echo "Configuring SDL3..."
@@ -116,42 +158,38 @@ INCLUDE_DIR="$ROOT_DIR/Engine/Vendor/SDL/include"
 mkdir -p "$LIB_DIR"
 
 # Copy the static library - CMake outputs it as libSDL3-static.a
-LIB_FILE="$BUILD_DIR/libSDL3-static.a"
-LIB_FILE_DEBUG="$BUILD_DIR/Debug/libSDL3-static.a"
+LIB_FILE="$BUILD_DIR/libSDL3.a"
+LIB_FILE_DEBUG="$BUILD_DIR/libSDL3.a"
 
 if [[ -f "$LIB_FILE" ]]; then
     cp "$LIB_FILE" "$LIB_DIR/"
     cp "$LIB_FILE" "$LIB_DIR/libSDL3.a"
-    echo "Copied libSDL3-static.a to $LIB_DIR (renamed to libSDL3.a)"
+    echo "Copied libSDL3.a to $LIB_DIR"
 elif [[ -f "$LIB_FILE_DEBUG" ]]; then
     cp "$LIB_FILE_DEBUG" "$LIB_DIR/"
     cp "$LIB_FILE_DEBUG" "$LIB_DIR/libSDL3.a"
-    echo "Copied libSDL3-static.a (Debug) to $LIB_DIR (renamed to libSDL3.a)"
+    echo "Copied libSDL3.a (Debug) to $LIB_DIR"
 else
     echo "Warning: SDL3 library not found. Checking build directory structure..."
     find "$BUILD_DIR" -name "*.a" -exec basename {} \;
 fi
 
-# Also copy to the Premake5 output directory for linking
-# Copy to both Debug and Release directories to handle both build configurations
-PREMAKE_LIB_DIR_RELEASE="$ROOT_DIR/Build/bin/Release_x64/SDL3"
-PREMAKE_LIB_DIR_DEBUG="$ROOT_DIR/Build/bin/Debug_x64/SDL3"
-mkdir -p "$PREMAKE_LIB_DIR_RELEASE"
-mkdir -p "$PREMAKE_LIB_DIR_DEBUG"
+# Also copy to Premake output directories for convenience
+for cfg in Debug_x64 Release_x64 Debug_ARM64 Release_ARM64; do
+    PREMAKE_LIB_DIR="$ROOT_DIR/Build/bin/$cfg/SDL3"
+    mkdir -p "$PREMAKE_LIB_DIR"
+    if [[ -f "$LIB_FILE" ]]; then
+        cp "$LIB_FILE" "$PREMAKE_LIB_DIR/libSDL3.a"
+    elif [[ -f "$LIB_FILE_DEBUG" ]]; then
+        cp "$LIB_FILE_DEBUG" "$PREMAKE_LIB_DIR/libSDL3.a"
+    fi
+done
+echo "Copied libSDL3.a to Premake output directories (Debug/Release x64 and ARM64)"
 
-if [[ -f "$LIB_FILE" ]]; then
-    cp "$LIB_FILE" "$PREMAKE_LIB_DIR_RELEASE/libSDL3.a"
-    cp "$LIB_FILE" "$PREMAKE_LIB_DIR_DEBUG/libSDL3.a"
-    echo "Copied libSDL3-static.a to Premake5 output directories as libSDL3.a (both Debug and Release)"
-elif [[ -f "$LIB_FILE_DEBUG" ]]; then
-    cp "$LIB_FILE_DEBUG" "$PREMAKE_LIB_DIR_RELEASE/libSDL3.a"
-    cp "$LIB_FILE_DEBUG" "$PREMAKE_LIB_DIR_DEBUG/libSDL3.a"
-    echo "Copied libSDL3-static.a (Debug) to Premake5 output directories as libSDL3.a (both Debug and Release)"
-fi
-
-# Copy the generated SDL_build_config.h file - CMake puts it in include-config-release/build_config/
+# Copy the generated SDL_build_config.h file
+# Path depends on build type; prefer Release, fallback to RelWithDebInfo
 BUILD_CONFIG_FILE="$BUILD_DIR/include-config-release/build_config/SDL_build_config.h"
-BUILD_CONFIG_FILE_DEBUG="$BUILD_DIR/include-config-debug/build_config/SDL_build_config.h"
+BUILD_CONFIG_FILE_DEBUG="$BUILD_DIR/include-config-relwithdebinfo/build_config/SDL_build_config.h"
 
 if [[ -f "$BUILD_CONFIG_FILE" ]]; then
     cp "$BUILD_CONFIG_FILE" "$INCLUDE_DIR/"

@@ -3,7 +3,7 @@ project "Sandbox"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++20"
-    staticruntime "On"
+    staticruntime "Off"
 
     targetdir ("%{wks.location}/bin/%{cfg.buildcfg}_%{cfg.platform}/%{prj.name}")
     objdir    ("%{wks.location}/obj/%{cfg.buildcfg}_%{cfg.platform}/%{prj.name}")
@@ -26,10 +26,10 @@ project "Sandbox"
         "../Engine/Vendor/SDL/include",
     }
 
-    -- Link against Engine and static libraries
+    -- Link against Engine (which already contains SDL3)
     links { "Engine" }
 
-    -- SDL3 static linking
+    -- SDL3 static linking is handled by Engine project
     defines { "SDL_STATIC" }
 
     filter "system:windows"

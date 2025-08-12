@@ -75,33 +75,75 @@ echo "Building SDL3 with CMake..."
 
 # Configure SDL3 with CMake
 cmake_args=(
-    -S "$SDL_DIR"
-    -B "$BUILD_DIR"
-    -DSDL_STATIC=ON
-    -DSDL_SHARED=OFF
-    -DSDL_TEST=OFF
-    -DSDL_EXAMPLES=OFF
-    -DSDL_INSTALL_TESTS=OFF
-    -DSDL_VIDEO_OPENGL=ON
-    -DSDL_VIDEO_VULKAN=ON
-    -DSDL_VIDEO_METAL=ON
-    -DSDL_AUDIO=ON
-    -DSDL_JOYSTICK=ON
-    -DSDL_HAPTIC=ON
-    -DSDL_POWER=ON
-    -DSDL_FILE=ON
-    -DSDL_LOADSO=ON
-    -DSDL_THREADS=ON
-    -DSDL_TIMERS=ON
-    -DSDL_ATOMIC=ON
-    -DSDL_CPUINFO=ON
-    -DSDL_EVENTS=ON
-    -DSDL_VIDEO=ON
-    -DSDL_RENDER=ON
-    -DSDL_SENSOR=ON
-    -DSDL_LOCALE=ON
-    -DSDL_MISC=ON
-    -DSDL_HIDAPI=ON
+        "-S", "$sdlDir"
+    "-B", "$buildDir"
+
+    # Build configuration
+    "-DCMAKE_BUILD_TYPE=Release"
+    "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+
+    # Build static, not shared, and avoid installing extras
+    "-DSDL_STATIC=ON"
+    "-DSDL_SHARED=OFF"
+    "-DSDL_INSTALL=OFF"
+    "-DSDL_TESTS=OFF"
+    "-DSDL_EXAMPLES=OFF"
+    "-DSDL_INSTALL_TESTS=OFF"
+    "-DSDL_DEPS_SHARED=OFF"
+    "-DSDL_RPATH=OFF"
+
+    # Subsystems (Windows-specific)
+    "-DSDL_AUDIO=ON"
+    "-DSDL_VIDEO=ON"
+    "-DSDL_GPU=ON"
+    "-DSDL_RENDER=ON"
+    "-DSDL_CAMERA=ON"
+    "-DSDL_JOYSTICK=ON"
+    "-DSDL_HAPTIC=ON"
+    "-DSDL_HIDAPI=ON"
+    "-DSDL_POWER=ON"
+    "-DSDL_SENSOR=ON"
+    "-DSDL_DIALOG=ON"
+
+    # Windows backends
+    "-DSDL_DIRECTX=ON"
+    "-DSDL_RENDER_D3D=ON"
+    "-DSDL_RENDER_D3D11=ON"
+    "-DSDL_RENDER_D3D12=ON"
+    "-DSDL_RENDER_GPU=ON"
+    "-DSDL_RENDER_VULKAN=ON"
+    "-DSDL_WASAPI=ON"
+    "-DSDL_XINPUT=ON"
+
+    # Graphics APIs
+    "-DSDL_OPENGL=ON"
+    "-DSDL_OPENGLES=ON"
+    "-DSDL_VULKAN=ON"
+
+    # Audio backends
+    "-DSDL_DISKAUDIO=ON"
+    "-DSDL_DUMMYAUDIO=ON"
+
+    # Video backends
+    "-DSDL_DUMMYVIDEO=ON"
+    "-DSDL_OFFSCREEN=ON"
+
+    # Camera backends
+    "-DSDL_DUMMYCAMERA=ON"
+
+    # Input backends
+    "-DSDL_VIRTUAL_JOYSTICK=ON"
+
+    # CPU optimizations
+    "-DSDL_ASSEMBLY=ON"
+    "-DSDL_AVX=ON"
+    "-DSDL_AVX2=ON"
+    "-DSDL_AVX512F=ON"
+    "-DSDL_SSE=ON"
+    "-DSDL_SSE2=ON"
+    "-DSDL_SSE3=ON"
+    "-DSDL_SSE4_1=ON"
+    "-DSDL_SSE4_2=ON"
 )
 
 echo "Configuring SDL3..."
