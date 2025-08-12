@@ -6,11 +6,67 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 SDL_DIR="$ROOT_DIR/Engine/Vendor/SDL"
 BUILD_DIR="$SDL_DIR/build"
 
-# Check if CMake is available
-if ! command -v cmake >/dev/null 2>&1; then
-  echo "CMake is required to build SDL3. Please install CMake." >&2
-  exit 1
+# Function to check if a command is available
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Function to detect package manager
+detect_package_manager() {
+    if command_exists apt-get; then
+        echo "apt"
+    elif command_exists dnf; then
+        echo "dnf"
+    elif command_exists yum; then
+        echo "yum"
+    elif command_exists pacman; then
+        echo "pacman"
+    elif command_exists zypper; then
+        echo "zypper"
+    else
+        echo "unknown"
+    fi
+}
+
+# Function to install CMake
+install_cmake() {
+    echo "CMake not found. Installing CMake..." >&2
+    
+    local pkg_manager=$(detect_package_manager)
+    case $pkg_manager in
+        "apt")
+            sudo apt-get update
+            sudo apt-get install -y cmake build-essential
+            ;;
+        "dnf"|"yum")
+            sudo $pkg_manager install -y cmake gcc gcc-c++ make
+            ;;
+        "pacman")
+            sudo pacman -S --noconfirm cmake base-devel
+            ;;
+        "zypper")
+            sudo zypper install -y cmake gcc-c++ make
+            ;;
+        *)
+            echo "Unsupported package manager. Please install CMake manually." >&2
+            exit 1
+            ;;
+    esac
+    
+    if command_exists cmake; then
+        echo "CMake installed successfully!" >&2
+    else
+        echo "Failed to install CMake. Please install manually." >&2
+        exit 1
+    fi
+}
+
+# Check and install CMake if needed
+if ! command_exists cmake; then
+    install_cmake
 fi
+
+echo "CMake is available!" >&2
 
 # Create build directory
 mkdir -p "$BUILD_DIR"

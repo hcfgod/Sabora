@@ -4,10 +4,37 @@ Param(
 
 $ErrorActionPreference = 'Stop'
 
-# Check if CMake is available
-if (-not (Get-Command cmake -ErrorAction SilentlyContinue)) {
-    throw "CMake is required to build SDL3. Please install CMake and add it to your PATH."
+# Function to check if a command is available
+function Test-Command($command) {
+    return [bool](Get-Command $command -ErrorAction SilentlyContinue)
 }
+
+# Function to install CMake using winget
+function Install-CMake {
+    Write-Host "CMake not found. Installing CMake using winget..." -ForegroundColor Yellow
+    
+    if (Test-Command winget) {
+        Write-Host "Installing CMake..." -ForegroundColor Green
+        winget install --id Kitware.CMake -e --accept-source-agreements --accept-package-agreements
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "CMake installed successfully!" -ForegroundColor Green
+            Write-Host "Please restart your terminal/PowerShell and run this script again." -ForegroundColor Yellow
+            Write-Host "This ensures the updated PATH is available." -ForegroundColor Yellow
+            exit 0
+        } else {
+            throw "Failed to install CMake using winget. Please install CMake manually from https://cmake.org/"
+        }
+    } else {
+        throw "winget not available. Please install CMake manually from https://cmake.org/"
+    }
+}
+
+# Check and install CMake if needed
+if (-not (Test-Command cmake)) {
+    Install-CMake
+}
+
+Write-Host "CMake is available!" -ForegroundColor Green
 
 $root = (Resolve-Path "$PSScriptRoot\..").Path
 $sdlDir = Join-Path $root "Engine\Vendor\SDL"

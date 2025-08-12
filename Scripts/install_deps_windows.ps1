@@ -4,10 +4,62 @@ Param(
 
 $ErrorActionPreference = 'Stop'
 
-# Ensure git is available
-if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-    throw "git is required to download dependencies. Please install git and retry."
+# Function to check if a command is available
+function Test-Command($command) {
+    return [bool](Get-Command $command -ErrorAction SilentlyContinue)
 }
+
+# Function to install Git using winget
+function Install-Git {
+    Write-Host "Git not found. Installing Git using winget..." -ForegroundColor Yellow
+    
+    if (Test-Command winget) {
+        Write-Host "Installing Git..." -ForegroundColor Green
+        winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Git installed successfully!" -ForegroundColor Green
+            Write-Host "Please restart your terminal/PowerShell and run this script again." -ForegroundColor Yellow
+            Write-Host "This ensures the updated PATH is available." -ForegroundColor Yellow
+            exit 0
+        } else {
+            throw "Failed to install Git using winget. Please install Git manually from https://git-scm.com/"
+        }
+    } else {
+        throw "winget not available. Please install Git manually from https://git-scm.com/"
+    }
+}
+
+# Function to install CMake using winget
+function Install-CMake {
+    Write-Host "CMake not found. Installing CMake using winget..." -ForegroundColor Yellow
+    
+    if (Test-Command winget) {
+        Write-Host "Installing CMake..." -ForegroundColor Green
+        winget install --id Kitware.CMake -e --accept-source-agreements --accept-package-agreements
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "CMake installed successfully!" -ForegroundColor Green
+            Write-Host "Please restart your terminal/PowerShell and run this script again." -ForegroundColor Yellow
+            Write-Host "This ensures the updated PATH is available." -ForegroundColor Yellow
+            exit 0
+        } else {
+            throw "Failed to install CMake using winget. Please install CMake manually from https://cmake.org/"
+        }
+    } else {
+        throw "winget not available. Please install CMake manually from https://cmake.org/"
+    }
+}
+
+# Check and install Git if needed
+if (-not (Test-Command git)) {
+    Install-Git
+}
+
+# Check and install CMake if needed
+if (-not (Test-Command cmake)) {
+    Install-CMake
+}
+
+Write-Host "All required tools are available!" -ForegroundColor Green
 
 $root = (Resolve-Path "$PSScriptRoot\..").Path
 $vendor = Join-Path $root "Engine\Vendor"

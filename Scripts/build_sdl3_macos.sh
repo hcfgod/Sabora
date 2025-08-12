@@ -6,11 +6,63 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 SDL_DIR="$ROOT_DIR/Engine/Vendor/SDL"
 BUILD_DIR="$SDL_DIR/build"
 
-# Check if CMake is available
-if ! command -v cmake >/dev/null 2>&1; then
-  echo "CMake is required to build SDL3. Please install CMake." >&2
-  exit 1
+# Function to check if a command is available
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Function to check if Homebrew is available
+has_homebrew() {
+    command -v brew >/dev/null 2>&1
+}
+
+# Function to install Homebrew
+install_homebrew() {
+    echo "Homebrew not found. Installing Homebrew..." >&2
+    
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
+    # Add Homebrew to PATH for current session
+    if [[ -f "/opt/homebrew/bin/brew" ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -f "/usr/local/bin/brew" ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+    
+    if has_homebrew; then
+        echo "Homebrew installed successfully!" >&2
+    else
+        echo "Failed to install Homebrew. Please install manually from https://brew.sh/" >&2
+        exit 1
+    fi
+}
+
+# Function to install CMake
+install_cmake() {
+    echo "CMake not found. Installing CMake..." >&2
+    
+    if has_homebrew; then
+        brew install cmake
+    else
+        # Try to install Homebrew first
+        install_homebrew
+        brew install cmake
+    fi
+    
+    if command_exists cmake; then
+        echo "CMake installed successfully!" >&2
+    else
+        echo "Failed to install CMake. Please install manually." >&2
+        exit 1
+    fi
+}
+
+# Check and install CMake if needed
+if ! command_exists cmake; then
+    install_cmake
 fi
+
+echo "CMake is available!" >&2
 
 # Create build directory
 mkdir -p "$BUILD_DIR"
