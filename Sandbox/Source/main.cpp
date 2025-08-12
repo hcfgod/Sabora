@@ -36,6 +36,7 @@ int main()
     SB_RENDERER_TRACE("Rendering frame {}", 1);
 
     app.run();
+
     std::cout << "Sandbox finished." << std::endl;
     return 0;
 }

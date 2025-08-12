@@ -30,10 +30,32 @@ clone_or_update() {
   fi
 }
 
+install_sdl3() {
+  local vendor_dir="$1"
+  local sdl_dir="$vendor_dir/SDL"
+  
+  # Remove existing SDL directory if it exists
+  if [[ -d "$sdl_dir" ]]; then
+    echo "Removing existing SDL directory..."
+    rm -rf "$sdl_dir"
+  fi
+  
+  # Clone SDL3
+  echo "Cloning SDL3..."
+  git clone --depth 1 "https://github.com/libsdl-org/SDL.git" "$sdl_dir"
+  
+  # Build SDL3 with CMake to generate build config files
+  echo "Building SDL3 with CMake to generate build configuration..."
+  "$SCRIPT_DIR/build_sdl3_linux.sh"
+}
+
 clone_or_update "https://github.com/gabime/spdlog.git"    "$VENDOR_DIR/spdlog"
 clone_or_update "https://github.com/doctest/doctest.git"   "$VENDOR_DIR/doctest"
 clone_or_update "https://github.com/g-truc/glm.git"        "$VENDOR_DIR/glm"
 clone_or_update "https://github.com/nlohmann/json.git"     "$VENDOR_DIR/json"
+
+# Install SDL3 with custom premake5.lua
+install_sdl3 "$VENDOR_DIR"
 
 echo "Dependencies are ready under $VENDOR_DIR"
 

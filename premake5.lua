@@ -41,10 +41,5 @@ workspace "Sabora"
 
     filter {}
 
--- Include subprojects
-group "ThirdParty"     
-
-group ""
-
 include "Engine"
 include "Sandbox"
