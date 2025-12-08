@@ -141,6 +141,7 @@ install_sdl3() {
   
   # Build SDL3 with CMake to generate build config files
   echo "Building SDL3 with CMake to generate build configuration..."
+  chmod +x "$SCRIPT_DIR/build_sdl3_linux.sh"
   "$SCRIPT_DIR/build_sdl3_linux.sh"
 }
 
