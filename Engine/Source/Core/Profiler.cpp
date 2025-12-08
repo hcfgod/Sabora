@@ -25,7 +25,7 @@ namespace Sabora
         std::lock_guard<std::mutex> lock(s_Mutex);
         if (s_Initialized)
         {
-            PrintStats();
+            PrintStatsLocked(); // Call version that doesn't lock
             s_Measurements.clear();
             s_Initialized = false;
         }
@@ -70,7 +70,12 @@ namespace Sabora
     PerformanceStats Profiler::GetStats(const std::string& name)
     {
         std::lock_guard<std::mutex> lock(s_Mutex);
-        
+        return GetStatsLocked(name);
+    }
+
+    PerformanceStats Profiler::GetStatsLocked(const std::string& name)
+    {
+        // Assumes mutex is already locked
         auto it = s_Measurements.find(name);
         if (it == s_Measurements.end() || it->second.Measurements.empty())
         {
@@ -136,7 +141,12 @@ namespace Sabora
     void Profiler::PrintStats()
     {
         std::lock_guard<std::mutex> lock(s_Mutex);
-        
+        PrintStatsLocked();
+    }
+
+    void Profiler::PrintStatsLocked()
+    {
+        // Assumes mutex is already locked
         if (s_Measurements.empty())
         {
             SB_INFO("No performance measurements recorded.");
@@ -147,13 +157,20 @@ namespace Sabora
         
         for (const auto& [name, data] : s_Measurements)
         {
-            PrintStats(name);
+            PrintStatsLocked(name);
         }
     }
 
     void Profiler::PrintStats(const std::string& name)
     {
-        const auto stats = GetStats(name);
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        PrintStatsLocked(name);
+    }
+
+    void Profiler::PrintStatsLocked(const std::string& name)
+    {
+        // Assumes mutex is already locked
+        const auto stats = GetStatsLocked(name);
         
         if (stats.Count == 0)
         {
@@ -204,4 +221,3 @@ namespace Sabora
     }
 
 } // namespace Sabora
-

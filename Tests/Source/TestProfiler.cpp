@@ -85,7 +85,8 @@ TEST_SUITE("Profiler")
         }, 10, "BenchmarkTest");
         
         CHECK(results.Iterations == 10);
-        CHECK(counter == 10);
+        // Benchmark does 1 warm-up run + iterations, so counter will be iterations + 1
+        CHECK(counter == 11);
         CHECK(results.TotalTimeMs > 0);
         CHECK(results.AverageTimeMs > 0);
         CHECK(results.MinTimeMs > 0);

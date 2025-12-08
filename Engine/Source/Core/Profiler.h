@@ -202,6 +202,12 @@ namespace Sabora
         static void PrintStats(const std::string& name);
 
     private:
+        // Internal versions that assume mutex is already locked
+        static void PrintStatsLocked();
+        static void PrintStatsLocked(const std::string& name);
+        static PerformanceStats GetStatsLocked(const std::string& name);
+
+    private:
         struct MeasurementData
         {
             std::vector<double> Measurements; // In milliseconds

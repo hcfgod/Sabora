@@ -11,6 +11,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using namespace Sabora;
 namespace fs = std::filesystem;
@@ -47,7 +48,13 @@ TEST_SUITE("AsyncIO")
         // Read it back
         auto result = AsyncIO::ReadTextFile(testFile);
         REQUIRE(result.IsSuccess());
-        CHECK(result.Value() == testContent);
+        // Normalize line endings for cross-platform compatibility
+        std::string readContent = result.Value();
+        std::string normalizedContent = testContent;
+        // Replace \r\n with \n in both strings for comparison
+        readContent.erase(std::remove(readContent.begin(), readContent.end(), '\r'), readContent.end());
+        normalizedContent.erase(std::remove(normalizedContent.begin(), normalizedContent.end(), '\r'), normalizedContent.end());
+        CHECK(readContent == normalizedContent);
 
         // Cleanup
         AsyncIO::RemoveFile(testFile);
