@@ -35,13 +35,38 @@ jobs:
     - name: Generate project files
       run: Tools\Premake\premake5.exe vs2022
 
+    - name: Find MSBuild
+      id: msbuild
+      run: |
+        $vswhere = "${Env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        if (Test-Path $vswhere) {
+          $installPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
+          if ($installPath) {
+            $msbuildPath = Join-Path $installPath "MSBuild\Current\Bin\MSBuild.exe"
+            if (Test-Path $msbuildPath) {
+              echo "MSBUILD_PATH=$msbuildPath" >> $env:GITHUB_ENV
+              echo "Found MSBuild at: $msbuildPath"
+            }
+          }
+        }
+        # Fallback: try to find msbuild in PATH
+        if (-not $env:MSBUILD_PATH) {
+          $msbuild = Get-Command msbuild.exe -ErrorAction SilentlyContinue
+          if ($msbuild) {
+            echo "MSBUILD_PATH=$($msbuild.Source)" >> $env:GITHUB_ENV
+            echo "Found MSBuild in PATH: $($msbuild.Source)"
+          } else {
+            throw "MSBuild not found. Please ensure Visual Studio is installed."
+          }
+        }
+
     - name: Build Engine
       run: |
-        msbuild Build\Sabora.sln /p:Configuration=Debug /p:Platform=x64 /m /v:minimal
+        & "$env:MSBUILD_PATH" Build\Sabora.sln /p:Configuration=Debug /p:Platform=x64 /m /v:minimal
 
     - name: Build Tests
       run: |
-        msbuild Build\Sabora.sln /p:Configuration=Debug /p:Platform=x64 /p:Project=Tests /m /v:minimal
+        & "$env:MSBUILD_PATH" Build\Sabora.sln /p:Configuration=Debug /p:Platform=x64 /p:Project=Tests /m /v:minimal
 
     - name: Run Tests
       run: |
