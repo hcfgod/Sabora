@@ -6,6 +6,8 @@
 #include "doctest.h"
 #include "Log.h"
 
+using namespace Sabora;
+
 TEST_SUITE("Log")
 {
     TEST_CASE("Initialize - Sets up logging system")

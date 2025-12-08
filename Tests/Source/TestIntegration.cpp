@@ -13,6 +13,8 @@
 #include "Profiler.h"
 
 #include <filesystem>
+
+using namespace Sabora;
 #include <fstream>
 
 namespace fs = std::filesystem;

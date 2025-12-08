@@ -9,6 +9,8 @@
 #include <thread>
 #include <chrono>
 
+using namespace Sabora;
+
 TEST_SUITE("Profiler")
 {
     TEST_CASE("Initialize - Sets up profiling system")

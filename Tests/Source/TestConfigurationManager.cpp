@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <fstream>
 
+using namespace Sabora;
 namespace fs = std::filesystem;
 
 TEST_SUITE("ConfigurationManager")

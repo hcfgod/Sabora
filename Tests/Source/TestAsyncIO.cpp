@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+using namespace Sabora;
 namespace fs = std::filesystem;
 
 TEST_SUITE("AsyncIO")

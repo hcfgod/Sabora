@@ -6,6 +6,8 @@
 #include "doctest.h"
 #include "Result.h"
 
+using namespace Sabora;
+
 TEST_SUITE("Result")
 {
     TEST_CASE("Success - Creates successful result")
