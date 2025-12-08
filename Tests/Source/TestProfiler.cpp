@@ -4,7 +4,7 @@
  */
 
 #include "doctest.h"
-#include "Profiler.h"
+#include "Core/Profiler.h"
 
 #include <thread>
 #include <chrono>

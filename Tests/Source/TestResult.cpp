@@ -4,7 +4,7 @@
  */
 
 #include "doctest.h"
-#include "Result.h"
+#include "Core/Result.h"
 
 using namespace Sabora;
 

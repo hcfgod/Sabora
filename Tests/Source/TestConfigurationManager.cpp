@@ -4,8 +4,8 @@
  */
 
 #include "doctest.h"
-#include "ConfigurationManager.h"
-#include "AsyncIO.h"
+#include "Core/ConfigurationManager.h"
+#include "Core/AsyncIO.h"
 
 #include <filesystem>
 #include <fstream>

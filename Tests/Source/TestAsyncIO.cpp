@@ -4,8 +4,8 @@
  */
 
 #include "doctest.h"
-#include "AsyncIO.h"
-#include "Result.h"
+#include "Core/AsyncIO.h"
+#include "Core/Result.h"
 
 #include <filesystem>
 #include <fstream>

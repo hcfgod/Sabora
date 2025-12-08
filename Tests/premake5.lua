@@ -28,7 +28,6 @@ project "Tests"
     includedirs {
         "Source",
         "../Engine/Source",
-        "../Engine/Source/Core",
         "../Engine/Vendor/doctest/doctest",
         "../Engine/Vendor/spdlog/include",
         "../Engine/Vendor/json/include",

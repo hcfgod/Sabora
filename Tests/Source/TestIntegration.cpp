@@ -7,10 +7,10 @@
 
 #include "doctest.h"
 #include "Sabora.h"
-#include "AsyncIO.h"
-#include "ConfigurationManager.h"
-#include "Log.h"
-#include "Profiler.h"
+#include "Core/AsyncIO.h"
+#include "Core/ConfigurationManager.h"
+#include "Core/Log.h"
+#include "Core/Profiler.h"
 
 #include <filesystem>
 

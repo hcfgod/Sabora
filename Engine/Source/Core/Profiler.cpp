@@ -120,7 +120,7 @@ namespace Sabora
 
         for (const auto& [name, data] : s_Measurements)
         {
-            stats.push_back(GetStats(name));
+            stats.push_back(GetStatsLocked(name));
         }
 
         return stats;

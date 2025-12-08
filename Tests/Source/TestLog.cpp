@@ -4,7 +4,7 @@
  */
 
 #include "doctest.h"
-#include "Log.h"
+#include "Core/Log.h"
 
 using namespace Sabora;
 
