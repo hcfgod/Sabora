@@ -211,11 +211,11 @@ cp "$LIB_FILE" "$LIB_DIR/libSDL3.a"
 echo "Copied $(basename "$LIB_FILE") to $LIB_DIR/libSDL3.a"
 
 # Also copy to Premake output directories for convenience
-if [[ -n "$FOUND_LIB" && -f "$FOUND_LIB" ]]; then
+if [[ -n "$LIB_FILE" && -f "$LIB_FILE" ]]; then
     for cfg in Debug_x64 Release_x64 Debug_ARM64 Release_ARM64; do
         PREMAKE_LIB_DIR="$ROOT_DIR/Build/bin/$cfg/SDL3"
         mkdir -p "$PREMAKE_LIB_DIR"
-        cp "$FOUND_LIB" "$PREMAKE_LIB_DIR/libSDL3.a"
+        cp "$LIB_FILE" "$PREMAKE_LIB_DIR/libSDL3.a"
     done
     echo "Copied libSDL3.a to Premake output directories (Debug/Release x64 and ARM64)"
 fi
