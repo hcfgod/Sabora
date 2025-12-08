@@ -18,18 +18,21 @@ Dependencies.SDL3 = {
     IncludePath = "Vendor/SDL/include",
     
     -- Library names per platform and configuration
+    -- Note: On Unix systems (macOS/Linux), specify library name without 'lib' prefix and '.a' extension
+    --       The linker will automatically add them (e.g., 'SDL3' becomes 'libSDL3.a')
+    -- Note: On Windows, specify the full library name including extension
     Libraries = {
         windows = {
             Debug = "SDL3-static-debug.lib",
             Release = "SDL3-static-release.lib"
         },
         macosx = {
-            Debug = "libSDL3.a",
-            Release = "libSDL3.a"
+            Debug = "SDL3",
+            Release = "SDL3"
         },
         linux = {
-            Debug = "libSDL3.a",
-            Release = "libSDL3.a"
+            Debug = "SDL3",
+            Release = "SDL3"
         }
     }
 }
