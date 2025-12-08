@@ -65,7 +65,6 @@ project "Engine"
         runtime "Release"
 
     filter "system:macosx"
-        links { Dependencies.SDL3.Libraries.macosx.Release }
         -- macOS system libraries needed by SDL3
         links { "CoreAudio.framework", 
                 "CoreVideo.framework", 
@@ -76,6 +75,12 @@ project "Engine"
                 "AVFoundation.framework", 
                 "Metal.framework", 
                 "QuartzCore.framework" }
+
+    filter { "system:macosx", "configurations:Debug" }
+        links { Dependencies.SDL3.Libraries.macosx.Debug }
+
+    filter { "system:macosx", "configurations:Release" }
+        links { Dependencies.SDL3.Libraries.macosx.Release }
 
     filter "system:linux"
         links { Dependencies.SDL3.Libraries.linux.Release }

@@ -168,8 +168,10 @@ echo "Configuring SDL3..."
 cmake "${cmake_args[@]}"
 
 # Build SDL3
+# Note: On macOS/Linux, CMake uses single-config generators (not multi-config like Windows)
+# The build type is set via CMAKE_BUILD_TYPE during configuration (set to Release above)
 echo "Building SDL3..."
-cmake --build "$BUILD_DIR" --config Release
+cmake --build "$BUILD_DIR"
 
 echo "SDL3 built successfully!"
 
@@ -179,34 +181,44 @@ INCLUDE_DIR="$ROOT_DIR/Engine/Vendor/SDL/include"
 
 mkdir -p "$LIB_DIR"
 
-# Copy the static library - CMake outputs it as libSDL3-static.a
-LIB_FILE="$BUILD_DIR/libSDL3.a"
-LIB_FILE_DEBUG="$BUILD_DIR/libSDL3.a"
+# Copy the static library
+# On macOS/Linux, CMake uses single-config generators, so the library is built directly
+# in the build directory, not in Release/Debug subdirectories
+# The library name is typically libSDL3-static.a or libSDL3.a
 
-if [[ -f "$LIB_FILE" ]]; then
-    cp "$LIB_FILE" "$LIB_DIR/"
-    cp "$LIB_FILE" "$LIB_DIR/libSDL3.a"
-    echo "Copied libSDL3.a to $LIB_DIR"
-elif [[ -f "$LIB_FILE_DEBUG" ]]; then
-    cp "$LIB_FILE_DEBUG" "$LIB_DIR/"
-    cp "$LIB_FILE_DEBUG" "$LIB_DIR/libSDL3.a"
-    echo "Copied libSDL3.a (Debug) to $LIB_DIR"
+# Try to find the SDL3 static library
+LIB_FILE=""
+# Check common locations and names
+if [[ -f "$BUILD_DIR/libSDL3-static.a" ]]; then
+    LIB_FILE="$BUILD_DIR/libSDL3-static.a"
+elif [[ -f "$BUILD_DIR/libSDL3.a" ]]; then
+    LIB_FILE="$BUILD_DIR/libSDL3.a"
 else
-    echo "Warning: SDL3 library not found. Checking build directory structure..."
-    find "$BUILD_DIR" -name "*.a" -exec basename {} \;
+    # Search for any SDL3 library file
+    LIB_FILE=$(find "$BUILD_DIR" -name "*SDL3*.a" -type f | head -1)
 fi
 
+if [[ -z "$LIB_FILE" || ! -f "$LIB_FILE" ]]; then
+    echo "Error: SDL3 library not found in build directory!"
+    echo "Build directory: $BUILD_DIR"
+    echo "Searching for all .a files..."
+    find "$BUILD_DIR" -name "*.a" -type f | head -10
+    exit 1
+fi
+
+# Copy the library to the expected location
+cp "$LIB_FILE" "$LIB_DIR/libSDL3.a"
+echo "Copied $(basename "$LIB_FILE") to $LIB_DIR/libSDL3.a"
+
 # Also copy to Premake output directories for convenience
-for cfg in Debug_x64 Release_x64 Debug_ARM64 Release_ARM64; do
-    PREMAKE_LIB_DIR="$ROOT_DIR/Build/bin/$cfg/SDL3"
-    mkdir -p "$PREMAKE_LIB_DIR"
-    if [[ -f "$LIB_FILE" ]]; then
-        cp "$LIB_FILE" "$PREMAKE_LIB_DIR/libSDL3.a"
-    elif [[ -f "$LIB_FILE_DEBUG" ]]; then
-        cp "$LIB_FILE_DEBUG" "$PREMAKE_LIB_DIR/libSDL3.a"
-    fi
-done
-echo "Copied libSDL3.a to Premake output directories (Debug/Release x64 and ARM64)"
+if [[ -n "$FOUND_LIB" && -f "$FOUND_LIB" ]]; then
+    for cfg in Debug_x64 Release_x64 Debug_ARM64 Release_ARM64; do
+        PREMAKE_LIB_DIR="$ROOT_DIR/Build/bin/$cfg/SDL3"
+        mkdir -p "$PREMAKE_LIB_DIR"
+        cp "$FOUND_LIB" "$PREMAKE_LIB_DIR/libSDL3.a"
+    done
+    echo "Copied libSDL3.a to Premake output directories (Debug/Release x64 and ARM64)"
+fi
 
 # Copy the generated SDL_build_config.h file
 # Path depends on build type; prefer Release, fallback to RelWithDebInfo
