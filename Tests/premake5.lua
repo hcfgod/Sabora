@@ -28,6 +28,7 @@ project "Tests"
     includedirs {
         "Source",
         "../Engine/Source",
+        "../Engine/Source/Core",
         "../Engine/Vendor/doctest/doctest",
         "../Engine/Vendor/spdlog/include",
         "../Engine/Vendor/json/include",
@@ -36,8 +37,8 @@ project "Tests"
     -- Link against Engine library
     links { "Engine" }
 
-    -- Define doctest implementation
-    defines { "DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN" }
+    -- Note: DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN is defined in main.cpp, not here
+    -- to avoid redefinition warnings
 
     filter "system:windows"
         links { "setupapi", "winmm", "imm32", "version", "ole32", "oleaut32", "uuid" }
