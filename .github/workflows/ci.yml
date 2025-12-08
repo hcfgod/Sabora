@@ -110,11 +110,21 @@ jobs:
         chmod +x Scripts/Linux/install_premake_linux.sh
         bash Scripts/Linux/install_premake_linux.sh
 
-    - name: Build SDL3
+    - name: Install Dependencies
       run: |
-        if [ -f "Scripts/Linux/build_sdl3_linux.sh" ]; then
-          chmod +x Scripts/Linux/build_sdl3_linux.sh
-          bash Scripts/Linux/build_sdl3_linux.sh
+        # Install vendor dependencies (spdlog, doctest, glm, json, SDL3)
+        if [ -f "Scripts/Linux/install_deps_linux.sh" ]; then
+          chmod +x Scripts/Linux/install_deps_linux.sh
+          bash Scripts/Linux/install_deps_linux.sh
+        else
+          # Fallback: manually clone dependencies if install script doesn't exist
+          VENDOR_DIR="Engine/Vendor"
+          mkdir -p "$VENDOR_DIR"
+          git clone --depth 1 https://github.com/gabime/spdlog.git "$VENDOR_DIR/spdlog"
+          git clone --depth 1 https://github.com/doctest/doctest.git "$VENDOR_DIR/doctest"
+          git clone --depth 1 https://github.com/g-truc/glm.git "$VENDOR_DIR/glm"
+          git clone --depth 1 https://github.com/nlohmann/json.git "$VENDOR_DIR/json"
+          # Note: SDL3 will be built in the next step
         fi
 
     - name: Generate project files
@@ -153,11 +163,21 @@ jobs:
         chmod +x Scripts/macOS/install_premake_macos.sh
         bash Scripts/macOS/install_premake_macos.sh
 
-    - name: Build SDL3
+    - name: Install Dependencies
       run: |
-        if [ -f "Scripts/macOS/build_sdl3_macos.sh" ]; then
-          chmod +x Scripts/macOS/build_sdl3_macos.sh
-          bash Scripts/macOS/build_sdl3_macos.sh
+        # Install vendor dependencies (spdlog, doctest, glm, json, SDL3)
+        if [ -f "Scripts/macOS/install_deps_macos.sh" ]; then
+          chmod +x Scripts/macOS/install_deps_macos.sh
+          bash Scripts/macOS/install_deps_macos.sh
+        else
+          # Fallback: manually clone dependencies if install script doesn't exist
+          VENDOR_DIR="Engine/Vendor"
+          mkdir -p "$VENDOR_DIR"
+          git clone --depth 1 https://github.com/gabime/spdlog.git "$VENDOR_DIR/spdlog"
+          git clone --depth 1 https://github.com/doctest/doctest.git "$VENDOR_DIR/doctest"
+          git clone --depth 1 https://github.com/g-truc/glm.git "$VENDOR_DIR/glm"
+          git clone --depth 1 https://github.com/nlohmann/json.git "$VENDOR_DIR/json"
+          # Note: SDL3 will be built in the next step
         fi
 
     - name: Generate project files
