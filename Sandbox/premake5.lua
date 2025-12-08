@@ -37,11 +37,16 @@ project "Sandbox"
         "../Engine/" .. Dependencies.SDL3.IncludePath,
     }
 
-    -- Link against Engine (which already contains SDL3)
+    -- Link against Engine
     links { "Engine" }
 
-    -- SDL3 static linking is handled by Engine project
+    -- SDL3 static linking - must be linked directly since Engine is a static library
     defines { "SDL_STATIC" }
+    
+    -- Library directory for SDL3 (relative to Sandbox, so we need to go up to Engine)
+    libdirs { 
+        "../Engine/" .. Dependencies.SDL3.LibraryPath
+    }
 
     filter "system:windows"
         -- Windows system libraries needed by SDL3
@@ -49,13 +54,32 @@ project "Sandbox"
         buildoptions { "/utf-8" }
 
     filter { "system:windows", "configurations:Debug" }
+        links { Dependencies.SDL3.Libraries.windows.Debug }
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
+        links { Dependencies.SDL3.Libraries.windows.Release }
         runtime "Release"
 
     filter "system:macosx"
+        -- macOS system libraries needed by SDL3
+        links { "CoreAudio.framework", 
+                "CoreVideo.framework", 
+                "IOKit.framework", 
+                "Cocoa.framework", 
+                "Carbon.framework", 
+                "ForceFeedback.framework",
+                "AVFoundation.framework", 
+                "Metal.framework", 
+                "QuartzCore.framework" }
+
+    filter { "system:macosx", "configurations:Debug" }
+        links { Dependencies.SDL3.Libraries.macosx.Debug }
+
+    filter { "system:macosx", "configurations:Release" }
+        links { Dependencies.SDL3.Libraries.macosx.Release }
 
     filter "system:linux"
+        links { Dependencies.SDL3.Libraries.linux.Release }
 
     filter {}
