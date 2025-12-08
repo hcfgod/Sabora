@@ -65,7 +65,7 @@ project "Engine"
         runtime "Release"
 
     filter "system:macosx"
-        -- macOS system libraries needed by SDL3
+        -- macOS system libraries and frameworks needed by SDL3
         links { "CoreAudio.framework", 
                 "CoreVideo.framework", 
                 "IOKit.framework", 
@@ -74,7 +74,16 @@ project "Engine"
                 "ForceFeedback.framework",
                 "AVFoundation.framework", 
                 "Metal.framework", 
-                "QuartzCore.framework" }
+                "QuartzCore.framework",
+                "AudioToolbox.framework",
+                "CoreHaptics.framework",
+                "CoreMedia.framework",
+                "GameController.framework",
+                "UniformTypeIdentifiers.framework",
+                "iconv" }
+        -- Link libusb (installed via homebrew on macOS)
+        libdirs { "/opt/homebrew/lib", "/usr/local/lib" }
+        links { "usb-1.0" }
 
     filter { "system:macosx", "configurations:Debug" }
         links { Dependencies.SDL3.Libraries.macosx.Debug }
