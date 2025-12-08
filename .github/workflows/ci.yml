@@ -39,7 +39,10 @@ jobs:
             git clone --depth 1 https://github.com/doctest/doctest.git "$vendorDir\doctest"
             git clone --depth 1 https://github.com/g-truc/glm.git "$vendorDir\glm"
             git clone --depth 1 https://github.com/nlohmann/json.git "$vendorDir\json"
-            # Note: SDL3 will be built in the next step
+            # Build SDL3 to match the primary path behavior
+            if (Test-Path "Scripts\Windows\build_sdl3_windows.ps1") {
+                powershell -ExecutionPolicy Bypass -File Scripts\Windows\build_sdl3_windows.ps1
+            }
         }
 
     - name: Generate project files
