@@ -21,15 +21,25 @@ jobs:
       run: |
         powershell -ExecutionPolicy Bypass -File Scripts\Windows\install_premake_windows.ps1
 
-    - name: Build SDL3
+    - name: Install Dependencies
       run: |
         # Ensure Git is available (should be on GitHub Actions runners)
         if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
             Write-Host "Git not found. Installing Git..." -ForegroundColor Yellow
             winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
         }
-        if (Test-Path "Scripts\Windows\build_sdl3_windows.ps1") {
-            powershell -ExecutionPolicy Bypass -File Scripts\Windows\build_sdl3_windows.ps1
+        # Install vendor dependencies (spdlog, doctest, glm, json, SDL3)
+        if (Test-Path "Scripts\Windows\install_deps_windows.ps1") {
+            powershell -ExecutionPolicy Bypass -File Scripts\Windows\install_deps_windows.ps1
+        } else {
+            # Fallback: manually clone dependencies if install script doesn't exist
+            $vendorDir = "Engine\Vendor"
+            New-Item -ItemType Directory -Force -Path $vendorDir | Out-Null
+            git clone --depth 1 https://github.com/gabime/spdlog.git "$vendorDir\spdlog"
+            git clone --depth 1 https://github.com/doctest/doctest.git "$vendorDir\doctest"
+            git clone --depth 1 https://github.com/g-truc/glm.git "$vendorDir\glm"
+            git clone --depth 1 https://github.com/nlohmann/json.git "$vendorDir\json"
+            # Note: SDL3 will be built in the next step
         }
 
     - name: Generate project files
