@@ -38,26 +38,31 @@ jobs:
     - name: Find MSBuild
       id: msbuild
       run: |
+        $msbuildPath = $null
         $vswhere = "${Env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         if (Test-Path $vswhere) {
           $installPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
           if ($installPath) {
-            $msbuildPath = Join-Path $installPath "MSBuild\Current\Bin\MSBuild.exe"
-            if (Test-Path $msbuildPath) {
-              echo "MSBUILD_PATH=$msbuildPath" >> $env:GITHUB_ENV
+            $candidate = Join-Path $installPath "MSBuild\Current\Bin\MSBuild.exe"
+            if (Test-Path $candidate) {
+              $msbuildPath = $candidate
               echo "Found MSBuild at: $msbuildPath"
             }
           }
         }
         # Fallback: try to find msbuild in PATH
-        if (-not $env:MSBUILD_PATH) {
+        if (-not $msbuildPath) {
           $msbuild = Get-Command msbuild.exe -ErrorAction SilentlyContinue
           if ($msbuild) {
-            echo "MSBUILD_PATH=$($msbuild.Source)" >> $env:GITHUB_ENV
-            echo "Found MSBuild in PATH: $($msbuild.Source)"
-          } else {
-            throw "MSBuild not found. Please ensure Visual Studio is installed."
+            $msbuildPath = $msbuild.Source
+            echo "Found MSBuild in PATH: $msbuildPath"
           }
+        }
+        # Set environment variable if found
+        if ($msbuildPath) {
+          echo "MSBUILD_PATH=$msbuildPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        } else {
+          throw "MSBuild not found. Please ensure Visual Studio is installed."
         }
 
     - name: Build Engine
