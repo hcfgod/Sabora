@@ -23,6 +23,11 @@ jobs:
 
     - name: Build SDL3
       run: |
+        # Ensure Git is available (should be on GitHub Actions runners)
+        if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+            Write-Host "Git not found. Installing Git..." -ForegroundColor Yellow
+            winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
+        }
         if (Test-Path "Scripts\Windows\build_sdl3_windows.ps1") {
             powershell -ExecutionPolicy Bypass -File Scripts\Windows\build_sdl3_windows.ps1
         }

@@ -40,6 +40,31 @@ $root = (Resolve-Path "$PSScriptRoot\..\..").Path
 $sdlDir = Join-Path $root "Engine\Vendor\SDL"
 $buildDir = Join-Path $sdlDir "build"
 
+# Check if SDL3 directory exists and has CMakeLists.txt
+if (-not (Test-Path (Join-Path $sdlDir "CMakeLists.txt"))) {
+    Write-Host "SDL3 not found. Cloning SDL3..." -ForegroundColor Yellow
+    
+    # Ensure Vendor directory exists
+    $vendorDir = Join-Path $root "Engine\Vendor"
+    New-Item -ItemType Directory -Force -Path $vendorDir | Out-Null
+    
+    # Clone SDL3 if it doesn't exist
+    if (-not (Test-Path $sdlDir)) {
+        Push-Location $vendorDir
+        try {
+            git clone --depth 1 https://github.com/libsdl-org/SDL.git SDL
+        }
+        finally {
+            Pop-Location
+        }
+    }
+    
+    # Verify CMakeLists.txt exists now
+    if (-not (Test-Path (Join-Path $sdlDir "CMakeLists.txt"))) {
+        throw "SDL3 CMakeLists.txt not found after cloning. SDL directory: $sdlDir"
+    }
+}
+
 # Create build directory
 New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
 

@@ -68,6 +68,28 @@ fi
 
 echo "CMake is available!" >&2
 
+# Check if SDL3 directory exists and has CMakeLists.txt
+if [[ ! -f "$SDL_DIR/CMakeLists.txt" ]]; then
+    echo "SDL3 not found. Cloning SDL3..." >&2
+    
+    # Ensure Vendor directory exists
+    VENDOR_DIR="$ROOT_DIR/Engine/Vendor"
+    mkdir -p "$VENDOR_DIR"
+    
+    # Clone SDL3 if it doesn't exist
+    if [[ ! -d "$SDL_DIR" ]]; then
+        cd "$VENDOR_DIR"
+        git clone --depth 1 https://github.com/libsdl-org/SDL.git SDL
+        cd "$ROOT_DIR"
+    fi
+    
+    # Verify CMakeLists.txt exists now
+    if [[ ! -f "$SDL_DIR/CMakeLists.txt" ]]; then
+        echo "Error: SDL3 CMakeLists.txt not found after cloning. SDL directory: $SDL_DIR" >&2
+        exit 1
+    fi
+fi
+
 # Create build directory
 mkdir -p "$BUILD_DIR"
 
@@ -75,8 +97,8 @@ echo "Building SDL3 with CMake..."
 
 # Configure SDL3 with CMake
 cmake_args=(
-        "-S", "$sdlDir"
-    "-B", "$buildDir"
+    "-S" "$SDL_DIR"
+    "-B" "$BUILD_DIR"
 
     # Build configuration
     "-DCMAKE_BUILD_TYPE=Release"
