@@ -58,7 +58,8 @@ TEST_SUITE("AsyncIO")
         // This test verifies that files exceeding MaxTextFileSize are rejected
         // Note: Creating a 100MB+ file for testing may be impractical
         // This is more of a documentation test
-        SUCCEED("File size limits are enforced in ReadTextFile");
+        // File size limits are enforced in ReadTextFile (see AsyncIO.h for MaxTextFileSize)
+        CHECK(true); // Placeholder - actual file size limit testing would require large file creation
     }
 
     TEST_CASE("WriteTextFile - Creates file with content")
