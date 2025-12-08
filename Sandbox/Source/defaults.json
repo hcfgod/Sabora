@@ -1,0 +1,13 @@
+{
+    "app_name": "Sabora Sandbox",
+    "window": {
+        "width": 1280,
+        "height": 720,
+        "title": "Sabora Engine - Sandbox"
+    },
+    "logging": {
+        "level": "Info",
+        "file_logging": true,
+        "console_logging": true
+    }
+}
