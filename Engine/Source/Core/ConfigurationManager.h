@@ -180,6 +180,13 @@ namespace Sabora
 
         static nlohmann::json MergeJson(const nlohmann::json& baseConfig,
                                         const nlohmann::json& overrides);
+    public:
+        // Expose MergeJson for testing purposes only
+        static nlohmann::json MergeJsonPublic(const nlohmann::json& baseConfig,
+                                              const nlohmann::json& overrides)
+        {
+            return MergeJson(baseConfig, overrides);
+        }
     };
 
 } // namespace Sabora

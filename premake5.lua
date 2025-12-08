@@ -65,3 +65,4 @@ workspace "Sabora"
 
 include "Engine"
 include "Sandbox"
+include "Tests"

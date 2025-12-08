@@ -1,0 +1,141 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-windows:
+    name: Build and Test (Windows)
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup Premake
+      run: |
+        $premakeUrl = "https://github.com/premake/premake-core/releases/download/v5.0.0-beta7/premake-5.0.0-beta7-windows.zip"
+        Invoke-WebRequest -Uri $premakeUrl -OutFile premake.zip
+        Expand-Archive -Path premake.zip -DestinationPath .
+        New-Item -ItemType Directory -Force -Path Tools/Premake
+        Move-Item -Path premake.exe -Destination Tools/Premake/premake5.exe
+
+    - name: Build SDL3
+      run: |
+        if (Test-Path "Scripts\Windows\build_sdl3_windows.ps1") {
+            powershell -ExecutionPolicy Bypass -File Scripts\Windows\build_sdl3_windows.ps1
+        }
+
+    - name: Generate project files
+      run: Tools\Premake\premake5.exe vs2022
+
+    - name: Build Engine
+      run: |
+        msbuild Build\Sabora.sln /p:Configuration=Debug /p:Platform=x64 /m /v:minimal
+
+    - name: Build Tests
+      run: |
+        msbuild Build\Sabora.sln /p:Configuration=Debug /p:Platform=x64 /p:Project=Tests /m /v:minimal
+
+    - name: Run Tests
+      run: |
+        Build\bin\Debug_x64\Tests\Tests.exe --success
+
+  build-linux:
+    name: Build and Test (Linux)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake git
+
+    - name: Setup Premake
+      run: |
+        wget https://github.com/premake/premake-core/releases/download/v5.0.0-beta7/premake-5.0.0-beta7-linux.tar.gz
+        tar -xzf premake-5.0.0-beta7-linux.tar.gz
+        mkdir -p Tools/Premake
+        mv premake Tools/Premake/premake5
+        chmod +x Tools/Premake/premake5
+
+    - name: Build SDL3
+      run: |
+        if [ -f "Scripts/Linux/build_sdl3_linux.sh" ]; then
+          chmod +x Scripts/Linux/build_sdl3_linux.sh
+          bash Scripts/Linux/build_sdl3_linux.sh
+        fi
+
+    - name: Generate project files
+      run: Tools/Premake/premake5 gmake2
+
+    - name: Build Engine
+      run: |
+        cd Build
+        make config=debug_x64 -j$(nproc)
+
+    - name: Build Tests
+      run: |
+        cd Build
+        make Tests config=debug_x64 -j$(nproc)
+
+    - name: Run Tests
+      run: |
+        Build/bin/Debug_x64/Tests/Tests --success
+
+  build-macos:
+    name: Build and Test (macOS)
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        brew install cmake git
+
+    - name: Setup Premake
+      run: |
+        curl -L -o premake.tar.gz https://github.com/premake/premake-core/releases/download/v5.0.0-beta7/premake-5.0.0-beta7-macosx.tar.gz
+        tar -xzf premake.tar.gz
+        mkdir -p Tools/Premake
+        mv premake Tools/Premake/premake5
+        chmod +x Tools/Premake/premake5
+
+    - name: Build SDL3
+      run: |
+        if [ -f "Scripts/macOS/build_sdl3_macos.sh" ]; then
+          chmod +x Scripts/macOS/build_sdl3_macos.sh
+          bash Scripts/macOS/build_sdl3_macos.sh
+        fi
+
+    - name: Generate project files
+      run: Tools/Premake/premake5 gmake2
+
+    - name: Build Engine
+      run: |
+        cd Build
+        make config=debug_x64 -j$(sysctl -n hw.ncpu)
+
+    - name: Build Tests
+      run: |
+        cd Build
+        make Tests config=debug_x64 -j$(sysctl -n hw.ncpu)
+
+    - name: Run Tests
+      run: |
+        Build/bin/Debug_x64/Tests/Tests --success
+
