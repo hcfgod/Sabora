@@ -30,7 +30,11 @@ tar -xzf "$TAR_FILE" -C "$TMP_DIR"
 
 FOUND="$(find "$TMP_DIR" -type f -name premake5 | head -n1)"
 if [[ -z "$FOUND" ]]; then
-  echo "Error: premake5 not found in archive." >&2
+  # Fallback: try "premake" without the "5"
+  FOUND="$(find "$TMP_DIR" -type f -name premake | head -n1)"
+fi
+if [[ -z "$FOUND" ]]; then
+  echo "Error: premake5 or premake not found in archive." >&2
   exit 1
 fi
 

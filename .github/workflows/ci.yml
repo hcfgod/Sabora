@@ -19,11 +19,7 @@ jobs:
 
     - name: Setup Premake
       run: |
-        $premakeUrl = "https://github.com/premake/premake-core/releases/download/v5.0.0-beta7/premake-5.0.0-beta7-windows.zip"
-        Invoke-WebRequest -Uri $premakeUrl -OutFile premake.zip
-        Expand-Archive -Path premake.zip -DestinationPath .
-        New-Item -ItemType Directory -Force -Path Tools/Premake
-        Move-Item -Path premake.exe -Destination Tools/Premake/premake5.exe
+        powershell -ExecutionPolicy Bypass -File Scripts\Windows\install_premake_windows.ps1
 
     - name: Build SDL3
       run: |
@@ -63,11 +59,8 @@ jobs:
 
     - name: Setup Premake
       run: |
-        wget https://github.com/premake/premake-core/releases/download/v5.0.0-beta7/premake-5.0.0-beta7-linux.tar.gz
-        tar -xzf premake-5.0.0-beta7-linux.tar.gz
-        mkdir -p Tools/Premake
-        mv premake Tools/Premake/premake5
-        chmod +x Tools/Premake/premake5
+        chmod +x Scripts/Linux/install_premake_linux.sh
+        bash Scripts/Linux/install_premake_linux.sh
 
     - name: Build SDL3
       run: |
@@ -109,11 +102,8 @@ jobs:
 
     - name: Setup Premake
       run: |
-        curl -L -o premake.tar.gz https://github.com/premake/premake-core/releases/download/v5.0.0-beta7/premake-5.0.0-beta7-macosx.tar.gz
-        tar -xzf premake.tar.gz
-        mkdir -p Tools/Premake
-        mv premake Tools/Premake/premake5
-        chmod +x Tools/Premake/premake5
+        chmod +x Scripts/macOS/install_premake_macos.sh
+        bash Scripts/macOS/install_premake_macos.sh
 
     - name: Build SDL3
       run: |

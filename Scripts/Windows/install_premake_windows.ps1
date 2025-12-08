@@ -35,9 +35,13 @@ if (Test-Path $exePath) {
     Remove-Item -Force $zipPath
 } else {
     # Locate the downloaded executable anywhere under tools dir
+    # Try premake5.exe first, then premake.exe as fallback
     $downloadedExe = Get-ChildItem -Path $toolsDir -Recurse -Filter "premake5.exe" -File | Select-Object -First 1
     if (-not $downloadedExe) {
-        throw "premake5.exe not found after extraction."
+        $downloadedExe = Get-ChildItem -Path $toolsDir -Recurse -Filter "premake.exe" -File | Select-Object -First 1
+    }
+    if (-not $downloadedExe) {
+        throw "premake5.exe or premake.exe not found after extraction."
     }
     Move-Item -Force $downloadedExe.FullName $exePath
     Remove-Item -Force $zipPath
