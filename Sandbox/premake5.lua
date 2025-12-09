@@ -98,7 +98,7 @@ project "Sandbox"
             "pthread", "dl", "m",
             -- X11 libraries (for X11 backend) - all X11 extensions
             "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
-            "Xxf86vm", "Xss", "Xtst", "Xrender", "Xshape",
+            "Xxf86vm", "Xss", "Xtst", "Xrender", "XShape",
             -- Wayland libraries (for Wayland backend)
             "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon",
             -- Graphics libraries (EGL/GLES/DRM/GBM)
@@ -119,7 +119,7 @@ project "Sandbox"
             "pthread", "dl", "m",
             -- X11 libraries (for X11 backend) - all X11 extensions
             "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
-            "Xxf86vm", "Xss", "Xtst", "Xrender", "Xshape",
+            "Xxf86vm", "Xss", "Xtst", "Xrender", "XShape",
             -- Wayland libraries (for Wayland backend)
             "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon",
             -- Graphics libraries (EGL/GLES/DRM/GBM)
