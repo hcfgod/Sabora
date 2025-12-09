@@ -93,19 +93,22 @@ project "Engine"
 
     filter "system:linux"
         -- Linux system libraries needed by SDL3 and dependencies
+        -- Link all dependencies that SDL3 static library requires
+        -- Order: Core -> X11 -> Wayland -> Graphics -> Audio -> USB/System
         links { 
+            -- Core system
             "pthread", "dl", "m",
-            -- X11 libraries
+            -- X11 (for X11 backend)
             "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
             "Xxf86vm", "Xss", "Xtst",
-            -- Wayland libraries
+            -- Wayland (for Wayland backend) 
             "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon",
-            -- Graphics libraries
+            -- Graphics/EGL
             "EGL", "GLESv2", "drm", "gbm",
-            -- Audio libraries
+            -- Audio backends (SDL3 may use any of these)
             "asound", "pulse", "jack", "pipewire-0.3",
-            -- Other dependencies
-            "dbus-1", "udev", "usb-1.0"
+            -- USB and system
+            "usb-1.0", "dbus-1", "udev"
         }
         
     filter { "system:linux", "configurations:Debug" }
