@@ -105,7 +105,7 @@ install_sdl3_dependencies() {
             sudo apt-get update
             sudo apt-get install -y \
                 libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
-                libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev \
+                libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libxtst-dev \
                 libwayland-dev libxkbcommon-dev wayland-protocols \
                 libegl1-mesa-dev libgles2-mesa-dev \
                 libasound2-dev libpulse-dev libjack-dev libpipewire-0.3-dev \
@@ -116,7 +116,7 @@ install_sdl3_dependencies() {
         "dnf")
             sudo dnf install -y \
                 libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                libXi-devel libXinerama-devel libXxf86vm-devel libXScrnSaver-devel \
+                libXi-devel libXinerama-devel libXxf86vm-devel libXScrnSaver-devel libXtst-devel \
                 wayland-devel libxkbcommon-devel wayland-protocols-devel \
                 mesa-libEGL-devel mesa-libGLES-devel \
                 alsa-lib-devel pulseaudio-libs-devel jack-audio-connection-kit-devel pipewire-devel \
@@ -127,7 +127,7 @@ install_sdl3_dependencies() {
         "yum")
             sudo yum install -y \
                 libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                libXi-devel libXinerama-devel libXxf86vm-devel libXScrnSaver-devel \
+                libXi-devel libXinerama-devel libXxf86vm-devel libXScrnSaver-devel libXtst-devel \
                 wayland-devel libxkbcommon-devel \
                 mesa-libEGL-devel mesa-libGLES-devel \
                 alsa-lib-devel pulseaudio-libs-devel \
@@ -137,7 +137,7 @@ install_sdl3_dependencies() {
             ;;
         "pacman")
             sudo pacman -S --noconfirm \
-                libx11 libxext libxrandr libxcursor libxfixes libxi libxinerama libxxf86vm libxss \
+                libx11 libxext libxrandr libxcursor libxfixes libxi libxinerama libxxf86vm libxss libxtst \
                 wayland wayland-protocols libxkbcommon \
                 mesa \
                 alsa-lib libpulse jack2 pipewire \
@@ -148,7 +148,7 @@ install_sdl3_dependencies() {
         "zypper")
             sudo zypper install -y \
                 libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
-                libXi-devel libXinerama-devel libXxf86vm-devel libXss-devel \
+                libXi-devel libXinerama-devel libXxf86vm-devel libXss-devel libXtst-devel \
                 wayland-devel libxkbcommon-devel wayland-protocols-devel \
                 Mesa-libEGL-devel Mesa-libGLES-devel \
                 alsa-devel libpulse-devel libjack-devel pipewire-devel \
