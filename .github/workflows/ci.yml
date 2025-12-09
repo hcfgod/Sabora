@@ -139,6 +139,20 @@ jobs:
           ls -la Engine/Vendor/SDL/lib/ || echo "Directory does not exist"
           exit 1
         fi
+        echo ""
+        echo "Checking for required system libraries..."
+        echo "Wayland libraries:"
+        pkg-config --libs wayland-client wayland-egl wayland-cursor xkbcommon 2>/dev/null || echo "pkg-config not available or libraries not found"
+        echo "PipeWire:"
+        pkg-config --libs libpipewire-0.3 2>/dev/null || echo "pkg-config not available or library not found"
+        echo "PulseAudio:"
+        pkg-config --libs libpulse 2>/dev/null || echo "pkg-config not available or library not found"
+        echo "ALSA:"
+        pkg-config --libs alsa 2>/dev/null || echo "pkg-config not available or library not found"
+        echo "libusb:"
+        pkg-config --libs libusb-1.0 2>/dev/null || echo "pkg-config not available or library not found"
+        echo "D-Bus:"
+        pkg-config --libs dbus-1 2>/dev/null || echo "pkg-config not available or library not found"
 
     - name: Generate project files
       run: Tools/Premake/premake5 gmake2
