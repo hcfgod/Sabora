@@ -51,6 +51,7 @@
 #include <functional>
 #include <type_traits>
 #include <source_location>
+#include <memory>
 #include <spdlog/fmt/fmt.h>
 
 namespace Sabora

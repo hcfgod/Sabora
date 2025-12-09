@@ -54,7 +54,8 @@ project "Tests"
         -- macOS system libraries if needed
 
     filter "system:linux"
-        -- Linux system libraries if needed
+        -- Linux system libraries needed by Engine/SDL3
+        links { "pthread", "dl", "m" }
 
     filter {}
 

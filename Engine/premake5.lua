@@ -92,6 +92,13 @@ project "Engine"
         links { Dependencies.SDL3.Libraries.macosx.Release }
 
     filter "system:linux"
+        -- Linux system libraries needed by SDL3
+        links { "pthread", "dl", "m" }
+        
+    filter { "system:linux", "configurations:Debug" }
+        links { Dependencies.SDL3.Libraries.linux.Debug }
+
+    filter { "system:linux", "configurations:Release" }
         links { Dependencies.SDL3.Libraries.linux.Release }
 
     filter {}
