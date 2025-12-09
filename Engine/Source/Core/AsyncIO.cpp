@@ -198,7 +198,7 @@ namespace Sabora
                 "Failed to determine file size: " + sanitizedPath.string()
             );
         }
-
+        
         // Bounds checking: ensure file size is within limits
         const auto sizeUnsigned = static_cast<std::size_t>(size);
         if (sizeUnsigned > MaxTextFileSize)
@@ -367,7 +367,7 @@ namespace Sabora
         // Validate path first
         auto pathResult = ValidateAndSanitizePath(path, /*allowAbsolute*/ true);
         if (pathResult.IsFailure())
-        {
+    {
             return Result<nlohmann::json>::Failure(pathResult.GetError());
         }
         const fs::path& sanitizedPath = pathResult.Value();
@@ -485,11 +485,11 @@ namespace Sabora
     {
         try
         {
-            return std::async(std::launch::async, [p = std::move(path)]()
+        return std::async(std::launch::async, [p = std::move(path)]()
             {
                 try
-                {
-                    return ReadTextFile(p);
+        {
+            return ReadTextFile(p);
                 }
                 catch (...)
                 {
@@ -516,11 +516,11 @@ namespace Sabora
     {
         try
         {
-            return std::async(std::launch::async, [p = std::move(path)]()
+        return std::async(std::launch::async, [p = std::move(path)]()
             {
                 try
-                {
-                    return ReadBinaryFile(p);
+        {
+            return ReadBinaryFile(p);
                 }
                 catch (...)
                 {
@@ -546,11 +546,11 @@ namespace Sabora
     {
         try
         {
-            return std::async(std::launch::async, [p = std::move(path), c = std::move(contents), createDirs]() 
+        return std::async(std::launch::async, [p = std::move(path), c = std::move(contents), createDirs]() 
             {
                 try
-                {
-                    return WriteTextFile(p, c, createDirs);
+        {
+            return WriteTextFile(p, c, createDirs);
                 }
                 catch (...)
                 {
@@ -576,11 +576,11 @@ namespace Sabora
     {
         try
         {
-            return std::async(std::launch::async, [p = std::move(path), d = std::move(data), createDirs]() 
+        return std::async(std::launch::async, [p = std::move(path), d = std::move(data), createDirs]() 
             {
                 try
-                {
-                    return WriteBinaryFile(p, d, createDirs);
+        {
+            return WriteBinaryFile(p, d, createDirs);
                 }
                 catch (...)
                 {
@@ -606,11 +606,11 @@ namespace Sabora
     {
         try
         {
-            return std::async(std::launch::async, [p = std::move(path)]() 
+        return std::async(std::launch::async, [p = std::move(path)]() 
             {
                 try
-                {
-                    return ReadJsonFile(p);
+        {
+            return ReadJsonFile(p);
                 }
                 catch (...)
                 {
@@ -636,11 +636,11 @@ namespace Sabora
     {
         try
         {
-            return std::async(std::launch::async, [p = std::move(path), j = std::move(json), pretty, createDirs]() 
+        return std::async(std::launch::async, [p = std::move(path), j = std::move(json), pretty, createDirs]() 
             {
                 try
-                {
-                    return WriteJsonFile(p, j, pretty, createDirs);
+        {
+            return WriteJsonFile(p, j, pretty, createDirs);
                 }
                 catch (...)
                 {

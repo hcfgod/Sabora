@@ -29,7 +29,7 @@ workspace "Sabora"
         systemversion "latest"
         defines { "SABORA_PLATFORM_WINDOWS", "_CRT_SECURE_NO_WARNINGS", "NOMINMAX" }
         if UseStaticRuntime then
-            staticruntime "On"
+        staticruntime "On"
         else
             staticruntime "Off"
         end
@@ -37,7 +37,7 @@ workspace "Sabora"
     filter "system:macosx"
         defines { "SABORA_PLATFORM_MACOS" }
         if UseStaticRuntime then
-            staticruntime "On"
+        staticruntime "On"
         else
             staticruntime "Off"
         end
@@ -45,7 +45,7 @@ workspace "Sabora"
     filter "system:linux"
         defines { "SABORA_PLATFORM_LINUX" }
         if UseStaticRuntime then
-            staticruntime "On"
+        staticruntime "On"
         else
             staticruntime "Off"
         end

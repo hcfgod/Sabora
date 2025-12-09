@@ -79,8 +79,8 @@ namespace Sabora
         
         try
         {
-            nlohmann::json::json_pointer ptr(jsonPointer);
-            m_userOverrides[ptr] = value;
+        nlohmann::json::json_pointer ptr(jsonPointer);
+        m_userOverrides[ptr] = value;
         }
         catch (const nlohmann::json::exception&)
         {
@@ -177,7 +177,7 @@ namespace Sabora
                 {
                     // Index string is not a valid number
                     return false;
-                }
+                } 
                 catch (...)
                 {
                     // If conversion fails for any other reason, return false

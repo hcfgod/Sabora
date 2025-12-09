@@ -13,7 +13,7 @@ project "Engine"
     if Dependencies.SDL3.StaticRuntime then
         staticruntime "On"
     else
-        staticruntime "Off"
+    staticruntime "Off"
     end
 
     targetdir ("%{wks.location}/bin/%{cfg.buildcfg}_%{cfg.platform}/%{prj.name}")

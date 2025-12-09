@@ -95,6 +95,76 @@ install_cmake() {
     fi
 }
 
+# Function to install SDL3 system dependencies
+install_sdl3_dependencies() {
+    echo "Installing SDL3 system dependencies..." >&2
+    
+    local pkg_manager=$(detect_package_manager)
+    case $pkg_manager in
+        "apt")
+            sudo apt-get update
+            sudo apt-get install -y \
+                libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
+                libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev \
+                libwayland-dev libxkbcommon-dev wayland-protocols \
+                libegl1-mesa-dev libgles2-mesa-dev \
+                libasound2-dev libpulse-dev libjack-dev libpipewire-0.3-dev \
+                libdbus-1-dev libibus-1.0-dev \
+                libudev-dev libusb-1.0-0-dev \
+                libdrm-dev libgbm-dev
+            ;;
+        "dnf")
+            sudo dnf install -y \
+                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                libXi-devel libXinerama-devel libXxf86vm-devel libXScrnSaver-devel \
+                wayland-devel libxkbcommon-devel wayland-protocols-devel \
+                mesa-libEGL-devel mesa-libGLES-devel \
+                alsa-lib-devel pulseaudio-libs-devel jack-audio-connection-kit-devel pipewire-devel \
+                dbus-devel ibus-devel \
+                systemd-devel libusb1-devel \
+                libdrm-devel mesa-libgbm-devel
+            ;;
+        "yum")
+            sudo yum install -y \
+                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                libXi-devel libXinerama-devel libXxf86vm-devel libXScrnSaver-devel \
+                wayland-devel libxkbcommon-devel \
+                mesa-libEGL-devel mesa-libGLES-devel \
+                alsa-lib-devel pulseaudio-libs-devel \
+                dbus-devel ibus-devel \
+                systemd-devel libusb1-devel \
+                libdrm-devel
+            ;;
+        "pacman")
+            sudo pacman -S --noconfirm \
+                libx11 libxext libxrandr libxcursor libxfixes libxi libxinerama libxxf86vm libxss \
+                wayland wayland-protocols libxkbcommon \
+                mesa \
+                alsa-lib libpulse jack2 pipewire \
+                dbus \
+                systemd libusb \
+                libdrm
+            ;;
+        "zypper")
+            sudo zypper install -y \
+                libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXfixes-devel \
+                libXi-devel libXinerama-devel libXxf86vm-devel libXss-devel \
+                wayland-devel libxkbcommon-devel wayland-protocols-devel \
+                Mesa-libEGL-devel Mesa-libGLES-devel \
+                alsa-devel libpulse-devel libjack-devel pipewire-devel \
+                dbus-1-devel \
+                systemd-devel libusb-1_0-devel \
+                libdrm-devel
+            ;;
+        *)
+            echo "Warning: Unsupported package manager. SDL3 dependencies may need to be installed manually." >&2
+            echo "See: https://wiki.libsdl.org/SDL3/README-linux#build-dependencies" >&2
+            ;;
+    esac
+    
+    echo "SDL3 system dependencies installed!" >&2
+}
+
 # Check and install Git if needed
 if ! command_exists git; then
     install_git
@@ -104,6 +174,9 @@ fi
 if ! command_exists cmake; then
     install_cmake
 fi
+
+# Install SDL3 system dependencies
+install_sdl3_dependencies
 
 echo "All required tools are available!" >&2
 

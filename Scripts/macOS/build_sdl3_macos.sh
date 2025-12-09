@@ -192,7 +192,7 @@ LIB_FILE=""
 if [[ -f "$BUILD_DIR/libSDL3-static.a" ]]; then
     LIB_FILE="$BUILD_DIR/libSDL3-static.a"
 elif [[ -f "$BUILD_DIR/libSDL3.a" ]]; then
-    LIB_FILE="$BUILD_DIR/libSDL3.a"
+LIB_FILE="$BUILD_DIR/libSDL3.a"
 else
     # Search for any SDL3 library file
     LIB_FILE=$(find "$BUILD_DIR" -name "*SDL3*.a" -type f | head -1)
@@ -212,12 +212,12 @@ echo "Copied $(basename "$LIB_FILE") to $LIB_DIR/libSDL3.a"
 
 # Also copy to Premake output directories for convenience
 if [[ -n "$LIB_FILE" && -f "$LIB_FILE" ]]; then
-    for cfg in Debug_x64 Release_x64 Debug_ARM64 Release_ARM64; do
-        PREMAKE_LIB_DIR="$ROOT_DIR/Build/bin/$cfg/SDL3"
-        mkdir -p "$PREMAKE_LIB_DIR"
+for cfg in Debug_x64 Release_x64 Debug_ARM64 Release_ARM64; do
+    PREMAKE_LIB_DIR="$ROOT_DIR/Build/bin/$cfg/SDL3"
+    mkdir -p "$PREMAKE_LIB_DIR"
         cp "$LIB_FILE" "$PREMAKE_LIB_DIR/libSDL3.a"
-    done
-    echo "Copied libSDL3.a to Premake output directories (Debug/Release x64 and ARM64)"
+done
+echo "Copied libSDL3.a to Premake output directories (Debug/Release x64 and ARM64)"
 fi
 
 # Copy the generated SDL_build_config.h file
