@@ -43,6 +43,7 @@
 #include <algorithm>
 #include <numeric>
 #include <cstdint>
+#include <cmath>
 
 namespace Sabora
 {
