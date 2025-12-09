@@ -127,6 +127,19 @@ jobs:
           # Note: SDL3 will be built in the next step
         fi
 
+    - name: Verify SDL3 Build
+      run: |
+        echo "Checking for SDL3 library..."
+        if [ -f "Engine/Vendor/SDL/lib/libSDL3.a" ]; then
+          echo "✓ SDL3 library found: Engine/Vendor/SDL/lib/libSDL3.a"
+          ls -lh Engine/Vendor/SDL/lib/libSDL3.a
+        else
+          echo "✗ SDL3 library NOT found at Engine/Vendor/SDL/lib/libSDL3.a"
+          echo "Contents of Engine/Vendor/SDL/lib/:"
+          ls -la Engine/Vendor/SDL/lib/ || echo "Directory does not exist"
+          exit 1
+        fi
+
     - name: Generate project files
       run: Tools/Premake/premake5 gmake2
 

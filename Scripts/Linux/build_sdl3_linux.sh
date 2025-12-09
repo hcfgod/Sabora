@@ -183,38 +183,42 @@ INCLUDE_DIR="$ROOT_DIR/Engine/Vendor/SDL/include"
 
 mkdir -p "$LIB_DIR"
 
-# Copy the static library - CMake outputs it as libSDL3-static.a
-LIB_FILE="$BUILD_DIR/libSDL3-static.a"
-LIB_FILE_DEBUG="$BUILD_DIR/Debug/libSDL3-static.a"
-
-if [[ -f "$LIB_FILE" ]]; then
-    cp "$LIB_FILE" "$LIB_DIR/"
-    cp "$LIB_FILE" "$LIB_DIR/libSDL3.a"
-    echo "Copied libSDL3-static.a to $LIB_DIR (renamed to libSDL3.a)"
-elif [[ -f "$LIB_FILE_DEBUG" ]]; then
-    cp "$LIB_FILE_DEBUG" "$LIB_DIR/"
-    cp "$LIB_FILE_DEBUG" "$LIB_DIR/libSDL3.a"
-    echo "Copied libSDL3-static.a (Debug) to $LIB_DIR (renamed to libSDL3.a)"
+# Copy the static library - SDL3 CMake may output different names
+# Try multiple possible locations and names
+LIB_FILE=""
+if [[ -f "$BUILD_DIR/libSDL3.a" ]]; then
+    LIB_FILE="$BUILD_DIR/libSDL3.a"
+elif [[ -f "$BUILD_DIR/libSDL3-static.a" ]]; then
+    LIB_FILE="$BUILD_DIR/libSDL3-static.a"
+elif [[ -f "$BUILD_DIR/Debug/libSDL3.a" ]]; then
+    LIB_FILE="$BUILD_DIR/Debug/libSDL3.a"
+elif [[ -f "$BUILD_DIR/Debug/libSDL3-static.a" ]]; then
+    LIB_FILE="$BUILD_DIR/Debug/libSDL3-static.a"
 else
-    echo "Warning: SDL3 library not found. Checking build directory structure..."
-    find "$BUILD_DIR" -name "*.a" -exec basename {} \;
+    # Search for any SDL3 library file
+    LIB_FILE=$(find "$BUILD_DIR" -name "*SDL3*.a" -type f | head -1)
+fi
+
+if [[ -n "$LIB_FILE" && -f "$LIB_FILE" ]]; then
+    cp "$LIB_FILE" "$LIB_DIR/libSDL3.a"
+    echo "Copied $(basename "$LIB_FILE") to $LIB_DIR/libSDL3.a"
+else
+    echo "Error: SDL3 library not found. Checking build directory structure..."
+    find "$BUILD_DIR" -name "*.a" -type f
+    exit 1
 fi
 
 # Also copy to the Premake5 output directory for linking
 # Copy to both Debug and Release directories to handle both build configurations
-PREMAKE_LIB_DIR_RELEASE="$ROOT_DIR/Build/bin/Release_x64/SDL3"
-PREMAKE_LIB_DIR_DEBUG="$ROOT_DIR/Build/bin/Debug_x64/SDL3"
-mkdir -p "$PREMAKE_LIB_DIR_RELEASE"
-mkdir -p "$PREMAKE_LIB_DIR_DEBUG"
-
-if [[ -f "$LIB_FILE" ]]; then
+if [[ -n "$LIB_FILE" && -f "$LIB_FILE" ]]; then
+    PREMAKE_LIB_DIR_RELEASE="$ROOT_DIR/Build/bin/Release_x64/SDL3"
+    PREMAKE_LIB_DIR_DEBUG="$ROOT_DIR/Build/bin/Debug_x64/SDL3"
+    mkdir -p "$PREMAKE_LIB_DIR_RELEASE"
+    mkdir -p "$PREMAKE_LIB_DIR_DEBUG"
+    
     cp "$LIB_FILE" "$PREMAKE_LIB_DIR_RELEASE/libSDL3.a"
     cp "$LIB_FILE" "$PREMAKE_LIB_DIR_DEBUG/libSDL3.a"
-    echo "Copied libSDL3-static.a to Premake5 output directories as libSDL3.a (both Debug and Release)"
-elif [[ -f "$LIB_FILE_DEBUG" ]]; then
-    cp "$LIB_FILE_DEBUG" "$PREMAKE_LIB_DIR_RELEASE/libSDL3.a"
-    cp "$LIB_FILE_DEBUG" "$PREMAKE_LIB_DIR_DEBUG/libSDL3.a"
-    echo "Copied libSDL3-static.a (Debug) to Premake5 output directories as libSDL3.a (both Debug and Release)"
+    echo "Copied libSDL3.a to Premake5 output directories (both Debug and Release)"
 fi
 
 # Copy the generated SDL_build_config.h file - CMake puts it in include-config-release/build_config/
