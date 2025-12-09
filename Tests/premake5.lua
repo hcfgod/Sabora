@@ -54,8 +54,21 @@ project "Tests"
         -- macOS system libraries if needed
 
     filter "system:linux"
-        -- Linux system libraries needed by Engine/SDL3
-        links { "pthread", "dl", "m" }
+        -- Linux system libraries needed by Engine/SDL3 and dependencies
+        links { 
+            "pthread", "dl", "m",
+            -- X11 libraries
+            "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
+            "Xxf86vm", "Xss", "Xtst",
+            -- Wayland libraries
+            "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon",
+            -- Graphics libraries
+            "EGL", "GLESv2", "drm", "gbm",
+            -- Audio libraries
+            "asound", "pulse", "jack", "pipewire-0.3",
+            -- Other dependencies
+            "dbus-1", "udev", "usb-1.0"
+        }
 
     filter {}
 
