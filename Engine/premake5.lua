@@ -100,8 +100,9 @@ project "Engine"
             -- Core system
             "pthread", "dl", "m",
             -- X11 libraries (for X11 backend) - all X11 extensions
+            -- Note: XShape functions are part of Xext, not a separate library
             "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
-            "Xxf86vm", "Xss", "Xtst", "Xrender", "XShape",
+            "Xxf86vm", "Xss", "Xtst", "Xrender",
             -- Wayland libraries (for Wayland backend)
             "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon",
             -- Graphics libraries (EGL/GLES/DRM/GBM)
@@ -121,8 +122,9 @@ project "Engine"
             -- Core system
             "pthread", "dl", "m",
             -- X11 libraries (for X11 backend) - all X11 extensions
+            -- Note: XShape functions are part of Xext, not a separate library
             "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
-            "Xxf86vm", "Xss", "Xtst", "Xrender", "XShape",
+            "Xxf86vm", "Xss", "Xtst", "Xrender",
             -- Wayland libraries (for Wayland backend)
             "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon",
             -- Graphics libraries (EGL/GLES/DRM/GBM)
