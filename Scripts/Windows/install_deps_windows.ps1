@@ -107,4 +107,26 @@ Clone-Or-Update "https://github.com/nlohmann/json.git"     (Join-Path $vendor "j
 # Install SDL3 with custom premake5.lua
 Install-SDL3 $vendor
 
+# Build shaderc (includes SPIRV-Tools and SPIRV-Headers)
+function Install-Shaderc($vendorDir) {
+    $shadercDir = Join-Path $vendorDir "shaderc"
+    
+    # Build shaderc
+    Write-Host "Building shaderc..."
+    & (Join-Path $PSScriptRoot "build_shaderc_windows.ps1")
+}
+
+# Build SPIRV-Cross
+function Install-SPIRVCross($vendorDir) {
+    $spirvCrossDir = Join-Path $vendorDir "SPIRV-Cross"
+    
+    # Build SPIRV-Cross
+    Write-Host "Building SPIRV-Cross..."
+    & (Join-Path $PSScriptRoot "build_spirv_cross_windows.ps1")
+}
+
+# Install shaderc and SPIRV-Cross
+Install-Shaderc $vendor
+Install-SPIRVCross $vendor
+
 Write-Host "Dependencies are ready under $vendor"

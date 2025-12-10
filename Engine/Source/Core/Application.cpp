@@ -2,6 +2,13 @@
 #include "Log.h"
 #include <SDL3/SDL.h>
 
+// Test shader compilation libraries
+#include <shaderc/shaderc.hpp>
+#include <spirv_cross.hpp>
+#include <spirv_glsl.hpp>
+#include <spirv_hlsl.hpp>
+#include <spirv_msl.hpp>
+
 namespace Sabora 
 {
     //==========================================================================
@@ -93,6 +100,10 @@ namespace Sabora
 
         m_SDLContext = std::move(sdlResult).Value();
 
+        // Test shader compilation libraries
+        SB_CORE_INFO("Testing shader compilation libraries...");
+        TestShaderLibraries();
+
         SB_CORE_INFO("Application initialization complete.");
         return Result<void>::Success();
     }
@@ -140,6 +151,78 @@ namespace Sabora
     {
         m_Running = false;
         SB_CORE_INFO("Application close requested.");
+    }
+
+    void Application::TestShaderLibraries()
+    {
+        // Test shaderc - create a compiler instance
+        shaderc::Compiler compiler;
+        shaderc::CompileOptions options;
+        
+        // Simple vertex shader in GLSL
+        const std::string vertexShader = R"(
+            #version 450
+            layout(location = 0) in vec3 inPosition;
+            layout(location = 0) out vec3 fragColor;
+            
+            void main() {
+                gl_Position = vec4(inPosition, 1.0);
+                fragColor = vec3(1.0, 0.0, 0.0);
+            }
+        )";
+
+        // Compile GLSL to SPIR-V
+        shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(
+            vertexShader, 
+            shaderc_vertex_shader, 
+            "test_shader", 
+            options
+        );
+
+        if (result.GetCompilationStatus() == shaderc_compilation_status_success)
+        {
+            std::vector<uint32_t> spirvCode(result.cbegin(), result.cend());
+            SB_CORE_INFO("✓ shaderc: Successfully compiled GLSL to SPIR-V ({} words)", spirvCode.size());
+            
+            // Test SPIRV-Cross - parse SPIR-V and convert to GLSL
+            try
+            {
+                spirv_cross::CompilerGLSL glslCompiler(spirvCode);
+                spirv_cross::CompilerGLSL::Options glslOptions;
+                glslOptions.version = 330;
+                glslOptions.es = false;
+                glslCompiler.set_common_options(glslOptions);
+                
+                std::string glslOutput = glslCompiler.compile();
+                SB_CORE_INFO("✓ SPIRV-Cross: Successfully converted SPIR-V to GLSL ({} bytes)", glslOutput.size());
+                
+                // Test HLSL output
+                spirv_cross::CompilerHLSL hlslCompiler(spirvCode);
+                spirv_cross::CompilerHLSL::Options hlslOptions;
+                hlslOptions.shader_model = 50;
+                hlslCompiler.set_hlsl_options(hlslOptions);
+                
+                std::string hlslOutput = hlslCompiler.compile();
+                SB_CORE_INFO("✓ SPIRV-Cross: Successfully converted SPIR-V to HLSL ({} bytes)", hlslOutput.size());
+                
+                // Test MSL output (for macOS/iOS)
+                spirv_cross::CompilerMSL mslCompiler(spirvCode);
+                spirv_cross::CompilerMSL::Options mslOptions;
+                mslOptions.set_msl_version(2, 0);
+                mslCompiler.set_msl_options(mslOptions);
+                
+                std::string mslOutput = mslCompiler.compile();
+                SB_CORE_INFO("✓ SPIRV-Cross: Successfully converted SPIR-V to MSL ({} bytes)", mslOutput.size());
+            }
+            catch (const std::exception& e)
+            {
+                SB_CORE_WARN("SPIRV-Cross test failed: {}", e.what());
+            }
+        }
+        else
+        {
+            SB_CORE_WARN("shaderc compilation failed: {}", result.GetErrorMessage());
+        }
     }
 
     Application::~Application() 

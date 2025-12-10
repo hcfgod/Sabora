@@ -73,9 +73,12 @@ Write-Host "Building SDL3 with CMake..."
 # Configure SDL3 with CMake
 
 Write-Host "Configuring SDL3..."
+# Set static runtime library - for Visual Studio generators this applies to all configs
+# We'll set it to MultiThreadedDebug initially, then configure Release separately if needed
 & cmake -S "$sdlDir" -B "$buildDir" `
     -DCMAKE_BUILD_TYPE=Release `
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON `
+    -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug `
     -DSDL_STATIC=ON `
     -DSDL_SHARED=OFF `
     -DSDL_INSTALL=OFF `

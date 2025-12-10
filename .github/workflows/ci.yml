@@ -82,6 +82,32 @@ jobs:
       run: |
         & "$env:MSBUILD_PATH" Build\Sabora.sln /p:Configuration=Debug /p:Platform=x64 /m /v:minimal
 
+    - name: Verify SPIRV-Cross Build
+      run: |
+        Write-Host "Checking for SPIRV-Cross libraries..."
+        $libDir = "Engine\Vendor\SPIRV-Cross\lib"
+        if (Test-Path $libDir) {
+          $libs = Get-ChildItem -Path $libDir -Filter "*.lib"
+          if ($libs.Count -gt 0) {
+            Write-Host "✓ SPIRV-Cross libraries found:"
+            $libs | ForEach-Object { Write-Host "  - $($_.Name)" }
+            # Verify we have both Debug and Release versions
+            $hasDebug = $libs | Where-Object { $_.Name -like "*-debug.lib" }
+            $hasRelease = $libs | Where-Object { $_.Name -like "*-release.lib" }
+            if ($hasDebug -and $hasRelease) {
+              Write-Host "✓ Both Debug and Release libraries found"
+            } else {
+              Write-Host "⚠ Warning: Missing Debug or Release libraries"
+            }
+          } else {
+            Write-Host "✗ No SPIRV-Cross libraries found in $libDir"
+            exit 1
+          }
+        } else {
+          Write-Host "✗ SPIRV-Cross lib directory not found: $libDir"
+          exit 1
+        }
+
     - name: Build Tests
       run: |
         & "$env:MSBUILD_PATH" Build\Sabora.sln /p:Configuration=Debug /p:Platform=x64 /p:Project=Tests /m /v:minimal
@@ -103,7 +129,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake git
+        sudo apt-get install -y build-essential cmake git python3
 
     - name: Setup Premake
       run: |
@@ -154,6 +180,54 @@ jobs:
         echo "D-Bus:"
         pkg-config --libs dbus-1 2>/dev/null || echo "pkg-config not available or library not found"
 
+    - name: Verify Shader Libraries Build
+      run: |
+        echo "Checking for shaderc library..."
+        if [ -f "Engine/Vendor/shaderc/lib/libshaderc.a" ]; then
+          echo "✓ shaderc library found: Engine/Vendor/shaderc/lib/libshaderc.a"
+          ls -lh Engine/Vendor/shaderc/lib/libshaderc.a
+        else
+          echo "✗ shaderc library NOT found at Engine/Vendor/shaderc/lib/libshaderc.a"
+          echo "Contents of Engine/Vendor/shaderc/lib/:"
+          ls -la Engine/Vendor/shaderc/lib/ || echo "Directory does not exist"
+          exit 1
+        fi
+        echo ""
+        echo "Checking for SPIRV-Cross libraries..."
+        LIB_DIR="Engine/Vendor/SPIRV-Cross/lib"
+        if [ -d "$LIB_DIR" ]; then
+          # Check for standard library names (for compatibility)
+          if [ -f "$LIB_DIR/libspirv-cross-core.a" ]; then
+            echo "✓ SPIRV-Cross libraries found (standard naming):"
+            ls -lh "$LIB_DIR"/*.a | grep -v -- "-debug.a\|-release.a" || true
+          fi
+          # Check for Debug libraries
+          DEBUG_COUNT=$(find "$LIB_DIR" -name "*-debug.a" | wc -l)
+          if [ "$DEBUG_COUNT" -gt 0 ]; then
+            echo "✓ SPIRV-Cross Debug libraries found ($DEBUG_COUNT files):"
+            ls -lh "$LIB_DIR"/*-debug.a
+          fi
+          # Check for Release libraries
+          RELEASE_COUNT=$(find "$LIB_DIR" -name "*-release.a" | wc -l)
+          if [ "$RELEASE_COUNT" -gt 0 ]; then
+            echo "✓ SPIRV-Cross Release libraries found ($RELEASE_COUNT files):"
+            ls -lh "$LIB_DIR"/*-release.a
+          fi
+          # Verify we have at least some libraries
+          TOTAL_COUNT=$(find "$LIB_DIR" -name "*.a" | wc -l)
+          if [ "$TOTAL_COUNT" -eq 0 ]; then
+            echo "✗ No SPIRV-Cross libraries found in $LIB_DIR"
+            echo "Contents of $LIB_DIR/:"
+            ls -la "$LIB_DIR/" || echo "Directory does not exist"
+            exit 1
+          else
+            echo "✓ Total SPIRV-Cross libraries: $TOTAL_COUNT"
+          fi
+        else
+          echo "✗ SPIRV-Cross lib directory not found: $LIB_DIR"
+          exit 1
+        fi
+
     - name: Generate project files
       run: Tools/Premake/premake5 gmake2
 
@@ -183,7 +257,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install cmake git
+        brew install cmake git python3 libusb
 
     - name: Setup Premake
       run: |
@@ -205,6 +279,54 @@ jobs:
           git clone --depth 1 https://github.com/g-truc/glm.git "$VENDOR_DIR/glm"
           git clone --depth 1 https://github.com/nlohmann/json.git "$VENDOR_DIR/json"
           # Note: SDL3 will be built in the next step
+        fi
+
+    - name: Verify Shader Libraries Build
+      run: |
+        echo "Checking for shaderc library..."
+        if [ -f "Engine/Vendor/shaderc/lib/libshaderc.a" ]; then
+          echo "✓ shaderc library found: Engine/Vendor/shaderc/lib/libshaderc.a"
+          ls -lh Engine/Vendor/shaderc/lib/libshaderc.a
+        else
+          echo "✗ shaderc library NOT found at Engine/Vendor/shaderc/lib/libshaderc.a"
+          echo "Contents of Engine/Vendor/shaderc/lib/:"
+          ls -la Engine/Vendor/shaderc/lib/ || echo "Directory does not exist"
+          exit 1
+        fi
+        echo ""
+        echo "Checking for SPIRV-Cross libraries..."
+        LIB_DIR="Engine/Vendor/SPIRV-Cross/lib"
+        if [ -d "$LIB_DIR" ]; then
+          # Check for standard library names (for compatibility)
+          if [ -f "$LIB_DIR/libspirv-cross-core.a" ]; then
+            echo "✓ SPIRV-Cross libraries found (standard naming):"
+            ls -lh "$LIB_DIR"/*.a | grep -v -- "-debug.a\|-release.a" || true
+          fi
+          # Check for Debug libraries
+          DEBUG_COUNT=$(find "$LIB_DIR" -name "*-debug.a" | wc -l)
+          if [ "$DEBUG_COUNT" -gt 0 ]; then
+            echo "✓ SPIRV-Cross Debug libraries found ($DEBUG_COUNT files):"
+            ls -lh "$LIB_DIR"/*-debug.a
+          fi
+          # Check for Release libraries
+          RELEASE_COUNT=$(find "$LIB_DIR" -name "*-release.a" | wc -l)
+          if [ "$RELEASE_COUNT" -gt 0 ]; then
+            echo "✓ SPIRV-Cross Release libraries found ($RELEASE_COUNT files):"
+            ls -lh "$LIB_DIR"/*-release.a
+          fi
+          # Verify we have at least some libraries
+          TOTAL_COUNT=$(find "$LIB_DIR" -name "*.a" | wc -l)
+          if [ "$TOTAL_COUNT" -eq 0 ]; then
+            echo "✗ No SPIRV-Cross libraries found in $LIB_DIR"
+            echo "Contents of $LIB_DIR/:"
+            ls -la "$LIB_DIR/" || echo "Directory does not exist"
+            exit 1
+          else
+            echo "✓ Total SPIRV-Cross libraries: $TOTAL_COUNT"
+          fi
+        else
+          echo "✗ SPIRV-Cross lib directory not found: $LIB_DIR"
+          exit 1
         fi
 
     - name: Generate project files

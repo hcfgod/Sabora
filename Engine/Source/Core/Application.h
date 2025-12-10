@@ -123,6 +123,13 @@ namespace Sabora
         [[nodiscard]] bool IsRunning() const noexcept { return m_Running.load(); }
 
     private:
+        /**
+         * @brief Test shader compilation libraries (shaderc and SPIRV-Cross).
+         * 
+         * Compiles a simple shader and tests cross-compilation to verify
+         * that the shader libraries are properly linked and functional.
+         */
+        void TestShaderLibraries();
         std::atomic<bool> m_Running{false};
 
         // RAII wrapper for SDL - ensures proper initialization and cleanup

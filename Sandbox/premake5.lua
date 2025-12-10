@@ -35,6 +35,8 @@ project "Sandbox"
         "../Engine/" .. Dependencies.glm.IncludePath,
         "../Engine/" .. Dependencies.json.IncludePath,
         "../Engine/" .. Dependencies.SDL3.IncludePath,
+        "../Engine/" .. Dependencies.shaderc.IncludePath,
+        "../Engine/" .. Dependencies.SPIRVCross.IncludePath,
     }
 
     -- Link against Engine
@@ -43,9 +45,11 @@ project "Sandbox"
     -- SDL3 static linking - must be linked directly since Engine is a static library
     defines { "SDL_STATIC" }
     
-    -- Library directory for SDL3 (relative to Sandbox, so we need to go up to Engine)
+    -- Library directory for SDL3 and shader libraries (relative to Sandbox, so we need to go up to Engine)
     libdirs { 
-        "../Engine/" .. Dependencies.SDL3.LibraryPath
+        "../Engine/" .. Dependencies.SDL3.LibraryPath,
+        "../Engine/" .. Dependencies.shaderc.LibraryPath,
+        "../Engine/" .. Dependencies.SPIRVCross.LibraryPath,
     }
 
     filter "system:windows"
@@ -54,11 +58,19 @@ project "Sandbox"
         buildoptions { "/utf-8" }
 
     filter { "system:windows", "configurations:Debug" }
-        links { Dependencies.SDL3.Libraries.windows.Debug }
+        links { 
+            Dependencies.SDL3.Libraries.windows.Debug,
+            Dependencies.shaderc.Libraries.windows.Debug
+        }
+        links ( Dependencies.SPIRVCross.Libraries.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
-        links { Dependencies.SDL3.Libraries.windows.Release }
+        links { 
+            Dependencies.SDL3.Libraries.windows.Release,
+            Dependencies.shaderc.Libraries.windows.Release
+        }
+        links ( Dependencies.SPIRVCross.Libraries.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -83,19 +95,31 @@ project "Sandbox"
         links { "usb-1.0" }
 
     filter { "system:macosx", "configurations:Debug" }
-        links { Dependencies.SDL3.Libraries.macosx.Debug }
+        links { 
+            Dependencies.SDL3.Libraries.macosx.Debug,
+            Dependencies.shaderc.Libraries.macosx.Debug
+        }
+        links ( Dependencies.SPIRVCross.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
-        links { Dependencies.SDL3.Libraries.macosx.Release }
+        links { 
+            Dependencies.SDL3.Libraries.macosx.Release,
+            Dependencies.shaderc.Libraries.macosx.Release
+        }
+        links ( Dependencies.SPIRVCross.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
-        links { Dependencies.SDL3.Libraries.linux.Debug }
+        links { 
+            Dependencies.SDL3.Libraries.linux.Debug,
+            Dependencies.shaderc.Libraries.linux.Debug
+        }
+        links ( Dependencies.SPIRVCross.Libraries.linux.Debug )
         -- Now link all SDL3 dependencies
         links { 
             -- Core system
-            "pthread", "dl", "m",
+            "pthread", "dl", "m", "stdc++",
             -- X11 libraries (for X11 backend) - all X11 extensions
             -- Note: XShape functions are part of Xext, not a separate library
             "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
@@ -113,11 +137,15 @@ project "Sandbox"
     filter { "system:linux", "configurations:Release" }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
-        links { Dependencies.SDL3.Libraries.linux.Release }
+        links { 
+            Dependencies.SDL3.Libraries.linux.Release,
+            Dependencies.shaderc.Libraries.linux.Release
+        }
+        links ( Dependencies.SPIRVCross.Libraries.linux.Release )
         -- Now link all SDL3 dependencies
         links { 
             -- Core system
-            "pthread", "dl", "m",
+            "pthread", "dl", "m", "stdc++",
             -- X11 libraries (for X11 backend) - all X11 extensions
             -- Note: XShape functions are part of Xext, not a separate library
             "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 

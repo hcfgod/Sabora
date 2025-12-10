@@ -136,4 +136,26 @@ clone_or_update "https://github.com/nlohmann/json.git"     "$VENDOR_DIR/json"
 # Install SDL3 with custom premake5.lua
 install_sdl3 "$VENDOR_DIR"
 
+# Build shaderc (includes SPIRV-Tools and SPIRV-Headers)
+install_shaderc() {
+  local vendor_dir="$1"
+  
+  echo "Building shaderc..."
+  chmod +x "$SCRIPT_DIR/build_shaderc_macos.sh" || true
+  bash "$SCRIPT_DIR/build_shaderc_macos.sh"
+}
+
+# Build SPIRV-Cross
+install_spirv_cross() {
+  local vendor_dir="$1"
+  
+  echo "Building SPIRV-Cross..."
+  chmod +x "$SCRIPT_DIR/build_spirv_cross_macos.sh" || true
+  bash "$SCRIPT_DIR/build_spirv_cross_macos.sh"
+}
+
+# Install shaderc and SPIRV-Cross
+install_shaderc "$VENDOR_DIR"
+install_spirv_cross "$VENDOR_DIR"
+
 echo "Dependencies are ready under $VENDOR_DIR"

@@ -13,7 +13,7 @@ project "Engine"
     if Dependencies.SDL3.StaticRuntime then
         staticruntime "On"
     else
-    staticruntime "Off"
+        staticruntime "Off"
     end
 
     targetdir ("%{wks.location}/bin/%{cfg.buildcfg}_%{cfg.platform}/%{prj.name}")
@@ -26,6 +26,13 @@ project "Engine"
         "Source/**.cpp",
         "Source/**.cc",
     }
+    
+    -- Explicitly exclude vendor source files to prevent accidental compilation
+    excludes {
+        "Vendor/**.cpp",
+        "Vendor/**.cc",
+        "Vendor/**.c",
+    }
 
     includedirs {
         "Source",
@@ -34,6 +41,8 @@ project "Engine"
         Dependencies.glm.IncludePath,
         Dependencies.json.IncludePath,
         Dependencies.SDL3.IncludePath,
+        Dependencies.shaderc.IncludePath,
+        Dependencies.SPIRVCross.IncludePath,
     }
 
     -- Flexible library directory path based on configuration
@@ -41,6 +50,8 @@ project "Engine"
     -- Path is relative to Engine directory, so we use it directly
     libdirs { 
         Dependencies.SDL3.LibraryPath,
+        Dependencies.shaderc.LibraryPath,
+        Dependencies.SPIRVCross.LibraryPath,
         -- Add platform/configuration-specific paths here if needed
         -- Example: Dependencies.SDL3.LibraryPath .. "/%{cfg.platform}/%{cfg.buildcfg}"
     }
@@ -57,11 +68,19 @@ project "Engine"
         defines { "_CRT_SECURE_NO_WARNINGS", "NOMINMAX" }
 
     filter { "system:windows", "configurations:Debug" }
-        links { Dependencies.SDL3.Libraries.windows.Debug }
+        links { 
+            Dependencies.SDL3.Libraries.windows.Debug,
+            Dependencies.shaderc.Libraries.windows.Debug
+        }
+        links ( Dependencies.SPIRVCross.Libraries.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
-        links { Dependencies.SDL3.Libraries.windows.Release }
+        links { 
+            Dependencies.SDL3.Libraries.windows.Release,
+            Dependencies.shaderc.Libraries.windows.Release
+        }
+        links ( Dependencies.SPIRVCross.Libraries.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -86,19 +105,31 @@ project "Engine"
         links { "usb-1.0" }
 
     filter { "system:macosx", "configurations:Debug" }
-        links { Dependencies.SDL3.Libraries.macosx.Debug }
+        links { 
+            Dependencies.SDL3.Libraries.macosx.Debug,
+            Dependencies.shaderc.Libraries.macosx.Debug
+        }
+        links ( Dependencies.SPIRVCross.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
-        links { Dependencies.SDL3.Libraries.macosx.Release }
+        links { 
+            Dependencies.SDL3.Libraries.macosx.Release,
+            Dependencies.shaderc.Libraries.macosx.Release
+        }
+        links ( Dependencies.SPIRVCross.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
-        links { Dependencies.SDL3.Libraries.linux.Debug }
+        links { 
+            Dependencies.SDL3.Libraries.linux.Debug,
+            Dependencies.shaderc.Libraries.linux.Debug
+        }
+        links ( Dependencies.SPIRVCross.Libraries.linux.Debug )
         -- Now link all SDL3 dependencies
         links { 
             -- Core system
-            "pthread", "dl", "m",
+            "pthread", "dl", "m", "stdc++",
             -- X11 libraries (for X11 backend) - all X11 extensions
             -- Note: XShape functions are part of Xext, not a separate library
             "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
@@ -116,11 +147,15 @@ project "Engine"
     filter { "system:linux", "configurations:Release" }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
-        links { Dependencies.SDL3.Libraries.linux.Release }
+        links { 
+            Dependencies.SDL3.Libraries.linux.Release,
+            Dependencies.shaderc.Libraries.linux.Release
+        }
+        links ( Dependencies.SPIRVCross.Libraries.linux.Release )
         -- Now link all SDL3 dependencies
         links { 
             -- Core system
-            "pthread", "dl", "m",
+            "pthread", "dl", "m", "stdc++",
             -- X11 libraries (for X11 backend) - all X11 extensions
             -- Note: XShape functions are part of Xext, not a separate library
             "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 

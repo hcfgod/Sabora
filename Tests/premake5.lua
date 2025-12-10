@@ -28,9 +28,18 @@ project "Tests"
     includedirs {
         "Source",
         "../Engine/Source",
+        "../Engine/Source/Core",
         "../Engine/Vendor/doctest/doctest",
         "../Engine/Vendor/spdlog/include",
         "../Engine/Vendor/json/include",
+        "../Engine/Vendor/shaderc/include",
+        "../Engine/Vendor/SPIRV-Cross/include",
+    }
+
+    -- Library directories for dependencies
+    libdirs {
+        "../Engine/Vendor/shaderc/lib",
+        "../Engine/Vendor/SPIRV-Cross/lib",
     }
 
     -- Link against Engine library
@@ -57,7 +66,7 @@ project "Tests"
         -- Linux system libraries needed by Engine/SDL3 and dependencies
         -- Note: SDL3 is linked in Engine, so we only need the system dependencies here
         -- Core system libraries
-        links { "pthread", "dl", "m" }
+        links { "pthread", "dl", "m", "stdc++" }
         -- X11 libraries (for X11 backend) - all X11 extensions
         -- Note: XShape functions are part of Xext, not a separate library
         links { "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
