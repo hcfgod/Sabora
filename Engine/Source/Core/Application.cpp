@@ -9,6 +9,13 @@
 #include <spirv_hlsl.hpp>
 #include <spirv_msl.hpp>
 
+// Test MSDF atlas generation library
+#include <msdf-atlas-gen/msdf-atlas-gen.h>
+
+// Test OpenAL Soft audio library
+#include <AL/al.h>
+#include <AL/alc.h>
+
 namespace Sabora 
 {
     //==========================================================================
@@ -103,6 +110,14 @@ namespace Sabora
         // Test shader compilation libraries
         SB_CORE_INFO("Testing shader compilation libraries...");
         TestShaderLibraries();
+
+        // Test MSDF atlas generation library
+        SB_CORE_INFO("Testing MSDF atlas generation library...");
+        TestMSDFAtlasGen();
+
+        // Test OpenAL Soft audio library
+        SB_CORE_INFO("Testing OpenAL Soft audio library...");
+        TestOpenALSoft();
 
         SB_CORE_INFO("Application initialization complete.");
         return Result<void>::Success();
@@ -224,6 +239,130 @@ namespace Sabora
             SB_CORE_WARN("shaderc compilation failed: {}", result.GetErrorMessage());
         }
     }
+
+    void Application::TestMSDFAtlasGen()
+    {
+        try
+        {
+            // Test that we can create basic types from msdf-atlas-gen
+            // Create a simple rectangle packer to verify linking
+            msdf_atlas::RectanglePacker packer(1024, 1024);
+            
+            // Test that we can create a font geometry structure
+            msdf_atlas::FontGeometry fontGeometry;
+            
+            // Test that we can access types and create rectangles
+            msdf_atlas::Rectangle testRect;
+            testRect.x = 0;
+            testRect.y = 0;
+            testRect.w = 10;
+            testRect.h = 10;
+            
+            msdf_atlas::GlyphBox glyphBox;
+            glyphBox.rect = testRect;
+            glyphBox.index = 0;
+            glyphBox.advance = 10.0;
+            
+            // Test enum types
+            [[maybe_unused]] msdf_atlas::ImageType imageType = msdf_atlas::ImageType::MSDF;
+            [[maybe_unused]] msdf_atlas::ImageFormat imageFormat = msdf_atlas::ImageFormat::PNG;
+            
+            SB_CORE_INFO("✓ msdf-atlas-gen: Library linked successfully, types accessible");
+            SB_CORE_INFO("  - RectanglePacker: OK (1024x1024)");
+            SB_CORE_INFO("  - FontGeometry: OK");
+            SB_CORE_INFO("  - GlyphBox: OK");
+            SB_CORE_INFO("  - ImageType enum: OK (MSDF)");
+            SB_CORE_INFO("  - ImageFormat enum: OK (PNG)");
+        }
+        catch (const std::exception& e)
+        {
+            SB_CORE_WARN("msdf-atlas-gen test failed: {}", e.what());
+        }
+        catch (...)
+        {
+            SB_CORE_WARN("msdf-atlas-gen test failed: Unknown exception");
+        }
+    }
+
+    void Application::TestOpenALSoft()
+    {
+        // OpenAL Soft test - initialize device and context
+        ALCdevice* device = nullptr;
+        ALCcontext* context = nullptr;
+        
+        try
+        {
+            // Open default audio device
+            device = alcOpenDevice(nullptr);
+            if (device == nullptr)
+            {
+                SB_CORE_WARN("OpenAL Soft: Failed to open default audio device");
+                return;
+            }
+            
+            // Create audio context
+            context = alcCreateContext(device, nullptr);
+            if (context == nullptr)
+            {
+                SB_CORE_WARN("OpenAL Soft: Failed to create audio context");
+                alcCloseDevice(device);
+                return;
+            }
+            
+            // Make context current
+            if (!alcMakeContextCurrent(context))
+            {
+                SB_CORE_WARN("OpenAL Soft: Failed to make context current");
+                alcDestroyContext(context);
+                alcCloseDevice(device);
+                return;
+            }
+            
+            // Get OpenAL version and renderer info
+            const ALCchar* version = alGetString(AL_VERSION);
+            const ALCchar* renderer = alGetString(AL_RENDERER);
+            const ALCchar* vendor = alGetString(AL_VENDOR);
+            
+            SB_CORE_INFO("✓ OpenAL Soft: Library linked successfully");
+            SB_CORE_INFO("  - Version: {}", version ? version : "Unknown");
+            SB_CORE_INFO("  - Renderer: {}", renderer ? renderer : "Unknown");
+            SB_CORE_INFO("  - Vendor: {}", vendor ? vendor : "Unknown");
+            
+            // Clean up
+            alcMakeContextCurrent(nullptr);
+            alcDestroyContext(context);
+            alcCloseDevice(device);
+        }
+        catch (const std::exception& e)
+        {
+            SB_CORE_WARN("OpenAL Soft test failed: {}", e.what());
+            // Clean up on error
+            if (context != nullptr)
+            {
+                alcMakeContextCurrent(nullptr);
+                alcDestroyContext(context);
+            }
+            if (device != nullptr)
+            {
+                alcCloseDevice(device);
+            }
+        }
+        catch (...)
+        {
+            SB_CORE_WARN("OpenAL Soft test failed: Unknown exception");
+            // Clean up on error
+            if (context != nullptr)
+            {
+                alcMakeContextCurrent(nullptr);
+                alcDestroyContext(context);
+            }
+            if (device != nullptr)
+            {
+                alcCloseDevice(device);
+            }
+        }
+    }
+
 
     Application::~Application() 
     {

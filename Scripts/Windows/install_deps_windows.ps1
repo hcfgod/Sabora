@@ -125,8 +125,30 @@ function Install-SPIRVCross($vendorDir) {
     & (Join-Path $PSScriptRoot "build_spirv_cross_windows.ps1")
 }
 
+# Build msdf-atlas-gen
+function Install-MSDFAtlasGen($vendorDir) {
+    $msdfAtlasGenDir = Join-Path $vendorDir "msdf-atlas-gen"
+    
+    # Build msdf-atlas-gen
+    Write-Host "Building msdf-atlas-gen..."
+    & (Join-Path $PSScriptRoot "build_msdf_atlas_gen_windows.ps1")
+}
+
+# Build OpenAL Soft
+function Install-OpenALSoft($vendorDir) {
+    $openalSoftDir = Join-Path $vendorDir "openal-soft"
+    
+    # Build OpenAL Soft
+    Write-Host "Building OpenAL Soft..."
+    & (Join-Path $PSScriptRoot "build_openal_soft_windows.ps1")
+}
+
 # Install shaderc and SPIRV-Cross
 Install-Shaderc $vendor
 Install-SPIRVCross $vendor
+
+# Install new libraries
+Install-MSDFAtlasGen $vendor
+Install-OpenALSoft $vendor
 
 Write-Host "Dependencies are ready under $vendor"

@@ -108,6 +108,32 @@ jobs:
           exit 1
         }
 
+    - name: Verify New Libraries Build
+      run: |
+        Write-Host "Checking for msdf-atlas-gen and OpenAL Soft libraries..."
+        
+        # Check msdf-atlas-gen
+        $msdfLibDir = "Engine\Vendor\msdf-atlas-gen\lib"
+        if (Test-Path $msdfLibDir) {
+          $msdfLibs = Get-ChildItem -Path $msdfLibDir -Filter "*.lib" -ErrorAction SilentlyContinue
+          if ($msdfLibs.Count -gt 0) {
+            Write-Host "✓ msdf-atlas-gen libraries found ($($msdfLibs.Count) files)"
+          } else {
+            Write-Host "⚠ msdf-atlas-gen libraries not found (may be header-only)"
+          }
+        }
+        
+        # Check OpenAL Soft
+        $openalLibDir = "Engine\Vendor\openal-soft\lib"
+        if (Test-Path $openalLibDir) {
+          $openalLibs = Get-ChildItem -Path $openalLibDir -Filter "*.lib" -ErrorAction SilentlyContinue
+          if ($openalLibs.Count -gt 0) {
+            Write-Host "✓ OpenAL Soft libraries found ($($openalLibs.Count) files)"
+          } else {
+            Write-Host "⚠ OpenAL Soft libraries not found"
+          }
+        }
+
     - name: Build Tests
       run: |
         & "$env:MSBUILD_PATH" Build\Sabora.sln /p:Configuration=Debug /p:Platform=x64 /p:Project=Tests /m /v:minimal
@@ -228,6 +254,33 @@ jobs:
           exit 1
         fi
 
+    - name: Verify New Libraries Build
+      run: |
+        echo "Checking for msdf-atlas-gen and OpenAL Soft libraries..."
+        
+        # Check msdf-atlas-gen
+        MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
+        if [ -d "$MSDF_LIB_DIR" ]; then
+          MSDF_COUNT=$(find "$MSDF_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$MSDF_COUNT" -gt 0 ]; then
+            echo "✓ msdf-atlas-gen libraries found ($MSDF_COUNT files)"
+          else
+            echo "⚠ msdf-atlas-gen libraries not found (may be header-only)"
+          fi
+        fi
+        
+        # Check OpenAL Soft
+        OPENAL_LIB_DIR="Engine/Vendor/openal-soft/lib"
+        if [ -d "$OPENAL_LIB_DIR" ]; then
+          OPENAL_COUNT=$(find "$OPENAL_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$OPENAL_COUNT" -gt 0 ]; then
+            echo "✓ OpenAL Soft libraries found ($OPENAL_COUNT files)"
+          else
+            echo "⚠ OpenAL Soft libraries not found"
+          fi
+        fi
+        
+
     - name: Generate project files
       run: Tools/Premake/premake5 gmake2
 
@@ -328,6 +381,33 @@ jobs:
           echo "✗ SPIRV-Cross lib directory not found: $LIB_DIR"
           exit 1
         fi
+
+    - name: Verify New Libraries Build
+      run: |
+        echo "Checking for msdf-atlas-gen and OpenAL Soft libraries..."
+        
+        # Check msdf-atlas-gen
+        MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
+        if [ -d "$MSDF_LIB_DIR" ]; then
+          MSDF_COUNT=$(find "$MSDF_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$MSDF_COUNT" -gt 0 ]; then
+            echo "✓ msdf-atlas-gen libraries found ($MSDF_COUNT files)"
+          else
+            echo "⚠ msdf-atlas-gen libraries not found (may be header-only)"
+          fi
+        fi
+        
+        # Check OpenAL Soft
+        OPENAL_LIB_DIR="Engine/Vendor/openal-soft/lib"
+        if [ -d "$OPENAL_LIB_DIR" ]; then
+          OPENAL_COUNT=$(find "$OPENAL_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$OPENAL_COUNT" -gt 0 ]; then
+            echo "✓ OpenAL Soft libraries found ($OPENAL_COUNT files)"
+          else
+            echo "⚠ OpenAL Soft libraries not found"
+          fi
+        fi
+        
 
     - name: Generate project files
       run: Tools/Premake/premake5 gmake2

@@ -179,4 +179,108 @@ Dependencies.SPIRVCross = {
     }
 }
 
+-- msdf-atlas-gen Configuration (static library for MSDF text atlas generation)
+Dependencies.msdfAtlasGen = {
+    -- Version string (update when pinning to specific version)
+    Version = "latest",
+    HeaderOnly = false,
+    
+    -- Paths relative to Engine directory
+    LibraryPath = "Vendor/msdf-atlas-gen/lib",
+    IncludePath = "Vendor/msdf-atlas-gen",
+    
+    -- Library names per platform and configuration
+    -- msdf-atlas-gen depends on msdfgen-core and msdfgen-ext
+    Libraries = {
+        windows = {
+            Debug = {
+                "msdf-atlas-gen-debug.lib",
+                "msdfgen-ext-debug.lib",
+                "msdfgen-core-debug.lib"
+            },
+            Release = {
+                "msdf-atlas-gen-release.lib",
+                "msdfgen-ext-release.lib",
+                "msdfgen-core-release.lib"
+            }
+        },
+        macosx = {
+            Debug = {
+                "msdf-atlas-gen",
+                "msdfgen-ext",
+                "msdfgen-core"
+            },
+            Release = {
+                "msdf-atlas-gen",
+                "msdfgen-ext",
+                "msdfgen-core"
+            }
+        },
+        linux = {
+            Debug = {
+                "msdf-atlas-gen",
+                "msdfgen-ext",
+                "msdfgen-core"
+            },
+            Release = {
+                "msdf-atlas-gen",
+                "msdfgen-ext",
+                "msdfgen-core"
+            }
+        }
+    }
+}
+
+-- Freetype Configuration (static library, dependency of msdfgen-ext)
+Dependencies.Freetype = {
+    Version = "latest",
+    HeaderOnly = false,
+    LibraryPath = "Vendor/msdf-atlas-gen/lib",  -- Copied to same lib directory as msdf-atlas-gen
+    IncludePath = "Vendor/freetype/include",
+    Libraries = {
+        windows = {
+            Debug = "freetype-debug.lib",
+            Release = "freetype-release.lib"
+        },
+        macosx = {
+            Debug = "freetype",
+            Release = "freetype"
+        },
+        linux = {
+            Debug = "freetype",
+            Release = "freetype"
+        }
+    }
+}
+
+-- OpenAL Soft Configuration (static library for 3D audio)
+Dependencies.OpenALSoft = {
+    -- Version string (update when pinning to specific version)
+    Version = "latest",
+    HeaderOnly = false,
+    
+    -- Static runtime setting must match how OpenAL Soft was built
+    StaticRuntime = true,
+    
+    -- Paths relative to Engine directory
+    LibraryPath = "Vendor/openal-soft/lib",
+    IncludePath = "Vendor/openal-soft/include",
+    
+    -- Library names per platform and configuration
+    Libraries = {
+        windows = {
+            Debug = "OpenAL32-debug.lib",
+            Release = "OpenAL32-release.lib"
+        },
+        macosx = {
+            Debug = "openal",
+            Release = "openal"
+        },
+        linux = {
+            Debug = "openal",
+            Release = "openal"
+        }
+    }
+}
+
 return Dependencies

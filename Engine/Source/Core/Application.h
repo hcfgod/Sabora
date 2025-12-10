@@ -130,6 +130,22 @@ namespace Sabora
          * that the shader libraries are properly linked and functional.
          */
         void TestShaderLibraries();
+
+        /**
+         * @brief Test MSDF atlas generation library.
+         * 
+         * Verifies that msdf-atlas-gen is properly linked and can create
+         * basic atlas generator instances.
+         */
+        void TestMSDFAtlasGen();
+
+        /**
+         * @brief Test OpenAL Soft audio library.
+         * 
+         * Verifies that OpenAL Soft is properly linked and can initialize
+         * an audio context.
+         */
+        void TestOpenALSoft();
         std::atomic<bool> m_Running{false};
 
         // RAII wrapper for SDL - ensures proper initialization and cleanup

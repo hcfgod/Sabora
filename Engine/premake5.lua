@@ -43,6 +43,10 @@ project "Engine"
         Dependencies.SDL3.IncludePath,
         Dependencies.shaderc.IncludePath,
         Dependencies.SPIRVCross.IncludePath,
+        Dependencies.msdfAtlasGen.IncludePath,
+        Dependencies.msdfAtlasGen.IncludePath .. "/msdfgen",  -- msdfgen headers needed by msdf-atlas-gen
+        Dependencies.Freetype.IncludePath,
+        Dependencies.OpenALSoft.IncludePath,
     }
 
     -- Flexible library directory path based on configuration
@@ -52,6 +56,9 @@ project "Engine"
         Dependencies.SDL3.LibraryPath,
         Dependencies.shaderc.LibraryPath,
         Dependencies.SPIRVCross.LibraryPath,
+        Dependencies.msdfAtlasGen.LibraryPath,
+        Dependencies.Freetype.LibraryPath,
+        Dependencies.OpenALSoft.LibraryPath,
         -- Add platform/configuration-specific paths here if needed
         -- Example: Dependencies.SDL3.LibraryPath .. "/%{cfg.platform}/%{cfg.buildcfg}"
     }
@@ -61,26 +68,35 @@ project "Engine"
 
     -- SDL3 static linking
     defines { "SDL_STATIC" }
+    
+    -- OpenAL Soft static linking
+    defines { "AL_LIBTYPE_STATIC" }
 
     filter "system:windows"
-        links { "setupapi", "winmm", "imm32", "version", "ole32", "oleaut32", "uuid" }
+        links { "setupapi", "winmm", "imm32", "version", "ole32", "oleaut32", "uuid", "avrt" }
         buildoptions { "/utf-8" }
         defines { "_CRT_SECURE_NO_WARNINGS", "NOMINMAX" }
 
     filter { "system:windows", "configurations:Debug" }
         links { 
             Dependencies.SDL3.Libraries.windows.Debug,
-            Dependencies.shaderc.Libraries.windows.Debug
+            Dependencies.shaderc.Libraries.windows.Debug,
+            Dependencies.OpenALSoft.Libraries.windows.Debug
         }
         links ( Dependencies.SPIRVCross.Libraries.windows.Debug )
+        links ( Dependencies.msdfAtlasGen.Libraries.windows.Debug )
+        links ( Dependencies.Freetype.Libraries.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
         links { 
             Dependencies.SDL3.Libraries.windows.Release,
-            Dependencies.shaderc.Libraries.windows.Release
+            Dependencies.shaderc.Libraries.windows.Release,
+            Dependencies.OpenALSoft.Libraries.windows.Release
         }
         links ( Dependencies.SPIRVCross.Libraries.windows.Release )
+        links ( Dependencies.msdfAtlasGen.Libraries.windows.Release )
+        links ( Dependencies.Freetype.Libraries.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -107,25 +123,34 @@ project "Engine"
     filter { "system:macosx", "configurations:Debug" }
         links { 
             Dependencies.SDL3.Libraries.macosx.Debug,
-            Dependencies.shaderc.Libraries.macosx.Debug
+            Dependencies.shaderc.Libraries.macosx.Debug,
+            Dependencies.OpenALSoft.Libraries.macosx.Debug
         }
         links ( Dependencies.SPIRVCross.Libraries.macosx.Debug )
+        links ( Dependencies.msdfAtlasGen.Libraries.macosx.Debug )
+        links ( Dependencies.Freetype.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
             Dependencies.SDL3.Libraries.macosx.Release,
-            Dependencies.shaderc.Libraries.macosx.Release
+            Dependencies.shaderc.Libraries.macosx.Release,
+            Dependencies.OpenALSoft.Libraries.macosx.Release
         }
         links ( Dependencies.SPIRVCross.Libraries.macosx.Release )
+        links ( Dependencies.msdfAtlasGen.Libraries.macosx.Release )
+        links ( Dependencies.Freetype.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
         links { 
             Dependencies.SDL3.Libraries.linux.Debug,
-            Dependencies.shaderc.Libraries.linux.Debug
+            Dependencies.shaderc.Libraries.linux.Debug,
+            Dependencies.OpenALSoft.Libraries.linux.Debug
         }
         links ( Dependencies.SPIRVCross.Libraries.linux.Debug )
+        links ( Dependencies.msdfAtlasGen.Libraries.linux.Debug )
+        links ( Dependencies.Freetype.Libraries.linux.Debug )
         -- Now link all SDL3 dependencies
         links { 
             -- Core system
@@ -149,9 +174,12 @@ project "Engine"
         -- On Linux, static libraries must be linked before their dependencies
         links { 
             Dependencies.SDL3.Libraries.linux.Release,
-            Dependencies.shaderc.Libraries.linux.Release
+            Dependencies.shaderc.Libraries.linux.Release,
+            Dependencies.OpenALSoft.Libraries.linux.Release
         }
         links ( Dependencies.SPIRVCross.Libraries.linux.Release )
+        links ( Dependencies.msdfAtlasGen.Libraries.linux.Release )
+        links ( Dependencies.Freetype.Libraries.linux.Release )
         -- Now link all SDL3 dependencies
         links { 
             -- Core system
