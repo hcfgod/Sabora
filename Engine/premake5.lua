@@ -148,8 +148,6 @@ project "Engine"
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
-        -- Ensure our library directories are searched before system directories
-        linkoptions { "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libsndfile.LibraryPath) }
         linkoptions { "-Wl,-Bstatic" }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
@@ -185,8 +183,6 @@ project "Engine"
 
     filter { "system:linux", "configurations:Release" }
         -- Prefer static libraries over shared libraries for our dependencies
-        -- Ensure our library directories are searched before system directories
-        linkoptions { "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libsndfile.LibraryPath) }
         linkoptions { "-Wl,-Bstatic" }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies

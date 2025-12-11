@@ -41,6 +41,7 @@ project "Sandbox"
         "../Engine/" .. Dependencies.msdfAtlasGen.IncludePath .. "/msdfgen",  -- msdfgen headers needed by msdf-atlas-gen
         "../Engine/" .. Dependencies.Freetype.IncludePath,
         "../Engine/" .. Dependencies.OpenALSoft.IncludePath,
+        "../Engine/" .. Dependencies.Libsndfile.IncludePath,
     }
 
     -- Link against Engine
@@ -60,6 +61,7 @@ project "Sandbox"
         "../Engine/" .. Dependencies.msdfAtlasGen.LibraryPath,
         "../Engine/" .. Dependencies.Freetype.LibraryPath,
         "../Engine/" .. Dependencies.OpenALSoft.LibraryPath,
+        "../Engine/" .. Dependencies.Libsndfile.LibraryPath,
     }
 
     filter "system:windows"
@@ -76,6 +78,7 @@ project "Sandbox"
         links ( Dependencies.SPIRVCross.Libraries.windows.Debug )
         links ( Dependencies.msdfAtlasGen.Libraries.windows.Debug )
         links ( Dependencies.Freetype.Libraries.windows.Debug )
+        links ( Dependencies.Libsndfile.Libraries.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
@@ -87,6 +90,7 @@ project "Sandbox"
         links ( Dependencies.SPIRVCross.Libraries.windows.Release )
         links ( Dependencies.msdfAtlasGen.Libraries.windows.Release )
         links ( Dependencies.Freetype.Libraries.windows.Release )
+        links ( Dependencies.Libsndfile.Libraries.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -119,6 +123,7 @@ project "Sandbox"
         links ( Dependencies.SPIRVCross.Libraries.macosx.Debug )
         links ( Dependencies.msdfAtlasGen.Libraries.macosx.Debug )
         links ( Dependencies.Freetype.Libraries.macosx.Debug )
+        links ( Dependencies.Libsndfile.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -129,8 +134,11 @@ project "Sandbox"
         links ( Dependencies.SPIRVCross.Libraries.macosx.Release )
         links ( Dependencies.msdfAtlasGen.Libraries.macosx.Release )
         links ( Dependencies.Freetype.Libraries.macosx.Release )
+        links ( Dependencies.Libsndfile.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
+        -- Prefer static libraries over shared libraries for our dependencies
+        linkoptions { "-Wl,-Bstatic" }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
         links { 
@@ -141,6 +149,10 @@ project "Sandbox"
         links ( Dependencies.SPIRVCross.Libraries.linux.Debug )
         links ( Dependencies.msdfAtlasGen.Libraries.linux.Debug )
         links ( Dependencies.Freetype.Libraries.linux.Debug )
+        -- Explicitly link libsndfile static library to avoid system library
+        links ( Dependencies.Libsndfile.Libraries.linux.Debug )
+        -- Switch back to dynamic linking for system libraries
+        linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
         links { 
             -- Core system
@@ -160,6 +172,8 @@ project "Sandbox"
         }
 
     filter { "system:linux", "configurations:Release" }
+        -- Prefer static libraries over shared libraries for our dependencies
+        linkoptions { "-Wl,-Bstatic" }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
         links { 
@@ -170,6 +184,10 @@ project "Sandbox"
         links ( Dependencies.SPIRVCross.Libraries.linux.Release )
         links ( Dependencies.msdfAtlasGen.Libraries.linux.Release )
         links ( Dependencies.Freetype.Libraries.linux.Release )
+        -- Explicitly link libsndfile static library to avoid system library
+        links ( Dependencies.Libsndfile.Libraries.linux.Release )
+        -- Switch back to dynamic linking for system libraries
+        linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
         links { 
             -- Core system

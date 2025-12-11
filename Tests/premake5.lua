@@ -131,8 +131,6 @@ project "Tests"
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
-        -- Ensure our library directories are searched before system directories
-        linkoptions { "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libsndfile.LibraryPath) }
         linkoptions { "-Wl,-Bstatic" }
         links { 
             Dependencies.shaderc.Libraries.linux.Debug,
@@ -148,8 +146,6 @@ project "Tests"
 
     filter { "system:linux", "configurations:Release" }
         -- Prefer static libraries over shared libraries for our dependencies
-        -- Ensure our library directories are searched before system directories
-        linkoptions { "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libsndfile.LibraryPath) }
         linkoptions { "-Wl,-Bstatic" }
         links { 
             Dependencies.shaderc.Libraries.linux.Release,
