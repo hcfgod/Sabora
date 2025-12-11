@@ -113,9 +113,6 @@ project "Sandbox"
         -- Link libusb (installed via homebrew on macOS)
         libdirs { "/opt/homebrew/lib", "/usr/local/lib" }
         links { "usb-1.0" }
-        -- Ensure our library directories are searched before system directories
-        -- Use explicit library search path for freetype
-        linkoptions { "-L%{wks.location}/../Engine/Vendor/msdf-atlas-gen/lib" }
 
     filter { "system:macosx", "configurations:Debug" }
         links { 

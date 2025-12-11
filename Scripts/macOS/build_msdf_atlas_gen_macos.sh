@@ -95,15 +95,15 @@ if [[ -f "$MSDF_ATLAS_GEN_DIR/msdfgen/CMakeLists.txt" ]]; then
 fi
 
 # Try to use system packages first, fall back to building from source
+# Always build our own libraries for static linking consistency
+# This ensures we have static libraries that match our build configuration
 USE_SYSTEM_FREETYPE=false
 USE_SYSTEM_PNG=false
 USE_SYSTEM_ZLIB=false
 
-# Check for system Freetype (macOS often has it, or via Homebrew)
-if pkg-config --exists freetype2 2>/dev/null || [[ -f "/opt/homebrew/lib/libfreetype.dylib" ]] || [[ -f "/usr/local/lib/libfreetype.dylib" ]]; then
-    USE_SYSTEM_FREETYPE=true
-    echo "Using system Freetype library" >&2
-fi
+# Note: We always build our own freetype to ensure static linking
+# System freetype might be dynamic, which would cause linking issues
+echo "Building our own Freetype library for static linking" >&2
 
 # Check for system libpng
 if pkg-config --exists libpng 2>/dev/null || [[ -f "/opt/homebrew/lib/libpng.dylib" ]] || [[ -f "/usr/local/lib/libpng.dylib" ]]; then
@@ -557,24 +557,38 @@ for lib in "${MSDFGEN_LIBS[@]}"; do
     fi
 done
 
-# Copy Freetype libraries if we built them
+# Copy Freetype libraries - we always build our own
 if [[ "$USE_SYSTEM_FREETYPE" == "false" ]]; then
-    if [[ -f "$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" ]]; then
-        cp "$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" "$LIB_DIR/freetype-debug.a"
-        # Create symlink with expected name for linker (points to debug version)
-        ln -sf "freetype-debug.a" "$LIB_DIR/libfreetype.a"
-        echo "Copied freetype (Debug) to $LIB_DIR/freetype-debug.a and created symlink libfreetype.a"
+    # Verify Debug library exists
+    if [[ ! -f "$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" ]]; then
+        echo "Error: Freetype Debug library not found at $FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" >&2
+        echo "Freetype Debug build may have failed. Please check the build logs." >&2
+        exit 1
     fi
-    if [[ -f "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" ]]; then
-        cp "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" "$LIB_DIR/freetype-release.a"
-        # Create symlink for Release as well (will be overwritten by Debug symlink, but ensures it exists)
-        # Note: Debug symlink takes precedence, but this ensures Release builds can find it
-        if [[ ! -L "$LIB_DIR/libfreetype.a" ]]; then
-            ln -sf "freetype-release.a" "$LIB_DIR/libfreetype.a"
-            echo "Created symlink libfreetype.a -> freetype-release.a for Release"
-        fi
-        echo "Copied freetype (Release) to $LIB_DIR/freetype-release.a"
+    
+    # Copy Debug library
+    cp "$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" "$LIB_DIR/freetype-debug.a"
+    # Create symlink with expected name for linker (points to debug version)
+    ln -sf "freetype-debug.a" "$LIB_DIR/libfreetype.a"
+    echo "Copied freetype (Debug) to $LIB_DIR/freetype-debug.a and created symlink libfreetype.a"
+    
+    # Verify Release library exists
+    if [[ ! -f "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" ]]; then
+        echo "Error: Freetype Release library not found at $FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" >&2
+        echo "Freetype Release build may have failed. Please check the build logs." >&2
+        exit 1
     fi
+    
+    # Copy Release library
+    cp "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" "$LIB_DIR/freetype-release.a"
+    echo "Copied freetype (Release) to $LIB_DIR/freetype-release.a"
+    
+    # Verify symlink exists
+    if [[ ! -L "$LIB_DIR/libfreetype.a" ]]; then
+        echo "Error: Freetype symlink libfreetype.a not created!" >&2
+        exit 1
+    fi
+    echo "Verified freetype symlink exists: $LIB_DIR/libfreetype.a -> $(readlink "$LIB_DIR/libfreetype.a")"
 fi
 
 # Copy headers
