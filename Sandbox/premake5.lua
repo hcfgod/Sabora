@@ -113,6 +113,8 @@ project "Sandbox"
         -- Link libusb (installed via homebrew on macOS)
         libdirs { "/opt/homebrew/lib", "/usr/local/lib" }
         links { "usb-1.0" }
+        -- Ensure freetype library path is explicitly set
+        linkoptions { "-L%{wks.location}/../Engine/" .. Dependencies.Freetype.LibraryPath }
 
     filter { "system:macosx", "configurations:Debug" }
         links { 

@@ -87,6 +87,8 @@ project "Tests"
     filter "system:macosx"
         -- macOS system libraries if needed
         links { "CoreAudio.framework", "AudioToolbox.framework" }
+        -- Ensure library search paths are set correctly
+        linkoptions { "-L%{wks.location}/../Engine/" .. Dependencies.Freetype.LibraryPath }
 
     filter { "system:macosx", "configurations:Debug" }
         links { 
