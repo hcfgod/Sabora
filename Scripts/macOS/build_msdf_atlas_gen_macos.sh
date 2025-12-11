@@ -567,6 +567,12 @@ if [[ "$USE_SYSTEM_FREETYPE" == "false" ]]; then
     fi
     if [[ -f "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" ]]; then
         cp "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" "$LIB_DIR/freetype-release.a"
+        # Create symlink for Release as well (will be overwritten by Debug symlink, but ensures it exists)
+        # Note: Debug symlink takes precedence, but this ensures Release builds can find it
+        if [[ ! -L "$LIB_DIR/libfreetype.a" ]]; then
+            ln -sf "freetype-release.a" "$LIB_DIR/libfreetype.a"
+            echo "Created symlink libfreetype.a -> freetype-release.a for Release"
+        fi
         echo "Copied freetype (Release) to $LIB_DIR/freetype-release.a"
     fi
 fi
