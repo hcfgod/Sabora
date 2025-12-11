@@ -131,6 +131,8 @@ project "Tests"
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
+        -- Ensure our library directories are searched before system directories
+        linkoptions { "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libsndfile.LibraryPath) }
         linkoptions { "-Wl,-Bstatic" }
         links { 
             Dependencies.shaderc.Libraries.linux.Debug,
@@ -139,12 +141,15 @@ project "Tests"
         links ( Dependencies.SPIRVCross.Libraries.linux.Debug )
         links ( Dependencies.msdfAtlasGen.Libraries.linux.Debug )
         links ( Dependencies.Freetype.Libraries.linux.Debug )
+        -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Debug )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
 
     filter { "system:linux", "configurations:Release" }
         -- Prefer static libraries over shared libraries for our dependencies
+        -- Ensure our library directories are searched before system directories
+        linkoptions { "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libsndfile.LibraryPath) }
         linkoptions { "-Wl,-Bstatic" }
         links { 
             Dependencies.shaderc.Libraries.linux.Release,
@@ -153,6 +158,7 @@ project "Tests"
         links ( Dependencies.SPIRVCross.Libraries.linux.Release )
         links ( Dependencies.msdfAtlasGen.Libraries.linux.Release )
         links ( Dependencies.Freetype.Libraries.linux.Release )
+        -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Release )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
