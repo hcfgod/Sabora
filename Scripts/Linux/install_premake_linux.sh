@@ -15,15 +15,66 @@ if [[ -f "$EXE_PATH" && "${1:-}" != "--force" ]]; then
   exit 0
 fi
 
-URL="https://github.com/premake/premake-core/releases/download/v${VERSION}/premake-${VERSION}-linux.tar.gz"
+# Try multiple possible URL formats for Linux builds
+URLS=(
+  "https://github.com/premake/premake-core/releases/download/v${VERSION}/premake-${VERSION}-linux.tar.gz"
+  "https://github.com/premake/premake-core/releases/download/v${VERSION}/premake-${VERSION}-linux64.tar.gz"
+  "https://github.com/premake/premake-core/releases/download/v${VERSION}/premake-${VERSION}-linux-x86_64.tar.gz"
+)
+
 TMP_DIR="$(mktemp -d)"
 TAR_FILE="$TMP_DIR/premake.tar.gz"
 
-echo "Downloading Premake $VERSION from $URL ..."
+DOWNLOAD_SUCCESS=false
+USED_URL=""
+
+echo "Downloading Premake $VERSION..."
+
 if command -v curl >/dev/null 2>&1; then
-  curl -L "$URL" -o "$TAR_FILE"
+  for URL in "${URLS[@]}"; do
+    echo "Trying: $URL" >&2
+    if curl -L -f -sS -o "$TAR_FILE" "$URL" 2>/dev/null; then
+      # Verify it's actually a gzip file
+      if [[ -f "$TAR_FILE" ]] && file "$TAR_FILE" | grep -qE "gzip|compressed|archive"; then
+        DOWNLOAD_SUCCESS=true
+        USED_URL="$URL"
+        echo "Successfully downloaded from: $USED_URL"
+        break
+      else
+        echo "Downloaded file is not a valid gzip archive (got: $(file "$TAR_FILE")), trying next URL..." >&2
+        rm -f "$TAR_FILE"
+      fi
+    fi
+  done
 else
-  wget -O "$TAR_FILE" "$URL"
+  for URL in "${URLS[@]}"; do
+    echo "Trying: $URL" >&2
+    if wget -q -O "$TAR_FILE" "$URL" 2>/dev/null; then
+      # Verify it's actually a gzip file
+      if [[ -f "$TAR_FILE" ]] && file "$TAR_FILE" | grep -qE "gzip|compressed|archive"; then
+        DOWNLOAD_SUCCESS=true
+        USED_URL="$URL"
+        echo "Successfully downloaded from: $USED_URL"
+        break
+      else
+        echo "Downloaded file is not a valid gzip archive (got: $(file "$TAR_FILE")), trying next URL..." >&2
+        rm -f "$TAR_FILE"
+      fi
+    fi
+  done
+fi
+
+if [[ "$DOWNLOAD_SUCCESS" == "false" ]]; then
+  echo "Error: Failed to download Premake from any of the attempted URLs:" >&2
+  for URL in "${URLS[@]}"; do
+    echo "  - $URL" >&2
+  done
+  echo "" >&2
+  echo "Please check:" >&2
+  echo "  1. That Premake $VERSION has a Linux release" >&2
+  echo "  2. The GitHub releases page: https://github.com/premake/premake-core/releases" >&2
+  echo "  3. Your internet connection" >&2
+  exit 1
 fi
 
 tar -xzf "$TAR_FILE" -C "$TMP_DIR"
