@@ -118,7 +118,6 @@ namespace Sabora
         }
 
         // Test that we can query format information
-        SF_FORMAT_INFO formatInfo = {};
         int formatCount = 0;
         
         // Get the number of supported formats

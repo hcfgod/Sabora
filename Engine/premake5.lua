@@ -147,6 +147,8 @@ project "Engine"
         links ( Dependencies.Libsndfile.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
+        -- Prefer static libraries over shared libraries for our dependencies
+        linkoptions { "-Wl,-Bstatic" }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
         links { 
@@ -158,6 +160,8 @@ project "Engine"
         links ( Dependencies.msdfAtlasGen.Libraries.linux.Debug )
         links ( Dependencies.Freetype.Libraries.linux.Debug )
         links ( Dependencies.Libsndfile.Libraries.linux.Debug )
+        -- Switch back to dynamic linking for system libraries
+        linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
         links { 
             -- Core system
@@ -177,6 +181,8 @@ project "Engine"
         }
 
     filter { "system:linux", "configurations:Release" }
+        -- Prefer static libraries over shared libraries for our dependencies
+        linkoptions { "-Wl,-Bstatic" }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
         links { 
@@ -188,6 +194,8 @@ project "Engine"
         links ( Dependencies.msdfAtlasGen.Libraries.linux.Release )
         links ( Dependencies.Freetype.Libraries.linux.Release )
         links ( Dependencies.Libsndfile.Libraries.linux.Release )
+        -- Switch back to dynamic linking for system libraries
+        linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
         links { 
             -- Core system
