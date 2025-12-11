@@ -87,6 +87,9 @@ project "Tests"
     filter "system:macosx"
         -- macOS system libraries if needed
         links { "CoreAudio.framework", "AudioToolbox.framework" }
+        -- Ensure our library directories are searched before system directories
+        -- Use explicit library search path for freetype
+        linkoptions { "-L%{wks.location}/../Engine/Vendor/msdf-atlas-gen/lib" }
 
     filter { "system:macosx", "configurations:Debug" }
         links { 
