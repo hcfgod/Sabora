@@ -61,3 +61,13 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+###############################################################################
+# Shell scripts - ensure proper line endings and mark as executable
+# 
+# Git on Windows doesn't preserve execute bits, so we mark these files
+# so they can be identified and have permissions fixed automatically.
+###############################################################################
+*.sh text eol=lf
+Scripts/**/*.sh text eol=lf
+Setup_*.sh text eol=lf

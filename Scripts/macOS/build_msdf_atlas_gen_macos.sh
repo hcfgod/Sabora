@@ -520,7 +520,9 @@ for lib in "${LIBS_TO_COPY[@]}"; do
     if [[ -n "$found_lib" && -f "$found_lib" ]]; then
         lib_name=$(basename "$lib" .a | sed 's/^lib//')
         cp "$found_lib" "$LIB_DIR/${lib_name}-debug.a"
-        echo "Copied $lib (Debug) to $LIB_DIR/${lib_name}-debug.a"
+        # Create symlink with expected name for linker (points to debug version)
+        ln -sf "${lib_name}-debug.a" "$LIB_DIR/$lib"
+        echo "Copied $lib (Debug) to $LIB_DIR/${lib_name}-debug.a and created symlink $lib"
     fi
 done
 
@@ -542,7 +544,9 @@ for lib in "${MSDFGEN_LIBS[@]}"; do
     if [[ -n "$found_lib" && -f "$found_lib" ]]; then
         lib_name=$(basename "$lib" .a | sed 's/^lib//')
         cp "$found_lib" "$LIB_DIR/${lib_name}-debug.a"
-        echo "Copied $lib (Debug) to $LIB_DIR/${lib_name}-debug.a"
+        # Create symlink with expected name for linker (points to debug version)
+        ln -sf "${lib_name}-debug.a" "$LIB_DIR/$lib"
+        echo "Copied $lib (Debug) to $LIB_DIR/${lib_name}-debug.a and created symlink $lib"
     fi
     # Release
     found_lib=$(find "$BUILD_DIR_RELEASE" -name "$lib" -type f | head -1)
@@ -557,7 +561,9 @@ done
 if [[ "$USE_SYSTEM_FREETYPE" == "false" ]]; then
     if [[ -f "$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" ]]; then
         cp "$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" "$LIB_DIR/freetype-debug.a"
-        echo "Copied freetype (Debug) to $LIB_DIR/freetype-debug.a"
+        # Create symlink with expected name for linker (points to debug version)
+        ln -sf "freetype-debug.a" "$LIB_DIR/libfreetype.a"
+        echo "Copied freetype (Debug) to $LIB_DIR/freetype-debug.a and created symlink libfreetype.a"
     fi
     if [[ -f "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" ]]; then
         cp "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" "$LIB_DIR/freetype-release.a"

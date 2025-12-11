@@ -45,12 +45,14 @@ The scripts automatically detect and install missing dependencies (Git, CMake) i
 - `build_sdl3_linux.sh` - Build SDL3 on Linux
 - `build_linux.sh` - Build the entire project on Linux
 - `install_premake_linux.sh` - Install Premake on Linux
+- `fix_script_permissions.sh` - Fix execute permissions for all shell scripts (automatically called by setup)
 
 ### macOS Scripts (`macOS/`)
 - `install_deps_macos.sh` - Install all vendor dependencies on macOS
 - `build_sdl3_macos.sh` - Build SDL3 on macOS
 - `build_macos.sh` - Build the entire project on macOS
 - `install_premake_macos.sh` - Install Premake on macOS
+- `fix_script_permissions.sh` - Fix execute permissions for all shell scripts (automatically called by setup)
 
 ## Usage
 
@@ -69,9 +71,25 @@ The scripts automatically detect and install missing dependencies (Git, CMake) i
 ## Notes
 
 - **Windows**: After installing Git or CMake, you may need to restart your terminal for PATH changes to take effect
-- **Linux**: Requires sudo access for package installation
+- **Linux/macOS**: Requires sudo access for package installation
 - **macOS**: Homebrew installation requires user interaction (accepting license agreements)
 - All scripts use `set -euo pipefail` (bash) or `$ErrorActionPreference = 'Stop'` (PowerShell) for robust error handling
+
+## Execute Permissions on Linux/macOS
+
+When developing on Windows and testing on Linux/macOS, Git doesn't preserve execute permissions for shell scripts. The setup scripts (`Setup_linux.sh` and `Setup_macos.sh`) automatically fix this by running `fix_script_permissions.sh` before executing other scripts.
+
+If you need to manually fix permissions (e.g., after cloning the repository), you can run:
+
+```bash
+# Linux
+bash Scripts/Linux/fix_script_permissions.sh
+
+# macOS
+bash Scripts/macOS/fix_script_permissions.sh
+```
+
+This script will automatically set execute permissions for all `.sh` files in the `Scripts/` directory and root-level setup scripts.
 
 ## Troubleshooting
 
