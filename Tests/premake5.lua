@@ -86,7 +86,8 @@ project "Tests"
 
     filter "system:macosx"
         -- macOS system libraries if needed
-        links { "CoreAudio.framework", "AudioToolbox.framework" }
+        -- CoreFoundation is required by OpenAL Soft on macOS
+        links { "CoreFoundation.framework", "CoreAudio.framework", "AudioToolbox.framework" }
 
     filter { "system:macosx", "configurations:Debug" }
         links { 

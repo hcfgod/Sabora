@@ -95,7 +95,9 @@ project "Sandbox"
 
     filter "system:macosx"
         -- macOS system libraries and frameworks needed by SDL3
-        links { "CoreAudio.framework", 
+        -- CoreFoundation is required by OpenAL Soft on macOS
+        links { "CoreFoundation.framework",
+                "CoreAudio.framework", 
                 "CoreVideo.framework", 
                 "IOKit.framework", 
                 "Cocoa.framework", 
