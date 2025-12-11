@@ -87,26 +87,30 @@ project "Tests"
     filter "system:macosx"
         -- macOS system libraries if needed
         links { "CoreAudio.framework", "AudioToolbox.framework" }
-        -- Ensure library search paths are set correctly
-        linkoptions { "-L%{wks.location}/../Engine/" .. Dependencies.Freetype.LibraryPath }
 
     filter { "system:macosx", "configurations:Debug" }
+        -- Ensure our library directories are searched before system directories
+        linkoptions { "-L%{wks.location}/../Engine/" .. Dependencies.Freetype.LibraryPath }
         links { 
             Dependencies.shaderc.Libraries.macosx.Debug,
             Dependencies.OpenALSoft.Libraries.macosx.Debug
         }
         links ( Dependencies.SPIRVCross.Libraries.macosx.Debug )
         links ( Dependencies.msdfAtlasGen.Libraries.macosx.Debug )
+        -- Link freetype explicitly to avoid system library
         links ( Dependencies.Freetype.Libraries.macosx.Debug )
         links ( Dependencies.Libsndfile.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
+        -- Ensure our library directories are searched before system directories
+        linkoptions { "-L%{wks.location}/../Engine/" .. Dependencies.Freetype.LibraryPath }
         links { 
             Dependencies.shaderc.Libraries.macosx.Release,
             Dependencies.OpenALSoft.Libraries.macosx.Release
         }
         links ( Dependencies.SPIRVCross.Libraries.macosx.Release )
         links ( Dependencies.msdfAtlasGen.Libraries.macosx.Release )
+        -- Link freetype explicitly to avoid system library
         links ( Dependencies.Freetype.Libraries.macosx.Release )
         links ( Dependencies.Libsndfile.Libraries.macosx.Release )
 

@@ -123,10 +123,10 @@ project "Engine"
         -- Link libusb (installed via homebrew on macOS)
         libdirs { "/opt/homebrew/lib", "/usr/local/lib" }
         links { "usb-1.0" }
-        -- Ensure freetype library path is explicitly set
-        linkoptions { "-L" .. Dependencies.Freetype.LibraryPath }
 
     filter { "system:macosx", "configurations:Debug" }
+        -- Ensure our library directories are searched before system directories
+        linkoptions { "-L" .. Dependencies.Freetype.LibraryPath }
         links { 
             Dependencies.SDL3.Libraries.macosx.Debug,
             Dependencies.shaderc.Libraries.macosx.Debug,
@@ -134,10 +134,13 @@ project "Engine"
         }
         links ( Dependencies.SPIRVCross.Libraries.macosx.Debug )
         links ( Dependencies.msdfAtlasGen.Libraries.macosx.Debug )
+        -- Link freetype explicitly to avoid system library
         links ( Dependencies.Freetype.Libraries.macosx.Debug )
         links ( Dependencies.Libsndfile.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
+        -- Ensure our library directories are searched before system directories
+        linkoptions { "-L" .. Dependencies.Freetype.LibraryPath }
         links { 
             Dependencies.SDL3.Libraries.macosx.Release,
             Dependencies.shaderc.Libraries.macosx.Release,
@@ -145,6 +148,7 @@ project "Engine"
         }
         links ( Dependencies.SPIRVCross.Libraries.macosx.Release )
         links ( Dependencies.msdfAtlasGen.Libraries.macosx.Release )
+        -- Link freetype explicitly to avoid system library
         links ( Dependencies.Freetype.Libraries.macosx.Release )
         links ( Dependencies.Libsndfile.Libraries.macosx.Release )
 
