@@ -244,7 +244,17 @@ if [[ "$USE_SYSTEM_FREETYPE" == "false" ]]; then
     fi
     
     # Build Freetype Debug
-    if [[ ! -f "$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" ]]; then
+    FREETYPE_DEBUG_LIB_FOUND=false
+    if [[ -f "$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" ]]; then
+        FREETYPE_DEBUG_LIB_FOUND=true
+    elif [[ -d "$FREETYPE_BUILD_DIR_DEBUG" ]]; then
+        # Search recursively for any freetype library
+        if find "$FREETYPE_BUILD_DIR_DEBUG" -name "libfreetype*.a" -type f | grep -q .; then
+            FREETYPE_DEBUG_LIB_FOUND=true
+        fi
+    fi
+    
+    if [[ "$FREETYPE_DEBUG_LIB_FOUND" == "false" ]]; then
         echo "Building Freetype (Debug)..." >&2
         mkdir -p "$FREETYPE_BUILD_DIR_DEBUG"
         CMAKE_ARGS=(
@@ -267,11 +277,49 @@ if [[ "$USE_SYSTEM_FREETYPE" == "false" ]]; then
             CMAKE_ARGS+=(-DFT_DISABLE_ZLIB=ON)
         fi
         cmake "${CMAKE_ARGS[@]}"
+        if [[ $? -ne 0 ]]; then
+            echo "Error: Freetype Debug CMake configuration failed!" >&2
+            exit 1
+        fi
+        
         cmake --build "$FREETYPE_BUILD_DIR_DEBUG" --parallel "$(sysctl -n hw.ncpu)"
+        if [[ $? -ne 0 ]]; then
+            echo "Error: Freetype Debug build failed!" >&2
+            exit 1
+        fi
+        
+        # Verify the library was built and create expected name if needed
+        if [[ ! -f "$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" ]]; then
+            # Search for the actual library file
+            ACTUAL_LIB=$(find "$FREETYPE_BUILD_DIR_DEBUG" -name "libfreetype*.a" -type f | head -1)
+            if [[ -n "$ACTUAL_LIB" && -f "$ACTUAL_LIB" ]]; then
+                echo "Found freetype library at $ACTUAL_LIB, copying to expected location..." >&2
+                cp "$ACTUAL_LIB" "$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a"
+            else
+                echo "Error: Freetype Debug build completed but library not found!" >&2
+                echo "Searched in: $FREETYPE_BUILD_DIR_DEBUG" >&2
+                echo "Listing build directory contents:" >&2
+                ls -la "$FREETYPE_BUILD_DIR_DEBUG" >&2 || true
+                exit 1
+            fi
+        fi
+        echo "Freetype Debug library verified at: $FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" >&2
+    else
+        echo "Freetype (Debug) already built, skipping..." >&2
     fi
     
     # Build Freetype Release
-    if [[ ! -f "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" ]]; then
+    FREETYPE_RELEASE_LIB_FOUND=false
+    if [[ -f "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" ]]; then
+        FREETYPE_RELEASE_LIB_FOUND=true
+    elif [[ -d "$FREETYPE_BUILD_DIR_RELEASE" ]]; then
+        # Search recursively for any freetype library
+        if find "$FREETYPE_BUILD_DIR_RELEASE" -name "libfreetype*.a" -type f | grep -q .; then
+            FREETYPE_RELEASE_LIB_FOUND=true
+        fi
+    fi
+    
+    if [[ "$FREETYPE_RELEASE_LIB_FOUND" == "false" ]]; then
         echo "Building Freetype (Release)..." >&2
         mkdir -p "$FREETYPE_BUILD_DIR_RELEASE"
         CMAKE_ARGS=(
@@ -294,7 +342,35 @@ if [[ "$USE_SYSTEM_FREETYPE" == "false" ]]; then
             CMAKE_ARGS+=(-DFT_DISABLE_ZLIB=ON)
         fi
         cmake "${CMAKE_ARGS[@]}"
+        if [[ $? -ne 0 ]]; then
+            echo "Error: Freetype Release CMake configuration failed!" >&2
+            exit 1
+        fi
+        
         cmake --build "$FREETYPE_BUILD_DIR_RELEASE" --parallel "$(sysctl -n hw.ncpu)"
+        if [[ $? -ne 0 ]]; then
+            echo "Error: Freetype Release build failed!" >&2
+            exit 1
+        fi
+        
+        # Verify the library was built and create expected name if needed
+        if [[ ! -f "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" ]]; then
+            # Search for the actual library file
+            ACTUAL_LIB=$(find "$FREETYPE_BUILD_DIR_RELEASE" -name "libfreetype*.a" -type f | head -1)
+            if [[ -n "$ACTUAL_LIB" && -f "$ACTUAL_LIB" ]]; then
+                echo "Found freetype library at $ACTUAL_LIB, copying to expected location..." >&2
+                cp "$ACTUAL_LIB" "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a"
+            else
+                echo "Error: Freetype Release build completed but library not found!" >&2
+                echo "Searched in: $FREETYPE_BUILD_DIR_RELEASE" >&2
+                echo "Listing build directory contents:" >&2
+                ls -la "$FREETYPE_BUILD_DIR_RELEASE" >&2 || true
+                exit 1
+            fi
+        fi
+        echo "Freetype Release library verified at: $FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" >&2
+    else
+        echo "Freetype (Release) already built, skipping..." >&2
     fi
 fi
 
@@ -453,6 +529,15 @@ if [[ "$USE_SYSTEM_FREETYPE" == "true" ]]; then
         fi
     fi
 else
+    # Verify libraries exist before passing to CMake (should already be verified, but double-check)
+    if [[ ! -f "$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" ]]; then
+        echo "Error: Freetype Debug library not found at expected path: $FREETYPE_BUILD_DIR_DEBUG/libfreetype.a" >&2
+        exit 1
+    fi
+    if [[ ! -f "$FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" ]]; then
+        echo "Error: Freetype Release library not found at expected path: $FREETYPE_BUILD_DIR_RELEASE/libfreetype.a" >&2
+        exit 1
+    fi
     CMAKE_ARGS_RELEASE+=(
         -DFREETYPE_DIR="$FREETYPE_DIR"
         -DFREETYPE_LIBRARY_DEBUG="$FREETYPE_BUILD_DIR_DEBUG/libfreetype.a"
