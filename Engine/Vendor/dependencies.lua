@@ -283,4 +283,37 @@ Dependencies.OpenALSoft = {
     }
 }
 
+-- libsndfile Configuration (static library for audio file I/O)
+Dependencies.Libsndfile = {
+    -- Version string (update when pinning to specific version)
+    Version = "latest",
+    HeaderOnly = false,
+    
+    -- Static runtime setting must match how libsndfile was built
+    StaticRuntime = true,
+    
+    -- Paths relative to Engine directory
+    LibraryPath = "Vendor/libsndfile/lib",
+    IncludePath = "Vendor/libsndfile/include",
+    
+    -- Library names per platform and configuration
+    -- Note: On Unix systems, specify library name without 'lib' prefix and '.a' extension
+    --       The linker will automatically add them (e.g., 'sndfile' becomes 'libsndfile.a')
+    -- Note: On Windows, specify the full library name including extension
+    Libraries = {
+        windows = {
+            Debug = "sndfile-debug.lib",
+            Release = "sndfile-release.lib"
+        },
+        macosx = {
+            Debug = "sndfile",
+            Release = "sndfile"
+        },
+        linux = {
+            Debug = "sndfile",
+            Release = "sndfile"
+        }
+    }
+}
+
 return Dependencies

@@ -110,7 +110,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        Write-Host "Checking for msdf-atlas-gen and OpenAL Soft libraries..."
+        Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, and libsndfile libraries..."
         
         # Check msdf-atlas-gen
         $msdfLibDir = "Engine\Vendor\msdf-atlas-gen\lib"
@@ -131,6 +131,17 @@ jobs:
             Write-Host "✓ OpenAL Soft libraries found ($($openalLibs.Count) files)"
           } else {
             Write-Host "⚠ OpenAL Soft libraries not found"
+          }
+        }
+        
+        # Check libsndfile
+        $libsndfileLibDir = "Engine\Vendor\libsndfile\lib"
+        if (Test-Path $libsndfileLibDir) {
+          $libsndfileLibs = Get-ChildItem -Path $libsndfileLibDir -Filter "*.lib" -ErrorAction SilentlyContinue
+          if ($libsndfileLibs.Count -gt 0) {
+            Write-Host "✓ libsndfile libraries found ($($libsndfileLibs.Count) files)"
+          } else {
+            Write-Host "⚠ libsndfile libraries not found"
           }
         }
 
@@ -256,7 +267,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen and OpenAL Soft libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, and libsndfile libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -277,6 +288,17 @@ jobs:
             echo "✓ OpenAL Soft libraries found ($OPENAL_COUNT files)"
           else
             echo "⚠ OpenAL Soft libraries not found"
+          fi
+        fi
+        
+        # Check libsndfile
+        LIBSNDFILE_LIB_DIR="Engine/Vendor/libsndfile/lib"
+        if [ -d "$LIBSNDFILE_LIB_DIR" ]; then
+          LIBSNDFILE_COUNT=$(find "$LIBSNDFILE_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$LIBSNDFILE_COUNT" -gt 0 ]; then
+            echo "✓ libsndfile libraries found ($LIBSNDFILE_COUNT files)"
+          else
+            echo "⚠ libsndfile libraries not found"
           fi
         fi
         
@@ -384,7 +406,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen and OpenAL Soft libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, and libsndfile libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -405,6 +427,17 @@ jobs:
             echo "✓ OpenAL Soft libraries found ($OPENAL_COUNT files)"
           else
             echo "⚠ OpenAL Soft libraries not found"
+          fi
+        fi
+        
+        # Check libsndfile
+        LIBSNDFILE_LIB_DIR="Engine/Vendor/libsndfile/lib"
+        if [ -d "$LIBSNDFILE_LIB_DIR" ]; then
+          LIBSNDFILE_COUNT=$(find "$LIBSNDFILE_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$LIBSNDFILE_COUNT" -gt 0 ]; then
+            echo "✓ libsndfile libraries found ($LIBSNDFILE_COUNT files)"
+          else
+            echo "⚠ libsndfile libraries not found"
           fi
         fi
         

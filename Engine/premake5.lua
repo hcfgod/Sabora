@@ -47,6 +47,7 @@ project "Engine"
         Dependencies.msdfAtlasGen.IncludePath .. "/msdfgen",  -- msdfgen headers needed by msdf-atlas-gen
         Dependencies.Freetype.IncludePath,
         Dependencies.OpenALSoft.IncludePath,
+        Dependencies.Libsndfile.IncludePath,
     }
 
     -- Flexible library directory path based on configuration
@@ -59,6 +60,7 @@ project "Engine"
         Dependencies.msdfAtlasGen.LibraryPath,
         Dependencies.Freetype.LibraryPath,
         Dependencies.OpenALSoft.LibraryPath,
+        Dependencies.Libsndfile.LibraryPath,
         -- Add platform/configuration-specific paths here if needed
         -- Example: Dependencies.SDL3.LibraryPath .. "/%{cfg.platform}/%{cfg.buildcfg}"
     }
@@ -86,6 +88,7 @@ project "Engine"
         links ( Dependencies.SPIRVCross.Libraries.windows.Debug )
         links ( Dependencies.msdfAtlasGen.Libraries.windows.Debug )
         links ( Dependencies.Freetype.Libraries.windows.Debug )
+        links ( Dependencies.Libsndfile.Libraries.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
@@ -97,6 +100,7 @@ project "Engine"
         links ( Dependencies.SPIRVCross.Libraries.windows.Release )
         links ( Dependencies.msdfAtlasGen.Libraries.windows.Release )
         links ( Dependencies.Freetype.Libraries.windows.Release )
+        links ( Dependencies.Libsndfile.Libraries.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -129,6 +133,7 @@ project "Engine"
         links ( Dependencies.SPIRVCross.Libraries.macosx.Debug )
         links ( Dependencies.msdfAtlasGen.Libraries.macosx.Debug )
         links ( Dependencies.Freetype.Libraries.macosx.Debug )
+        links ( Dependencies.Libsndfile.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -139,6 +144,7 @@ project "Engine"
         links ( Dependencies.SPIRVCross.Libraries.macosx.Release )
         links ( Dependencies.msdfAtlasGen.Libraries.macosx.Release )
         links ( Dependencies.Freetype.Libraries.macosx.Release )
+        links ( Dependencies.Libsndfile.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
         -- Link SDL3 FIRST, then its dependencies
@@ -151,6 +157,7 @@ project "Engine"
         links ( Dependencies.SPIRVCross.Libraries.linux.Debug )
         links ( Dependencies.msdfAtlasGen.Libraries.linux.Debug )
         links ( Dependencies.Freetype.Libraries.linux.Debug )
+        links ( Dependencies.Libsndfile.Libraries.linux.Debug )
         -- Now link all SDL3 dependencies
         links { 
             -- Core system
@@ -180,6 +187,7 @@ project "Engine"
         links ( Dependencies.SPIRVCross.Libraries.linux.Release )
         links ( Dependencies.msdfAtlasGen.Libraries.linux.Release )
         links ( Dependencies.Freetype.Libraries.linux.Release )
+        links ( Dependencies.Libsndfile.Libraries.linux.Release )
         -- Now link all SDL3 dependencies
         links { 
             -- Core system

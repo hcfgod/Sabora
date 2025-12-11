@@ -172,6 +172,15 @@ install_openal_soft() {
   bash "$SCRIPT_DIR/build_openal_soft_macos.sh"
 }
 
+# Build libsndfile
+install_libsndfile() {
+  local vendor_dir="$1"
+  
+  echo "Building libsndfile..."
+  chmod +x "$SCRIPT_DIR/build_libsndfile_macos.sh" || true
+  bash "$SCRIPT_DIR/build_libsndfile_macos.sh"
+}
+
 # Install shaderc and SPIRV-Cross
 install_shaderc "$VENDOR_DIR"
 install_spirv_cross "$VENDOR_DIR"
@@ -179,5 +188,6 @@ install_spirv_cross "$VENDOR_DIR"
 # Install new libraries
 install_msdf_atlas_gen "$VENDOR_DIR"
 install_openal_soft "$VENDOR_DIR"
+install_libsndfile "$VENDOR_DIR"
 
 echo "Dependencies are ready under $VENDOR_DIR"

@@ -32,14 +32,21 @@ project "Tests"
         "../Engine/Vendor/doctest/doctest",
         "../Engine/Vendor/spdlog/include",
         "../Engine/Vendor/json/include",
-        "../Engine/Vendor/shaderc/include",
-        "../Engine/Vendor/SPIRV-Cross/include",
+        "../Engine/" .. Dependencies.shaderc.IncludePath,
+        "../Engine/" .. Dependencies.SPIRVCross.IncludePath,
+        "../Engine/" .. Dependencies.msdfAtlasGen.IncludePath,
+        "../Engine/" .. Dependencies.msdfAtlasGen.IncludePath .. "/msdfgen",  -- msdfgen headers needed by msdf-atlas-gen
+        "../Engine/" .. Dependencies.OpenALSoft.IncludePath,
+        "../Engine/" .. Dependencies.Libsndfile.IncludePath,
     }
 
     -- Library directories for dependencies
     libdirs {
-        "../Engine/Vendor/shaderc/lib",
-        "../Engine/Vendor/SPIRV-Cross/lib",
+        "../Engine/" .. Dependencies.shaderc.LibraryPath,
+        "../Engine/" .. Dependencies.SPIRVCross.LibraryPath,
+        "../Engine/" .. Dependencies.msdfAtlasGen.LibraryPath,
+        "../Engine/" .. Dependencies.OpenALSoft.LibraryPath,
+        "../Engine/" .. Dependencies.Libsndfile.LibraryPath,
     }
 
     -- Link against Engine library
@@ -51,16 +58,49 @@ project "Tests"
     filter "system:windows"
         links { "setupapi", "winmm", "imm32", "version", "ole32", "oleaut32", "uuid" }
         buildoptions { "/utf-8" }
-        defines { "_CRT_SECURE_NO_WARNINGS", "NOMINMAX" }
+        defines { "_CRT_SECURE_NO_WARNINGS", "NOMINMAX", "AL_LIBTYPE_STATIC" }
 
     filter { "system:windows", "configurations:Debug" }
+        links { 
+            Dependencies.shaderc.Libraries.windows.Debug,
+            Dependencies.OpenALSoft.Libraries.windows.Debug
+        }
+        links ( Dependencies.SPIRVCross.Libraries.windows.Debug )
+        links ( Dependencies.msdfAtlasGen.Libraries.windows.Debug )
+        links ( Dependencies.Libsndfile.Libraries.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
+        links { 
+            Dependencies.shaderc.Libraries.windows.Release,
+            Dependencies.OpenALSoft.Libraries.windows.Release
+        }
+        links ( Dependencies.SPIRVCross.Libraries.windows.Release )
+        links ( Dependencies.msdfAtlasGen.Libraries.windows.Release )
+        links ( Dependencies.Libsndfile.Libraries.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
         -- macOS system libraries if needed
+        links { "CoreAudio.framework", "AudioToolbox.framework" }
+
+    filter { "system:macosx", "configurations:Debug" }
+        links { 
+            Dependencies.shaderc.Libraries.macosx.Debug,
+            Dependencies.OpenALSoft.Libraries.macosx.Debug
+        }
+        links ( Dependencies.SPIRVCross.Libraries.macosx.Debug )
+        links ( Dependencies.msdfAtlasGen.Libraries.macosx.Debug )
+        links ( Dependencies.Libsndfile.Libraries.macosx.Debug )
+
+    filter { "system:macosx", "configurations:Release" }
+        links { 
+            Dependencies.shaderc.Libraries.macosx.Release,
+            Dependencies.OpenALSoft.Libraries.macosx.Release
+        }
+        links ( Dependencies.SPIRVCross.Libraries.macosx.Release )
+        links ( Dependencies.msdfAtlasGen.Libraries.macosx.Release )
+        links ( Dependencies.Libsndfile.Libraries.macosx.Release )
 
     filter "system:linux"
         -- Linux system libraries needed by Engine/SDL3 and dependencies
@@ -79,6 +119,24 @@ project "Tests"
         links { "asound", "pulse", "jack", "pipewire-0.3" }
         -- USB and system libraries
         links { "usb-1.0", "dbus-1", "udev" }
+        defines { "AL_LIBTYPE_STATIC" }
+
+    filter { "system:linux", "configurations:Debug" }
+        links { 
+            Dependencies.shaderc.Libraries.linux.Debug,
+            Dependencies.OpenALSoft.Libraries.linux.Debug
+        }
+        links ( Dependencies.SPIRVCross.Libraries.linux.Debug )
+        links ( Dependencies.msdfAtlasGen.Libraries.linux.Debug )
+        links ( Dependencies.Libsndfile.Libraries.linux.Debug )
+
+    filter { "system:linux", "configurations:Release" }
+        links { 
+            Dependencies.shaderc.Libraries.linux.Release,
+            Dependencies.OpenALSoft.Libraries.linux.Release
+        }
+        links ( Dependencies.SPIRVCross.Libraries.linux.Release )
+        links ( Dependencies.msdfAtlasGen.Libraries.linux.Release )
+        links ( Dependencies.Libsndfile.Libraries.linux.Release )
 
     filter {}
-

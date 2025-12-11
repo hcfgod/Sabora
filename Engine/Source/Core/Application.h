@@ -124,28 +124,12 @@ namespace Sabora
 
     private:
         /**
-         * @brief Test shader compilation libraries (shaderc and SPIRV-Cross).
+         * @brief Test libsndfile library integration.
          * 
-         * Compiles a simple shader and tests cross-compilation to verify
-         * that the shader libraries are properly linked and functional.
+         * Verifies that libsndfile is properly linked and can be used.
+         * Called during initialization to ensure the library is available.
          */
-        void TestShaderLibraries();
-
-        /**
-         * @brief Test MSDF atlas generation library.
-         * 
-         * Verifies that msdf-atlas-gen is properly linked and can create
-         * basic atlas generator instances.
-         */
-        void TestMSDFAtlasGen();
-
-        /**
-         * @brief Test OpenAL Soft audio library.
-         * 
-         * Verifies that OpenAL Soft is properly linked and can initialize
-         * an audio context.
-         */
-        void TestOpenALSoft();
+        void TestLibsndfile();
         std::atomic<bool> m_Running{false};
 
         // RAII wrapper for SDL - ensures proper initialization and cleanup

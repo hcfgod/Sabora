@@ -143,6 +143,15 @@ function Install-OpenALSoft($vendorDir) {
     & (Join-Path $PSScriptRoot "build_openal_soft_windows.ps1")
 }
 
+# Build libsndfile
+function Install-Libsndfile($vendorDir) {
+    $libsndfileDir = Join-Path $vendorDir "libsndfile"
+    
+    # Build libsndfile
+    Write-Host "Building libsndfile..."
+    & (Join-Path $PSScriptRoot "build_libsndfile_windows.ps1")
+}
+
 # Install shaderc and SPIRV-Cross
 Install-Shaderc $vendor
 Install-SPIRVCross $vendor
@@ -150,5 +159,6 @@ Install-SPIRVCross $vendor
 # Install new libraries
 Install-MSDFAtlasGen $vendor
 Install-OpenALSoft $vendor
+Install-Libsndfile $vendor
 
 Write-Host "Dependencies are ready under $vendor"
