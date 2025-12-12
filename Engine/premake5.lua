@@ -97,6 +97,7 @@ project "Engine"
         links ( Dependencies.Libogg.Libraries.windows.Debug )
         links ( Dependencies.Libvorbis.Libraries.windows.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Debug )
+        links ( Dependencies.Libvorbis.LibrariesEnc.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
@@ -113,6 +114,7 @@ project "Engine"
         links ( Dependencies.Libogg.Libraries.windows.Release )
         links ( Dependencies.Libvorbis.Libraries.windows.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Release )
+        links ( Dependencies.Libvorbis.LibrariesEnc.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -152,6 +154,7 @@ project "Engine"
         links ( Dependencies.Libogg.Libraries.macosx.Debug )
         links ( Dependencies.Libvorbis.Libraries.macosx.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Debug )
+        links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -167,6 +170,7 @@ project "Engine"
         links ( Dependencies.Libogg.Libraries.macosx.Release )
         links ( Dependencies.Libvorbis.Libraries.macosx.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Release )
+        links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
@@ -187,6 +191,7 @@ project "Engine"
         links ( Dependencies.Libogg.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Debug )
+        links ( Dependencies.Libvorbis.LibrariesEnc.linux.Debug )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -226,6 +231,7 @@ project "Engine"
         links ( Dependencies.Libogg.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Release )
+        links ( Dependencies.Libvorbis.LibrariesEnc.linux.Release )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies

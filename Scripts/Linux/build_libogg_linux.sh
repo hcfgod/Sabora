@@ -158,6 +158,10 @@ fi
 OGG_RELEASE_LIB=$(find "$BUILD_DIR_RELEASE" -name "libogg.a" | head -1)
 if [[ -n "$OGG_RELEASE_LIB" && -f "$OGG_RELEASE_LIB" ]]; then
     cp "$OGG_RELEASE_LIB" "$LIB_DIR/ogg-release.a"
+    # Ensure symlink exists for Release (Debug symlink may already exist)
+    if [[ ! -L "$LIB_DIR/libogg.a" ]] || [[ "$(readlink "$LIB_DIR/libogg.a")" != "ogg-debug.a" ]]; then
+        ln -sf "ogg-debug.a" "$LIB_DIR/libogg.a"
+    fi
     echo "Copied libogg (Release) to $LIB_DIR/ogg-release.a" >&2
 else
     echo "Error: libogg Release library not found!" >&2

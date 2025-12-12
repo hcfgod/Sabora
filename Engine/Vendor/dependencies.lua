@@ -395,6 +395,21 @@ Dependencies.Libvorbis = {
             Debug = "vorbisfile",
             Release = "vorbisfile"
         }
+    },
+    -- Additional library: vorbisenc (encoding API)
+    LibrariesEnc = {
+        windows = {
+            Debug = "vorbisenc-debug.lib",
+            Release = "vorbisenc-release.lib"
+        },
+        macosx = {
+            Debug = "vorbisenc",
+            Release = "vorbisenc"
+        },
+        linux = {
+            Debug = "vorbisenc",
+            Release = "vorbisenc"
+        }
     }
 }
 

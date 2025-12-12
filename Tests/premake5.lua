@@ -79,6 +79,7 @@ project "Tests"
         links ( Dependencies.Libogg.Libraries.windows.Debug )
         links ( Dependencies.Libvorbis.Libraries.windows.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Debug )
+        links ( Dependencies.Libvorbis.LibrariesEnc.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
@@ -94,6 +95,7 @@ project "Tests"
         links ( Dependencies.Libogg.Libraries.windows.Release )
         links ( Dependencies.Libvorbis.Libraries.windows.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Release )
+        links ( Dependencies.Libvorbis.LibrariesEnc.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -114,6 +116,7 @@ project "Tests"
         links ( Dependencies.Libogg.Libraries.macosx.Debug )
         links ( Dependencies.Libvorbis.Libraries.macosx.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Debug )
+        links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -128,6 +131,7 @@ project "Tests"
         links ( Dependencies.Libogg.Libraries.macosx.Release )
         links ( Dependencies.Libvorbis.Libraries.macosx.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Release )
+        links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Release )
 
     filter "system:linux"
         -- Prefer static libraries over shared libraries
@@ -166,6 +170,7 @@ project "Tests"
         links ( Dependencies.Libogg.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Debug )
+        links ( Dependencies.Libvorbis.LibrariesEnc.linux.Debug )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
 
@@ -185,6 +190,7 @@ project "Tests"
         links ( Dependencies.Libogg.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Release )
+        links ( Dependencies.Libvorbis.LibrariesEnc.linux.Release )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
 
