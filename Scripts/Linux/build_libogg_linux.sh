@@ -146,9 +146,11 @@ mkdir -p "$INCLUDE_DIR"
 OGG_DEBUG_LIB=$(find "$BUILD_DIR_DEBUG" -name "libogg.a" -o -name "liboggd.a" | head -1)
 if [[ -n "$OGG_DEBUG_LIB" && -f "$OGG_DEBUG_LIB" ]]; then
     cp "$OGG_DEBUG_LIB" "$LIB_DIR/ogg-debug.a"
-    # Create symlink for linker compatibility
+    # Remove any existing symlink and create a new one for linker compatibility
+    rm -f "$LIB_DIR/libogg.a"
     ln -sf "ogg-debug.a" "$LIB_DIR/libogg.a"
     echo "Copied libogg (Debug) to $LIB_DIR/ogg-debug.a" >&2
+    echo "Created symlink: $LIB_DIR/libogg.a -> ogg-debug.a" >&2
 else
     echo "Error: libogg Debug library not found!" >&2
     exit 1
@@ -158,15 +160,30 @@ fi
 OGG_RELEASE_LIB=$(find "$BUILD_DIR_RELEASE" -name "libogg.a" | head -1)
 if [[ -n "$OGG_RELEASE_LIB" && -f "$OGG_RELEASE_LIB" ]]; then
     cp "$OGG_RELEASE_LIB" "$LIB_DIR/ogg-release.a"
-    # Ensure symlink exists for Release (Debug symlink may already exist)
-    if [[ ! -L "$LIB_DIR/libogg.a" ]] || [[ "$(readlink "$LIB_DIR/libogg.a")" != "ogg-debug.a" ]]; then
+    # Ensure symlink exists and points to debug (for linker compatibility)
+    if [[ ! -L "$LIB_DIR/libogg.a" ]] || [[ "$(readlink -f "$LIB_DIR/libogg.a")" != "$(readlink -f "$LIB_DIR/ogg-debug.a")" ]]; then
+        rm -f "$LIB_DIR/libogg.a"
         ln -sf "ogg-debug.a" "$LIB_DIR/libogg.a"
+        echo "Updated symlink: $LIB_DIR/libogg.a -> ogg-debug.a" >&2
     fi
     echo "Copied libogg (Release) to $LIB_DIR/ogg-release.a" >&2
 else
     echo "Error: libogg Release library not found!" >&2
     exit 1
 fi
+
+# Verify the symlink exists and is correct
+if [[ ! -L "$LIB_DIR/libogg.a" ]]; then
+    echo "Error: libogg.a symlink was not created!" >&2
+    exit 1
+fi
+
+if [[ ! -f "$LIB_DIR/libogg.a" ]]; then
+    echo "Error: libogg.a symlink is broken!" >&2
+    exit 1
+fi
+
+echo "Verified libogg.a symlink is correct" >&2
 
 # Copy headers
 HEADER_SOURCE_DIR="$LIBOGG_DIR/include"
