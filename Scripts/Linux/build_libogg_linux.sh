@@ -171,8 +171,16 @@ if [[ ! -d "$HEADER_SOURCE_DIR" ]]; then
 fi
 
 if [[ -d "$HEADER_SOURCE_DIR/ogg" ]]; then
-    cp -r "$HEADER_SOURCE_DIR/ogg" "$INCLUDE_DIR/"
-    echo "Copied ogg headers to $INCLUDE_DIR" >&2
+    # Check if source and destination are the same (to avoid copying to itself)
+    SOURCE_PATH=$(cd "$HEADER_SOURCE_DIR/ogg" && pwd)
+    DEST_PATH=$(cd "$INCLUDE_DIR" && pwd 2>/dev/null || echo "$INCLUDE_DIR")
+    
+    if [[ "$SOURCE_PATH" == "$DEST_PATH/ogg" ]] || [[ "$SOURCE_PATH" == "$DEST_PATH" ]]; then
+        echo "Headers already in correct location: $HEADER_SOURCE_DIR/ogg" >&2
+    else
+        cp -r "$HEADER_SOURCE_DIR/ogg" "$INCLUDE_DIR/"
+        echo "Copied ogg headers to $INCLUDE_DIR" >&2
+    fi
 else
     echo "Error: ogg header directory not found!" >&2
     exit 1
