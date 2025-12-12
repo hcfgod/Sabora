@@ -152,6 +152,24 @@ function Install-Libsndfile($vendorDir) {
     & (Join-Path $PSScriptRoot "build_libsndfile_windows.ps1")
 }
 
+# Build libogg
+function Install-Libogg($vendorDir) {
+    $liboggDir = Join-Path $vendorDir "libogg"
+    
+    # Build libogg
+    Write-Host "Building libogg..."
+    & (Join-Path $PSScriptRoot "build_libogg_windows.ps1")
+}
+
+# Build libvorbis (depends on libogg)
+function Install-Libvorbis($vendorDir) {
+    $libvorbisDir = Join-Path $vendorDir "libvorbis"
+    
+    # Build libvorbis
+    Write-Host "Building libvorbis..."
+    & (Join-Path $PSScriptRoot "build_libvorbis_windows.ps1")
+}
+
 # Install shaderc and SPIRV-Cross
 Install-Shaderc $vendor
 Install-SPIRVCross $vendor
@@ -160,5 +178,7 @@ Install-SPIRVCross $vendor
 Install-MSDFAtlasGen $vendor
 Install-OpenALSoft $vendor
 Install-Libsndfile $vendor
+Install-Libogg $vendor
+Install-Libvorbis $vendor
 
 Write-Host "Dependencies are ready under $vendor"

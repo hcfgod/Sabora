@@ -48,6 +48,8 @@ project "Engine"
         Dependencies.Freetype.IncludePath,
         Dependencies.OpenALSoft.IncludePath,
         Dependencies.Libsndfile.IncludePath,
+        Dependencies.Libogg.IncludePath,
+        Dependencies.Libvorbis.IncludePath,
     }
 
     -- Flexible library directory path based on configuration
@@ -61,6 +63,8 @@ project "Engine"
         Dependencies.Freetype.LibraryPath,
         Dependencies.OpenALSoft.LibraryPath,
         Dependencies.Libsndfile.LibraryPath,
+        Dependencies.Libogg.LibraryPath,
+        Dependencies.Libvorbis.LibraryPath,
         -- Add platform/configuration-specific paths here if needed
         -- Example: Dependencies.SDL3.LibraryPath .. "/%{cfg.platform}/%{cfg.buildcfg}"
     }
@@ -89,6 +93,10 @@ project "Engine"
         links ( Dependencies.msdfAtlasGen.Libraries.windows.Debug )
         links ( Dependencies.Freetype.Libraries.windows.Debug )
         links ( Dependencies.Libsndfile.Libraries.windows.Debug )
+        -- libogg must be linked before libvorbis (dependency)
+        links ( Dependencies.Libogg.Libraries.windows.Debug )
+        links ( Dependencies.Libvorbis.Libraries.windows.Debug )
+        links ( Dependencies.Libvorbis.LibrariesFile.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
@@ -101,6 +109,10 @@ project "Engine"
         links ( Dependencies.msdfAtlasGen.Libraries.windows.Release )
         links ( Dependencies.Freetype.Libraries.windows.Release )
         links ( Dependencies.Libsndfile.Libraries.windows.Release )
+        -- libogg must be linked before libvorbis (dependency)
+        links ( Dependencies.Libogg.Libraries.windows.Release )
+        links ( Dependencies.Libvorbis.Libraries.windows.Release )
+        links ( Dependencies.Libvorbis.LibrariesFile.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -136,6 +148,10 @@ project "Engine"
         links ( Dependencies.msdfAtlasGen.Libraries.macosx.Debug )
         links ( Dependencies.Freetype.Libraries.macosx.Debug )
         links ( Dependencies.Libsndfile.Libraries.macosx.Debug )
+        -- libogg must be linked before libvorbis (dependency)
+        links ( Dependencies.Libogg.Libraries.macosx.Debug )
+        links ( Dependencies.Libvorbis.Libraries.macosx.Debug )
+        links ( Dependencies.Libvorbis.LibrariesFile.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -147,6 +163,10 @@ project "Engine"
         links ( Dependencies.msdfAtlasGen.Libraries.macosx.Release )
         links ( Dependencies.Freetype.Libraries.macosx.Release )
         links ( Dependencies.Libsndfile.Libraries.macosx.Release )
+        -- libogg must be linked before libvorbis (dependency)
+        links ( Dependencies.Libogg.Libraries.macosx.Release )
+        links ( Dependencies.Libvorbis.Libraries.macosx.Release )
+        links ( Dependencies.Libvorbis.LibrariesFile.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
@@ -163,6 +183,10 @@ project "Engine"
         links ( Dependencies.Freetype.Libraries.linux.Debug )
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Debug )
+        -- libogg must be linked before libvorbis (dependency)
+        links ( Dependencies.Libogg.Libraries.linux.Debug )
+        links ( Dependencies.Libvorbis.Libraries.linux.Debug )
+        links ( Dependencies.Libvorbis.LibrariesFile.linux.Debug )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -198,6 +222,10 @@ project "Engine"
         links ( Dependencies.Freetype.Libraries.linux.Release )
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Release )
+        -- libogg must be linked before libvorbis (dependency)
+        links ( Dependencies.Libogg.Libraries.linux.Release )
+        links ( Dependencies.Libvorbis.Libraries.linux.Release )
+        links ( Dependencies.Libvorbis.LibrariesFile.linux.Release )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies

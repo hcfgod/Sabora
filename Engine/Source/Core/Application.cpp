@@ -5,6 +5,14 @@
 // Test libsndfile library
 #include <sndfile.h>
 
+// Test libogg library
+#include <ogg/ogg.h>
+
+// Test libvorbis library
+#include <vorbis/codec.h>
+#include <vorbis/vorbisfile.h>
+#include <vorbis/vorbisenc.h>
+
 namespace Sabora 
 {
     //==========================================================================
@@ -96,38 +104,8 @@ namespace Sabora
 
         m_SDLContext = std::move(sdlResult).Value();
 
-        // Test libsndfile library
-        SB_CORE_INFO("Testing libsndfile library...");
-        TestLibsndfile();
-
         SB_CORE_INFO("Application initialization complete.");
         return Result<void>::Success();
-    }
-
-    void Application::TestLibsndfile()
-    {
-        // Test that libsndfile is properly linked by checking version information
-        const char* version = sf_version_string();
-        if (version != nullptr)
-        {
-            SB_CORE_INFO("libsndfile version: {}", version);
-        }
-        else
-        {
-            SB_CORE_WARN("libsndfile version string not available");
-        }
-
-        // Test that we can query format information
-        int formatCount = 0;
-        
-        // Get the number of supported formats
-        sf_command(nullptr, SFC_GET_FORMAT_MAJOR_COUNT, &formatCount, sizeof(int));
-        if (formatCount > 0)
-        {
-            SB_CORE_INFO("libsndfile supports {} major formats", formatCount);
-        }
-        
-        SB_CORE_INFO("libsndfile library linked successfully");
     }
 
     void Application::Run() 

@@ -181,6 +181,24 @@ install_libsndfile() {
   bash "$SCRIPT_DIR/build_libsndfile_macos.sh"
 }
 
+# Build libogg
+install_libogg() {
+  local vendor_dir="$1"
+  
+  echo "Building libogg..."
+  chmod +x "$SCRIPT_DIR/build_libogg_macos.sh" || true
+  bash "$SCRIPT_DIR/build_libogg_macos.sh"
+}
+
+# Build libvorbis (depends on libogg)
+install_libvorbis() {
+  local vendor_dir="$1"
+  
+  echo "Building libvorbis..."
+  chmod +x "$SCRIPT_DIR/build_libvorbis_macos.sh" || true
+  bash "$SCRIPT_DIR/build_libvorbis_macos.sh"
+}
+
 # Install shaderc and SPIRV-Cross
 install_shaderc "$VENDOR_DIR"
 install_spirv_cross "$VENDOR_DIR"
@@ -189,5 +207,7 @@ install_spirv_cross "$VENDOR_DIR"
 install_msdf_atlas_gen "$VENDOR_DIR"
 install_openal_soft "$VENDOR_DIR"
 install_libsndfile "$VENDOR_DIR"
+install_libogg "$VENDOR_DIR"
+install_libvorbis "$VENDOR_DIR"
 
 echo "Dependencies are ready under $VENDOR_DIR"

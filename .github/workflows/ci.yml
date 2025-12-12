@@ -110,7 +110,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, and libsndfile libraries..."
+        Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, and libvorbis libraries..."
         
         # Check msdf-atlas-gen
         $msdfLibDir = "Engine\Vendor\msdf-atlas-gen\lib"
@@ -142,6 +142,28 @@ jobs:
             Write-Host "✓ libsndfile libraries found ($($libsndfileLibs.Count) files)"
           } else {
             Write-Host "⚠ libsndfile libraries not found"
+          }
+        }
+        
+        # Check libogg
+        $liboggLibDir = "Engine\Vendor\libogg\lib"
+        if (Test-Path $liboggLibDir) {
+          $liboggLibs = Get-ChildItem -Path $liboggLibDir -Filter "*.lib" -ErrorAction SilentlyContinue
+          if ($liboggLibs.Count -gt 0) {
+            Write-Host "✓ libogg libraries found ($($liboggLibs.Count) files)"
+          } else {
+            Write-Host "⚠ libogg libraries not found"
+          }
+        }
+        
+        # Check libvorbis
+        $libvorbisLibDir = "Engine\Vendor\libvorbis\lib"
+        if (Test-Path $libvorbisLibDir) {
+          $libvorbisLibs = Get-ChildItem -Path $libvorbisLibDir -Filter "*.lib" -ErrorAction SilentlyContinue
+          if ($libvorbisLibs.Count -gt 0) {
+            Write-Host "✓ libvorbis libraries found ($($libvorbisLibs.Count) files)"
+          } else {
+            Write-Host "⚠ libvorbis libraries not found"
           }
         }
 
@@ -267,7 +289,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen, OpenAL Soft, and libsndfile libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, and libvorbis libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -299,6 +321,28 @@ jobs:
             echo "✓ libsndfile libraries found ($LIBSNDFILE_COUNT files)"
           else
             echo "⚠ libsndfile libraries not found"
+          fi
+        fi
+        
+        # Check libogg
+        LIBOGG_LIB_DIR="Engine/Vendor/libogg/lib"
+        if [ -d "$LIBOGG_LIB_DIR" ]; then
+          LIBOGG_COUNT=$(find "$LIBOGG_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$LIBOGG_COUNT" -gt 0 ]; then
+            echo "✓ libogg libraries found ($LIBOGG_COUNT files)"
+          else
+            echo "⚠ libogg libraries not found"
+          fi
+        fi
+        
+        # Check libvorbis
+        LIBVORBIS_LIB_DIR="Engine/Vendor/libvorbis/lib"
+        if [ -d "$LIBVORBIS_LIB_DIR" ]; then
+          LIBVORBIS_COUNT=$(find "$LIBVORBIS_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$LIBVORBIS_COUNT" -gt 0 ]; then
+            echo "✓ libvorbis libraries found ($LIBVORBIS_COUNT files)"
+          else
+            echo "⚠ libvorbis libraries not found"
           fi
         fi
         
@@ -406,7 +450,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen, OpenAL Soft, and libsndfile libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, and libvorbis libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -438,6 +482,28 @@ jobs:
             echo "✓ libsndfile libraries found ($LIBSNDFILE_COUNT files)"
           else
             echo "⚠ libsndfile libraries not found"
+          fi
+        fi
+        
+        # Check libogg
+        LIBOGG_LIB_DIR="Engine/Vendor/libogg/lib"
+        if [ -d "$LIBOGG_LIB_DIR" ]; then
+          LIBOGG_COUNT=$(find "$LIBOGG_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$LIBOGG_COUNT" -gt 0 ]; then
+            echo "✓ libogg libraries found ($LIBOGG_COUNT files)"
+          else
+            echo "⚠ libogg libraries not found"
+          fi
+        fi
+        
+        # Check libvorbis
+        LIBVORBIS_LIB_DIR="Engine/Vendor/libvorbis/lib"
+        if [ -d "$LIBVORBIS_LIB_DIR" ]; then
+          LIBVORBIS_COUNT=$(find "$LIBVORBIS_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$LIBVORBIS_COUNT" -gt 0 ]; then
+            echo "✓ libvorbis libraries found ($LIBVORBIS_COUNT files)"
+          else
+            echo "⚠ libvorbis libraries not found"
           fi
         fi
         

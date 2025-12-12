@@ -123,13 +123,6 @@ namespace Sabora
         [[nodiscard]] bool IsRunning() const noexcept { return m_Running.load(); }
 
     private:
-        /**
-         * @brief Test libsndfile library integration.
-         * 
-         * Verifies that libsndfile is properly linked and can be used.
-         * Called during initialization to ensure the library is available.
-         */
-        void TestLibsndfile();
         std::atomic<bool> m_Running{false};
 
         // RAII wrapper for SDL - ensures proper initialization and cleanup

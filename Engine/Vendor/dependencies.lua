@@ -316,4 +316,86 @@ Dependencies.Libsndfile = {
     }
 }
 
+-- libogg Configuration (static library for OGG container format)
+Dependencies.Libogg = {
+    -- Version string (update when pinning to specific version)
+    Version = "latest",
+    HeaderOnly = false,
+    
+    -- Static runtime setting must match how libogg was built
+    StaticRuntime = true,
+    
+    -- Paths relative to Engine directory
+    LibraryPath = "Vendor/libogg/lib",
+    IncludePath = "Vendor/libogg/include",
+    
+    -- Library names per platform and configuration
+    -- Note: On Unix systems, specify library name without 'lib' prefix and '.a' extension
+    --       The linker will automatically add them (e.g., 'ogg' becomes 'libogg.a')
+    -- Note: On Windows, specify the full library name including extension
+    Libraries = {
+        windows = {
+            Debug = "ogg-debug.lib",
+            Release = "ogg-release.lib"
+        },
+        macosx = {
+            Debug = "ogg",
+            Release = "ogg"
+        },
+        linux = {
+            Debug = "ogg",
+            Release = "ogg"
+        }
+    }
+}
+
+-- libvorbis Configuration (static library for Vorbis audio codec, depends on libogg)
+Dependencies.Libvorbis = {
+    -- Version string (update when pinning to specific version)
+    Version = "latest",
+    HeaderOnly = false,
+    
+    -- Static runtime setting must match how libvorbis was built
+    StaticRuntime = true,
+    
+    -- Paths relative to Engine directory
+    LibraryPath = "Vendor/libvorbis/lib",
+    IncludePath = "Vendor/libvorbis/include",
+    
+    -- Library names per platform and configuration
+    -- Note: libvorbis provides two libraries: vorbis and vorbisfile
+    --       On Unix systems, specify library name without 'lib' prefix and '.a' extension
+    --       The linker will automatically add them (e.g., 'vorbis' becomes 'libvorbis.a')
+    -- Note: On Windows, specify the full library name including extension
+    Libraries = {
+        windows = {
+            Debug = "vorbis-debug.lib",
+            Release = "vorbis-release.lib"
+        },
+        macosx = {
+            Debug = "vorbis",
+            Release = "vorbis"
+        },
+        linux = {
+            Debug = "vorbis",
+            Release = "vorbis"
+        }
+    },
+    -- Additional library: vorbisfile (high-level file I/O API)
+    LibrariesFile = {
+        windows = {
+            Debug = "vorbisfile-debug.lib",
+            Release = "vorbisfile-release.lib"
+        },
+        macosx = {
+            Debug = "vorbisfile",
+            Release = "vorbisfile"
+        },
+        linux = {
+            Debug = "vorbisfile",
+            Release = "vorbisfile"
+        }
+    }
+}
+
 return Dependencies
