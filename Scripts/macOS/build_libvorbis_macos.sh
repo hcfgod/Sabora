@@ -238,8 +238,16 @@ if [[ ! -d "$HEADER_SOURCE_DIR" ]]; then
 fi
 
 if [[ -d "$HEADER_SOURCE_DIR/vorbis" ]]; then
-    cp -r "$HEADER_SOURCE_DIR/vorbis" "$INCLUDE_DIR/"
-    echo "Copied vorbis headers to $INCLUDE_DIR" >&2
+    # Check if source and destination are the same (to avoid copying to itself)
+    SOURCE_PATH=$(cd "$HEADER_SOURCE_DIR/vorbis" && pwd)
+    DEST_PATH=$(cd "$INCLUDE_DIR" && pwd 2>/dev/null || echo "$INCLUDE_DIR")
+    
+    if [[ "$SOURCE_PATH" == "$DEST_PATH/vorbis" ]] || [[ "$SOURCE_PATH" == "$DEST_PATH" ]]; then
+        echo "Headers already in correct location: $HEADER_SOURCE_DIR/vorbis" >&2
+    else
+        cp -r "$HEADER_SOURCE_DIR/vorbis" "$INCLUDE_DIR/"
+        echo "Copied vorbis headers to $INCLUDE_DIR" >&2
+    fi
 else
     echo "Warning: vorbis header directory not found. Downloading headers from GitHub..." >&2
     # Download headers directly from GitHub repository
