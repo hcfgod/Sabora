@@ -186,6 +186,10 @@ fi
 
 echo "Verified libogg symlinks are correct" >&2
 
+# List all library files for debugging
+echo "Library files in $LIB_DIR:" >&2
+ls -la "$LIB_DIR"/*.a 2>/dev/null | head -10 >&2 || echo "No .a files found" >&2
+
 # Copy headers
 HEADER_SOURCE_DIR="$LIBOGG_DIR/include"
 if [[ ! -d "$HEADER_SOURCE_DIR" ]]; then
