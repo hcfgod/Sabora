@@ -157,12 +157,7 @@ project "Tests"
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
         -- Use -Wl,-Bstatic to force static linking for our vendor libraries
-        -- Use -L to ensure our library directories are searched first
-        linkoptions { 
-            "-Wl,-Bstatic",
-            "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libogg.LibraryPath),
-            "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libvorbis.LibraryPath)
-        }
+        linkoptions { "-Wl,-Bstatic" }
         links { 
             Dependencies.shaderc.Libraries.linux.Debug,
             Dependencies.OpenALSoft.Libraries.linux.Debug
@@ -173,8 +168,11 @@ project "Tests"
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Debug )
         -- libogg must be linked before libvorbis (dependency)
-        -- Use explicit library name to ensure we get our static library
-        links ( Dependencies.Libogg.Libraries.linux.Debug )
+        -- Link using full path to ensure we get our static library, not system library
+        -- The symlink libogg.a points to ogg-debug.a
+        linkoptions { 
+            "../Engine/" .. Dependencies.Libogg.LibraryPath .. "/libogg.a"
+        }
         links ( Dependencies.Libvorbis.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.linux.Debug )
@@ -184,12 +182,7 @@ project "Tests"
     filter { "system:linux", "configurations:Release" }
         -- Prefer static libraries over shared libraries for our dependencies
         -- Use -Wl,-Bstatic to force static linking for our vendor libraries
-        -- Use -L to ensure our library directories are searched first
-        linkoptions { 
-            "-Wl,-Bstatic",
-            "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libogg.LibraryPath),
-            "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libvorbis.LibraryPath)
-        }
+        linkoptions { "-Wl,-Bstatic" }
         links { 
             Dependencies.shaderc.Libraries.linux.Release,
             Dependencies.OpenALSoft.Libraries.linux.Release
@@ -200,8 +193,11 @@ project "Tests"
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Release )
         -- libogg must be linked before libvorbis (dependency)
-        -- Use explicit library name to ensure we get our static library
-        links ( Dependencies.Libogg.Libraries.linux.Release )
+        -- For Release, we need to update the symlink or use ogg-release.a directly
+        -- Since libogg.a symlink points to ogg-debug.a, we use ogg-release.a directly
+        linkoptions { 
+            "../Engine/" .. Dependencies.Libogg.LibraryPath .. "/ogg-release.a"
+        }
         links ( Dependencies.Libvorbis.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.linux.Release )
