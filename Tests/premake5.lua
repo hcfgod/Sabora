@@ -156,7 +156,13 @@ project "Tests"
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
-        linkoptions { "-Wl,-Bstatic" }
+        -- Use -Wl,-Bstatic to force static linking for our vendor libraries
+        -- Use -L to ensure our library directories are searched first
+        linkoptions { 
+            "-Wl,-Bstatic",
+            "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libogg.LibraryPath),
+            "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libvorbis.LibraryPath)
+        }
         links { 
             Dependencies.shaderc.Libraries.linux.Debug,
             Dependencies.OpenALSoft.Libraries.linux.Debug
@@ -167,6 +173,7 @@ project "Tests"
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Debug )
         -- libogg must be linked before libvorbis (dependency)
+        -- Use explicit library name to ensure we get our static library
         links ( Dependencies.Libogg.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Debug )
@@ -176,7 +183,13 @@ project "Tests"
 
     filter { "system:linux", "configurations:Release" }
         -- Prefer static libraries over shared libraries for our dependencies
-        linkoptions { "-Wl,-Bstatic" }
+        -- Use -Wl,-Bstatic to force static linking for our vendor libraries
+        -- Use -L to ensure our library directories are searched first
+        linkoptions { 
+            "-Wl,-Bstatic",
+            "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libogg.LibraryPath),
+            "-L" .. path.getabsolute("../Engine/" .. Dependencies.Libvorbis.LibraryPath)
+        }
         links { 
             Dependencies.shaderc.Libraries.linux.Release,
             Dependencies.OpenALSoft.Libraries.linux.Release
@@ -187,6 +200,7 @@ project "Tests"
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Release )
         -- libogg must be linked before libvorbis (dependency)
+        -- Use explicit library name to ensure we get our static library
         links ( Dependencies.Libogg.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Release )

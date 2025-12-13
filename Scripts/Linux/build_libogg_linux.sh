@@ -170,14 +170,36 @@ fi
 # Verify the symlink exists and is correct
 if [[ ! -L "$LIB_DIR/libogg.a" ]] || [[ ! -f "$LIB_DIR/libogg.a" ]]; then
     echo "Error: libogg.a symlink is missing or broken!" >&2
+    echo "Contents of $LIB_DIR:" >&2
+    ls -lah "$LIB_DIR" 2>/dev/null || echo "Directory does not exist" >&2
     exit 1
 fi
 
-echo "Verified libogg symlink is correct" >&2
+# Verify the symlink points to the correct file
+SYMLINK_TARGET=$(readlink -f "$LIB_DIR/libogg.a")
+EXPECTED_TARGET=$(readlink -f "$LIB_DIR/ogg-debug.a")
+if [[ "$SYMLINK_TARGET" != "$EXPECTED_TARGET" ]]; then
+    echo "Error: libogg.a symlink points to wrong target!" >&2
+    echo "Expected: $EXPECTED_TARGET" >&2
+    echo "Actual: $SYMLINK_TARGET" >&2
+    exit 1
+fi
+
+echo "Verified libogg symlink is correct (points to ogg-debug.a)" >&2
 
 # List all library files for debugging
 echo "Library files in $LIB_DIR:" >&2
-ls -la "$LIB_DIR"/*.a 2>/dev/null | head -10 >&2 || echo "No .a files found" >&2
+ls -lah "$LIB_DIR"/*.a 2>/dev/null || echo "No .a files found" >&2
+
+# Verify the actual library file has symbols
+if command -v nm >/dev/null 2>&1; then
+    echo "Checking for oggpack symbols in ogg-debug.a:" >&2
+    if nm "$LIB_DIR/ogg-debug.a" 2>/dev/null | grep -q "oggpack_writeinit"; then
+        echo "✓ oggpack_writeinit found in library" >&2
+    else
+        echo "⚠ oggpack_writeinit NOT found in library" >&2
+    fi
+fi
 
 # Copy headers
 HEADER_SOURCE_DIR="$LIBOGG_DIR/include"
