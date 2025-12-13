@@ -339,12 +339,12 @@ Dependencies.Libogg = {
             Release = "ogg-release.lib"
         },
         macosx = {
-            Debug = "ogg-debug",
-            Release = "ogg-release"
+            Debug = "ogg",
+            Release = "ogg"
         },
         linux = {
-            Debug = "ogg-debug",
-            Release = "ogg-release"
+            Debug = "ogg",
+            Release = "ogg"
         }
     }
 }
