@@ -134,35 +134,12 @@ project "Tests"
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Release )
 
     filter "system:linux"
-        -- Prefer static libraries over shared libraries
-        linkoptions { "-Wl,-Bstatic" }
-        -- Linux system libraries needed by Engine/SDL3 and dependencies
-        -- Note: SDL3 is linked in Engine, so we only need the system dependencies here
-        -- Core system libraries
-        links { "pthread", "dl", "m", "stdc++" }
-        -- X11 libraries (for X11 backend) - all X11 extensions
-        -- Note: XShape functions are part of Xext, not a separate library
-        links { "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
-                "Xxf86vm", "Xss", "Xtst", "Xrender" }
-        -- Wayland libraries (for Wayland backend)
-        links { "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon" }
-        -- Graphics libraries (EGL/GLES/DRM/GBM)
-        links { "EGL", "GLESv2", "drm", "gbm" }
-        -- Audio libraries (all backends SDL3 might use)
-        links { "asound", "pulse", "jack", "pipewire-0.3" }
-        -- USB and system libraries
-        links { "usb-1.0", "dbus-1", "udev" }
         defines { "AL_LIBTYPE_STATIC" }
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
         -- Use -Wl,-Bstatic to force static linking for our vendor libraries
-        -- Add -L flags to ensure our library directories are searched first
-        linkoptions { 
-            "-Wl,-Bstatic",
-            "-L../Engine/" .. Dependencies.Libogg.LibraryPath,
-            "-L../Engine/" .. Dependencies.Libvorbis.LibraryPath
-        }
+        linkoptions { "-Wl,-Bstatic" }
         links { 
             Dependencies.shaderc.Libraries.linux.Debug,
             Dependencies.OpenALSoft.Libraries.linux.Debug
@@ -173,23 +150,34 @@ project "Tests"
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Debug )
         -- libogg must be linked before libvorbis (dependency)
-        -- The symlink libogg.a points to ogg-debug.a
         links ( Dependencies.Libogg.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.linux.Debug )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
+        -- Now link all SDL3 dependencies
+        links { 
+            -- Core system
+            "pthread", "dl", "m", "stdc++",
+            -- X11 libraries (for X11 backend) - all X11 extensions
+            -- Note: XShape functions are part of Xext, not a separate library
+            "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
+            "Xxf86vm", "Xss", "Xtst", "Xrender",
+            -- Wayland libraries (for Wayland backend)
+            "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon",
+            -- Graphics libraries (EGL/GLES/DRM/GBM)
+            "EGL", "GLESv2", "drm", "gbm",
+            -- Audio libraries (all backends SDL3 might use)
+            "asound", "pulse", "jack", "pipewire-0.3",
+            -- USB and system libraries
+            "usb-1.0", "dbus-1", "udev"
+        }
 
     filter { "system:linux", "configurations:Release" }
         -- Prefer static libraries over shared libraries for our dependencies
         -- Use -Wl,-Bstatic to force static linking for our vendor libraries
-        -- Add -L flags to ensure our library directories are searched first
-        linkoptions { 
-            "-Wl,-Bstatic",
-            "-L../Engine/" .. Dependencies.Libogg.LibraryPath,
-            "-L../Engine/" .. Dependencies.Libvorbis.LibraryPath
-        }
+        linkoptions { "-Wl,-Bstatic" }
         links { 
             Dependencies.shaderc.Libraries.linux.Release,
             Dependencies.OpenALSoft.Libraries.linux.Release
@@ -200,14 +188,28 @@ project "Tests"
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Release )
         -- libogg must be linked before libvorbis (dependency)
-        -- For Release, we need to link ogg-release.a directly
-        -- Since libogg.a symlink points to ogg-debug.a, we'll use the explicit name
-        -- But first, let's try using the library name and see if -L helps
         links ( Dependencies.Libogg.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.linux.Release )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
+        -- Now link all SDL3 dependencies
+        links { 
+            -- Core system
+            "pthread", "dl", "m", "stdc++",
+            -- X11 libraries (for X11 backend) - all X11 extensions
+            -- Note: XShape functions are part of Xext, not a separate library
+            "X11", "Xext", "Xrandr", "Xcursor", "Xfixes", "Xi", "Xinerama", 
+            "Xxf86vm", "Xss", "Xtst", "Xrender",
+            -- Wayland libraries (for Wayland backend)
+            "wayland-client", "wayland-egl", "wayland-cursor", "xkbcommon",
+            -- Graphics libraries (EGL/GLES/DRM/GBM)
+            "EGL", "GLESv2", "drm", "gbm",
+            -- Audio libraries (all backends SDL3 might use)
+            "asound", "pulse", "jack", "pipewire-0.3",
+            -- USB and system libraries
+            "usb-1.0", "dbus-1", "udev"
+        }
 
     filter {}
