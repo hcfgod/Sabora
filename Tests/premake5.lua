@@ -150,7 +150,10 @@ project "Tests"
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Debug )
         -- libogg must be linked before libvorbis (dependency)
-        links ( Dependencies.Libogg.Libraries.linux.Debug )
+        -- Use full path to bypass library search and ensure we get our static library
+        linkoptions { 
+            "../Engine/" .. Dependencies.Libogg.LibraryPath .. "/libogg.a"
+        }
         links ( Dependencies.Libvorbis.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.linux.Debug )
@@ -188,7 +191,10 @@ project "Tests"
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Release )
         -- libogg must be linked before libvorbis (dependency)
-        links ( Dependencies.Libogg.Libraries.linux.Release )
+        -- For Release, use ogg-release.a directly since libogg.a symlink points to ogg-debug.a
+        linkoptions { 
+            "../Engine/" .. Dependencies.Libogg.LibraryPath .. "/ogg-release.a"
+        }
         links ( Dependencies.Libvorbis.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.linux.Release )
