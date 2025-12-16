@@ -138,6 +138,25 @@ OPUS_RELEASE_LIB="$LIBOPUS_LIB_DIR/opus-release.a"
 
 LIBOPUS_INCLUDE_DIR="$LIBOPUS_DIR/include"
 
+# Ensure pkg-config metadata for libopus exists (configure uses pkg-config)
+PKGCONFIG_DIR="$LIBOPUS_LIB_DIR/pkgconfig"
+mkdir -p "$PKGCONFIG_DIR"
+OPUS_PC_FILE="$PKGCONFIG_DIR/opus.pc"
+if [[ ! -f "$OPUS_PC_FILE" ]]; then
+    cat > "$OPUS_PC_FILE" <<EOF
+prefix=$LIBOPUS_DIR
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: Opus
+Description: Opus audio codec library
+Version: 1.5.2
+Libs: -L\${libdir} -lopus
+Cflags: -I\${includedir}
+EOF
+fi
+
 # Get number of cores for parallel builds
 NUM_CORES=$(sysctl -n hw.ncpu 2>/dev/null || echo 4)
 
@@ -294,6 +313,9 @@ else
     mkdir -p "$BUILD_DIR_DEBUG"
     mkdir -p "$BUILD_DIR_RELEASE"
     
+    # Preserve existing PKG_CONFIG_PATH if set (avoid unbound variable under `set -u`)
+    PKG_CONFIG_PATH_SAFE="${PKG_CONFIG_PATH:-}"
+
     # Build Debug configuration
     echo "Configuring libopusenc (Debug)..."
     cd "$LIBOPUSENC_DIR"
@@ -311,7 +333,7 @@ else
         CFLAGS="-g -O0" \
         CPPFLAGS="-I$LIBOPUS_INCLUDE_DIR" \
         LDFLAGS="-L$LIBOPUS_LIB_DIR" \
-        PKG_CONFIG_PATH="$LIBOPUS_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
+        PKG_CONFIG_PATH="$LIBOPUS_DIR/lib/pkgconfig:$PKG_CONFIG_PATH_SAFE"
     
     echo "Building libopusenc (Debug)..."
     make -j"$NUM_CORES"
@@ -328,7 +350,7 @@ else
         CFLAGS="-O3" \
         CPPFLAGS="-I$LIBOPUS_INCLUDE_DIR" \
         LDFLAGS="-L$LIBOPUS_LIB_DIR" \
-        PKG_CONFIG_PATH="$LIBOPUS_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
+        PKG_CONFIG_PATH="$LIBOPUS_DIR/lib/pkgconfig:$PKG_CONFIG_PATH_SAFE"
     
     echo "Building libopusenc (Release)..."
     make -j"$NUM_CORES"
