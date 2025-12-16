@@ -17,9 +17,34 @@
 #include <FLAC/format.h>
 #include <opus/opus.h>
 #include <opus/opusfile.h>
+#include <opus/opusenc.h>
+
+#include <vector>
 
 namespace Sabora 
 {
+    namespace
+    {
+        // Simple in-memory write callback for libopusenc diagnostic usage
+        int OpeWriteCallback(void* userData, const unsigned char* ptr, opus_int32 len)
+        {
+            auto* buffer = static_cast<std::vector<unsigned char>*>(userData);
+            if (buffer == nullptr || ptr == nullptr || len < 0)
+            {
+                return 1;
+            }
+
+            buffer->insert(buffer->end(), ptr, ptr + len);
+            return 0;
+        }
+
+        // No-op close callback
+        int OpeCloseCallback(void* /*userData*/)
+        {
+            return 0;
+        }
+    } // namespace
+
     //==========================================================================
     // SDLContext Implementation
     //==========================================================================
@@ -248,6 +273,51 @@ namespace Sabora
         // Note: op_open_file requires a file path, so we just verify the library is linked
         // by checking that the header is included and compilation succeeds
         SB_CORE_INFO("opusfile library linked successfully (file reading support for Opus files)");
+
+        // Test libopusenc - verify high-level Opus encoder wrapper is linked
+        OggOpusComments* opusComments = ope_comments_create();
+        if (opusComments != nullptr)
+        {
+            ope_comments_add(opusComments, "ENCODER", "Sabora Diagnostics");
+
+            std::vector<unsigned char> opusEncodedData;
+            const OpusEncCallbacks callbacks{
+                &OpeWriteCallback,
+                &OpeCloseCallback
+            };
+
+            int opusencError = OPE_OK;
+            OggOpusEnc* opusEncHandle = ope_encoder_create_callbacks(
+                &callbacks,
+                &opusEncodedData,
+                opusComments,
+                48000,
+                2,
+                0,
+                &opusencError);
+
+            if (opusEncHandle != nullptr && opusencError == OPE_OK)
+            {
+                const int drainResult = ope_encoder_drain(opusEncHandle);
+
+                SB_CORE_INFO(
+                    "libopusenc encoder initialized (drain={}, buffered={} bytes)",
+                    drainResult,
+                    opusEncodedData.size());
+
+                ope_encoder_destroy(opusEncHandle);
+            }
+            else
+            {
+                SB_CORE_WARN("libopusenc encoder initialization failed (error code: {})", opusencError);
+            }
+
+            ope_comments_destroy(opusComments);
+        }
+        else
+        {
+            SB_CORE_WARN("libopusenc comments initialization failed");
+        }
 
         SB_CORE_INFO("Application initialization complete.");
         return Result<void>::Success();

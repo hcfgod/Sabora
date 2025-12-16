@@ -225,6 +225,14 @@ install_opusfile() {
   bash "$SCRIPT_DIR/build_opusfile_macos.sh"
 }
 
+# Build libopusenc (depends on libopus)
+install_libopusenc() {
+  local vendor_dir="$1"
+  echo "Building libopusenc..."
+  chmod +x "$SCRIPT_DIR/build_libopusenc_macos.sh" || true
+  bash "$SCRIPT_DIR/build_libopusenc_macos.sh"
+}
+
 # Install shaderc and SPIRV-Cross
 install_shaderc "$VENDOR_DIR"
 install_spirv_cross "$VENDOR_DIR"
@@ -237,6 +245,7 @@ install_libogg "$VENDOR_DIR"
 install_libvorbis "$VENDOR_DIR"
 install_libflac "$VENDOR_DIR"
 install_libopus "$VENDOR_DIR"
+install_libopusenc "$VENDOR_DIR"
 install_opusfile "$VENDOR_DIR"
 
 echo "Dependencies are ready under $VENDOR_DIR"

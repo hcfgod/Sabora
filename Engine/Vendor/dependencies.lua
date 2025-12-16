@@ -490,6 +490,29 @@ Dependencies.Libopus = {
     }
 }
 
+-- libopusenc Configuration (static library - high-level Opus encoder wrapper)
+Dependencies.Libopusenc = {
+    Version = "0.2.1",
+    HeaderOnly = false,
+    StaticRuntime = true,
+    LibraryPath = "Vendor/libopusenc/lib",
+    IncludePath = "Vendor/libopusenc/include",
+    Libraries = {
+        windows = {
+            Debug = "opusenc-debug.lib",
+            Release = "opusenc-release.lib"
+        },
+        macosx = {
+            Debug = "opusenc",
+            Release = "opusenc"
+        },
+        linux = {
+            Debug = "opusenc",
+            Release = "opusenc"
+        }
+    }
+}
+
 -- opusfile Configuration (static library for reading Opus files, depends on libopus + libogg)
 Dependencies.Opusfile = {
     -- Version string (update when pinning to specific version)
