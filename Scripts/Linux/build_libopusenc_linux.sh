@@ -279,6 +279,9 @@ else
     mkdir -p "$BUILD_DIR_DEBUG"
     mkdir -p "$BUILD_DIR_RELEASE"
     
+    # Preserve existing PKG_CONFIG_PATH if set (avoid unbound variable under `set -u`)
+    PKG_CONFIG_PATH_SAFE="${PKG_CONFIG_PATH:-}"
+
     # Build Debug configuration
     echo "Configuring libopusenc (Debug)..."
     cd "$LIBOPUSENC_DIR"
@@ -296,7 +299,7 @@ else
         CFLAGS="-g -O0" \
         CPPFLAGS="-I$LIBOPUS_INCLUDE_DIR" \
         LDFLAGS="-L$LIBOPUS_LIB_DIR" \
-        PKG_CONFIG_PATH="$LIBOPUS_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
+        PKG_CONFIG_PATH="$LIBOPUS_DIR/lib/pkgconfig:$PKG_CONFIG_PATH_SAFE"
     
     echo "Building libopusenc (Debug)..."
     make -j"$NUM_CORES"
@@ -313,7 +316,7 @@ else
         CFLAGS="-O3" \
         CPPFLAGS="-I$LIBOPUS_INCLUDE_DIR" \
         LDFLAGS="-L$LIBOPUS_LIB_DIR" \
-        PKG_CONFIG_PATH="$LIBOPUS_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
+        PKG_CONFIG_PATH="$LIBOPUS_DIR/lib/pkgconfig:$PKG_CONFIG_PATH_SAFE"
     
     echo "Building libopusenc (Release)..."
     make -j"$NUM_CORES"
