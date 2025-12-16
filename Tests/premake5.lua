@@ -189,10 +189,9 @@ project "Tests"
         linkoptions { "-Wl,--end-group" }
         -- libFLAC can optionally use libogg, but we link it separately
         links ( Dependencies.Libflac.Libraries.linux.Debug )
-        -- libopus is standalone, link it separately
-        links ( Dependencies.Libopus.Libraries.linux.Debug )
-        -- libopusenc depends on libopus
+        -- Link libopusenc first, then its dependency libopus
         links ( Dependencies.Libopusenc.Libraries.linux.Debug )
+        links ( Dependencies.Libopus.Libraries.linux.Debug )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Debug )
         -- Switch back to dynamic linking for system libraries
@@ -243,10 +242,9 @@ project "Tests"
         linkoptions { "-Wl,--end-group" }
         -- libFLAC can optionally use libogg, but we link it separately
         links ( Dependencies.Libflac.Libraries.linux.Release )
-        -- libopus is standalone, link it separately
-        links ( Dependencies.Libopus.Libraries.linux.Release )
-        -- libopusenc depends on libopus
+        -- Link libopusenc first, then its dependency libopus
         links ( Dependencies.Libopusenc.Libraries.linux.Release )
+        links ( Dependencies.Libopus.Libraries.linux.Release )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Release )
         -- Switch back to dynamic linking for system libraries

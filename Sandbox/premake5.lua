@@ -47,6 +47,7 @@ project "Sandbox"
         "../Engine/" .. Dependencies.Minimp3.IncludePath,
         "../Engine/" .. Dependencies.Libflac.IncludePath,
         "../Engine/" .. Dependencies.Libopus.IncludePath,
+        "../Engine/" .. Dependencies.Libopusenc.IncludePath,
         "../Engine/" .. Dependencies.Opusfile.IncludePath,
     }
 
@@ -72,6 +73,7 @@ project "Sandbox"
         "../Engine/" .. Dependencies.Libvorbis.LibraryPath,
         "../Engine/" .. Dependencies.Libflac.LibraryPath,
         "../Engine/" .. Dependencies.Libopus.LibraryPath,
+        "../Engine/" .. Dependencies.Libopusenc.LibraryPath,
         "../Engine/" .. Dependencies.Opusfile.LibraryPath,
     }
 
@@ -98,6 +100,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesEnc.windows.Debug )
         links ( Dependencies.Libflac.Libraries.windows.Debug )
         links ( Dependencies.Libopus.Libraries.windows.Debug )
+        links ( Dependencies.Libopusenc.Libraries.windows.Debug )
         links ( Dependencies.Opusfile.Libraries.windows.Debug )
         runtime "Debug"
 
@@ -118,6 +121,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesEnc.windows.Release )
         links ( Dependencies.Libflac.Libraries.windows.Release )
         links ( Dependencies.Libopus.Libraries.windows.Release )
+        links ( Dependencies.Libopusenc.Libraries.windows.Release )
         links ( Dependencies.Opusfile.Libraries.windows.Release )
         runtime "Release"
 
@@ -161,6 +165,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Debug )
         links ( Dependencies.Libflac.Libraries.macosx.Debug )
         links ( Dependencies.Libopus.Libraries.macosx.Debug )
+        links ( Dependencies.Libopusenc.Libraries.macosx.Debug )
         links ( Dependencies.Opusfile.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
@@ -180,6 +185,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Release )
         links ( Dependencies.Libflac.Libraries.macosx.Release )
         links ( Dependencies.Libopus.Libraries.macosx.Release )
+        links ( Dependencies.Libopusenc.Libraries.macosx.Release )
         links ( Dependencies.Opusfile.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
@@ -208,7 +214,8 @@ project "Sandbox"
         linkoptions { "-Wl,--end-group" }
         -- libFLAC can optionally use libogg, but we link it separately
         links ( Dependencies.Libflac.Libraries.linux.Debug )
-        -- libopus is standalone, link it separately
+        -- Link libopusenc first, then its dependency libopus
+        links ( Dependencies.Libopusenc.Libraries.linux.Debug )
         links ( Dependencies.Libopus.Libraries.linux.Debug )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Debug )
@@ -258,7 +265,8 @@ project "Sandbox"
         linkoptions { "-Wl,--end-group" }
         -- libFLAC can optionally use libogg, but we link it separately
         links ( Dependencies.Libflac.Libraries.linux.Release )
-        -- libopus is standalone, link it separately
+        -- Link libopusenc first, then its dependency libopus
+        links ( Dependencies.Libopusenc.Libraries.linux.Release )
         links ( Dependencies.Libopus.Libraries.linux.Release )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Release )
