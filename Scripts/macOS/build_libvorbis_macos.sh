@@ -132,6 +132,7 @@ cmake_args_debug=(
     "-DOGG_INCLUDE_DIR=$LIBOGG_INCLUDE_DIR"
     "-DOGG_LIBRARY=$LIBOGG_LIB_DIR/ogg-debug.a"
     "-DCMAKE_PREFIX_PATH=$LIBOGG_DIR"
+    "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
 )
 
 cmake "${cmake_args_debug[@]}"
@@ -153,6 +154,7 @@ cmake_args_release=(
     "-DOGG_INCLUDE_DIR=$LIBOGG_INCLUDE_DIR"
     "-DOGG_LIBRARY=$LIBOGG_LIB_DIR/ogg-release.a"
     "-DCMAKE_PREFIX_PATH=$LIBOGG_DIR"
+    "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
 )
 
 cmake "${cmake_args_release[@]}"
