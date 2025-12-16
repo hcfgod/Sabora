@@ -81,6 +81,74 @@ if [[ ! -f "$OPUSFILE_DIR/CMakeLists.txt" ]]; then
     fi
 fi
 
+# Patch opusfile's FindOgg.cmake to work without PkgConfig
+FIND_OGG_PATH="$OPUSFILE_DIR/cmake/FindOgg.cmake"
+if [[ -f "$FIND_OGG_PATH" ]]; then
+    if ! grep -q "OGG_INCLUDE_DIR AND OGG_LIBRARY" "$FIND_OGG_PATH"; then
+        cat > "$FIND_OGG_PATH" << 'EOF'
+# Skip CONFIG mode since OggConfig.cmake may not be available
+# find_package(Ogg CONFIG QUIET)
+if(NOT TARGET Ogg::ogg)
+  find_package(PkgConfig QUIET)
+  if(PkgConfig_FOUND)
+    pkg_check_modules(Ogg REQUIRED IMPORTED_TARGET ogg)
+    set_target_properties(PkgConfig::Ogg PROPERTIES IMPORTED_GLOBAL TRUE)
+    add_library(Ogg::ogg ALIAS PkgConfig::Ogg)
+  else()
+    # Fallback: use manual variables if PkgConfig is not available
+    if(OGG_INCLUDE_DIR AND OGG_LIBRARY)
+      if(NOT TARGET Ogg::ogg)
+        add_library(Ogg::ogg UNKNOWN IMPORTED)
+        set_target_properties(Ogg::ogg PROPERTIES
+          INTERFACE_INCLUDE_DIRECTORIES "${OGG_INCLUDE_DIR}"
+          IMPORTED_LOCATION "${OGG_LIBRARY}"
+        )
+      endif()
+      set(Ogg_FOUND TRUE)
+    else()
+      message(FATAL_ERROR "Ogg library not found. Please set OGG_INCLUDE_DIR and OGG_LIBRARY, or install PkgConfig.")
+    endif()
+  endif()
+endif()
+EOF
+        echo "Patched opusfile FindOgg.cmake to work without PkgConfig" >&2
+    fi
+fi
+
+# Patch opusfile's FindOpus.cmake to work without PkgConfig and incomplete OpusConfig.cmake
+FIND_OPUS_PATH="$OPUSFILE_DIR/cmake/FindOpus.cmake"
+if [[ -f "$FIND_OPUS_PATH" ]]; then
+    if ! grep -q "OPUS_INCLUDE_DIR AND OPUS_LIBRARY" "$FIND_OPUS_PATH"; then
+        cat > "$FIND_OPUS_PATH" << 'EOF'
+# Skip CONFIG mode since OpusConfig.cmake from libopus is incomplete
+# find_package(Opus CONFIG QUIET)
+if(NOT TARGET Opus::opus)
+  find_package(PkgConfig QUIET)
+  if(PkgConfig_FOUND)
+    pkg_check_modules(Opus REQUIRED IMPORTED_TARGET opus)
+    set_target_properties(PkgConfig::Opus PROPERTIES IMPORTED_GLOBAL TRUE)
+    add_library(Opus::opus ALIAS PkgConfig::Opus)
+  else()
+    # Fallback: use manual variables if PkgConfig is not available
+    if(OPUS_INCLUDE_DIR AND OPUS_LIBRARY)
+      if(NOT TARGET Opus::opus)
+        add_library(Opus::opus UNKNOWN IMPORTED)
+        set_target_properties(Opus::opus PROPERTIES
+          INTERFACE_INCLUDE_DIRECTORIES "${OPUS_INCLUDE_DIR}"
+          IMPORTED_LOCATION "${OPUS_LIBRARY}"
+        )
+      endif()
+      set(Opus_FOUND TRUE)
+    else()
+      message(FATAL_ERROR "Opus library not found. Please set OPUS_INCLUDE_DIR and OPUS_LIBRARY, or install PkgConfig.")
+    endif()
+  endif()
+endif()
+EOF
+        echo "Patched opusfile FindOpus.cmake to work without PkgConfig" >&2
+    fi
+fi
+
 # Create build directories for Debug and Release separately
 BUILD_DIR_DEBUG="$OPUSFILE_DIR/build-debug"
 BUILD_DIR_RELEASE="$OPUSFILE_DIR/build-release"
