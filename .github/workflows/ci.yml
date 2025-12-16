@@ -110,7 +110,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-            Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, minimp3, and libopus libraries..."
+        Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, minimp3, and libopus libraries..."
         
         # Check msdf-atlas-gen
         $msdfLibDir = "Engine\Vendor\msdf-atlas-gen\lib"
