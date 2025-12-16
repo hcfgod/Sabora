@@ -299,6 +299,14 @@ install_libflac() {
   bash "$SCRIPT_DIR/build_libflac_linux.sh"
 }
 
+# Build libopus (standalone, no dependencies)
+install_libopus() {
+  local vendor_dir="$1"
+  echo "Building libopus..."
+  chmod +x "$SCRIPT_DIR/build_libopus_linux.sh" || true
+  bash "$SCRIPT_DIR/build_libopus_linux.sh"
+}
+
 # Install shaderc and SPIRV-Cross
 install_shaderc "$VENDOR_DIR"
 install_spirv_cross "$VENDOR_DIR"
@@ -310,6 +318,7 @@ install_libsndfile "$VENDOR_DIR"
 install_libogg "$VENDOR_DIR"
 install_libvorbis "$VENDOR_DIR"
 install_libflac "$VENDOR_DIR"
+install_libopus "$VENDOR_DIR"
 
 echo "Dependencies are ready under $VENDOR_DIR"
 

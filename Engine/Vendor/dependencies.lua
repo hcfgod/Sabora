@@ -457,4 +457,37 @@ Dependencies.Libflac = {
     }
 }
 
+-- libopus Configuration (static library for Opus audio codec - best quality/compression ratio)
+Dependencies.Libopus = {
+    -- Version string (update when pinning to specific version)
+    Version = "latest",
+    HeaderOnly = false,
+    
+    -- Static runtime setting must match how libopus was built
+    StaticRuntime = true,
+    
+    -- Paths relative to Engine directory
+    LibraryPath = "Vendor/libopus/lib",
+    IncludePath = "Vendor/libopus/include",
+    
+    -- Library names per platform and configuration
+    -- Note: On Unix systems, specify library name without 'lib' prefix and '.a' extension
+    --       The linker will automatically add them (e.g., 'opus' becomes 'libopus.a')
+    -- Note: On Windows, specify the full library name including extension
+    Libraries = {
+        windows = {
+            Debug = "opus-debug.lib",
+            Release = "opus-release.lib"
+        },
+        macosx = {
+            Debug = "opus",
+            Release = "opus"
+        },
+        linux = {
+            Debug = "opus",
+            Release = "opus"
+        }
+    }
+}
+
 return Dependencies

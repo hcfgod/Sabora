@@ -52,6 +52,7 @@ project "Engine"
         Dependencies.Libvorbis.IncludePath,
         Dependencies.Minimp3.IncludePath,
         Dependencies.Libflac.IncludePath,
+        Dependencies.Libopus.IncludePath,
     }
 
     -- Flexible library directory path based on configuration
@@ -68,6 +69,7 @@ project "Engine"
         Dependencies.Libogg.LibraryPath,
         Dependencies.Libvorbis.LibraryPath,
         Dependencies.Libflac.LibraryPath,
+        Dependencies.Libopus.LibraryPath,
         -- Add platform/configuration-specific paths here if needed
         -- Example: Dependencies.SDL3.LibraryPath .. "/%{cfg.platform}/%{cfg.buildcfg}"
     }
@@ -100,9 +102,10 @@ project "Engine"
         links ( Dependencies.Libogg.Libraries.windows.Debug )
         links ( Dependencies.Libvorbis.Libraries.windows.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Debug )
-        links ( Dependencies.Libvorbis.LibrariesEnc.windows.Debug )
-        links ( Dependencies.Libflac.Libraries.windows.Debug )
-        runtime "Debug"
+                links ( Dependencies.Libvorbis.LibrariesEnc.windows.Debug )
+                links ( Dependencies.Libflac.Libraries.windows.Debug )
+                links ( Dependencies.Libopus.Libraries.windows.Debug )
+                runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
         links { 
@@ -118,9 +121,10 @@ project "Engine"
         links ( Dependencies.Libogg.Libraries.windows.Release )
         links ( Dependencies.Libvorbis.Libraries.windows.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Release )
-        links ( Dependencies.Libvorbis.LibrariesEnc.windows.Release )
-        links ( Dependencies.Libflac.Libraries.windows.Release )
-        runtime "Release"
+                links ( Dependencies.Libvorbis.LibrariesEnc.windows.Release )
+                links ( Dependencies.Libflac.Libraries.windows.Release )
+                links ( Dependencies.Libopus.Libraries.windows.Release )
+                runtime "Release"
 
     filter "system:macosx"
         -- macOS system libraries and frameworks needed by SDL3
@@ -161,6 +165,7 @@ project "Engine"
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Debug )
         links ( Dependencies.Libflac.Libraries.macosx.Debug )
+        links ( Dependencies.Libopus.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -178,6 +183,7 @@ project "Engine"
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Release )
         links ( Dependencies.Libflac.Libraries.macosx.Release )
+        links ( Dependencies.Libopus.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
@@ -205,6 +211,8 @@ project "Engine"
         linkoptions { "-Wl,--end-group" }
         -- libFLAC can optionally use libogg, but we link it separately
         links ( Dependencies.Libflac.Libraries.linux.Debug )
+        -- libopus is standalone, link it separately
+        links ( Dependencies.Libopus.Libraries.linux.Debug )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -251,6 +259,8 @@ project "Engine"
         linkoptions { "-Wl,--end-group" }
         -- libFLAC can optionally use libogg, but we link it separately
         links ( Dependencies.Libflac.Libraries.linux.Release )
+        -- libopus is standalone, link it separately
+        links ( Dependencies.Libopus.Libraries.linux.Release )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies

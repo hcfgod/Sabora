@@ -46,6 +46,7 @@ project "Sandbox"
         "../Engine/" .. Dependencies.Libvorbis.IncludePath,
         "../Engine/" .. Dependencies.Minimp3.IncludePath,
         "../Engine/" .. Dependencies.Libflac.IncludePath,
+        "../Engine/" .. Dependencies.Libopus.IncludePath,
     }
 
     -- Link against Engine
@@ -69,6 +70,7 @@ project "Sandbox"
         "../Engine/" .. Dependencies.Libogg.LibraryPath,
         "../Engine/" .. Dependencies.Libvorbis.LibraryPath,
         "../Engine/" .. Dependencies.Libflac.LibraryPath,
+        "../Engine/" .. Dependencies.Libopus.LibraryPath,
     }
 
     filter "system:windows"
@@ -93,6 +95,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.windows.Debug )
         links ( Dependencies.Libflac.Libraries.windows.Debug )
+        links ( Dependencies.Libopus.Libraries.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
@@ -111,6 +114,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.windows.Release )
         links ( Dependencies.Libflac.Libraries.windows.Release )
+        links ( Dependencies.Libopus.Libraries.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -152,6 +156,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Debug )
         links ( Dependencies.Libflac.Libraries.macosx.Debug )
+        links ( Dependencies.Libopus.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -169,6 +174,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Release )
         links ( Dependencies.Libflac.Libraries.macosx.Release )
+        links ( Dependencies.Libopus.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
@@ -196,6 +202,8 @@ project "Sandbox"
         linkoptions { "-Wl,--end-group" }
         -- libFLAC can optionally use libogg, but we link it separately
         links ( Dependencies.Libflac.Libraries.linux.Debug )
+        -- libopus is standalone, link it separately
+        links ( Dependencies.Libopus.Libraries.linux.Debug )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -242,6 +250,8 @@ project "Sandbox"
         linkoptions { "-Wl,--end-group" }
         -- libFLAC can optionally use libogg, but we link it separately
         links ( Dependencies.Libflac.Libraries.linux.Release )
+        -- libopus is standalone, link it separately
+        links ( Dependencies.Libopus.Libraries.linux.Release )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies

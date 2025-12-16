@@ -110,7 +110,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, and minimp3 libraries..."
+            Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, minimp3, and libopus libraries..."
         
         # Check msdf-atlas-gen
         $msdfLibDir = "Engine\Vendor\msdf-atlas-gen\lib"
@@ -184,6 +184,17 @@ jobs:
           Write-Host "✓ minimp3 header found"
         } else {
           Write-Host "⚠ minimp3 header not found"
+        }
+        
+        # Check libopus
+        $libopusLibDir = "Engine\Vendor\libopus\lib"
+        if (Test-Path $libopusLibDir) {
+          $libopusLibs = Get-ChildItem -Path $libopusLibDir -Filter "*.lib" -ErrorAction SilentlyContinue
+          if ($libopusLibs.Count -gt 0) {
+            Write-Host "✓ libopus libraries found ($($libopusLibs.Count) files)"
+          } else {
+            Write-Host "⚠ libopus libraries not found"
+          }
         }
 
     - name: Build Tests
@@ -309,7 +320,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, and minimp3 libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, minimp3, and libopus libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -382,6 +393,17 @@ jobs:
           echo "✓ minimp3 header found"
         else
           echo "⚠ minimp3 header not found"
+        fi
+        
+        # Check libopus
+        LIBOPUS_LIB_DIR="Engine/Vendor/libopus/lib"
+        if [ -d "$LIBOPUS_LIB_DIR" ]; then
+          LIBOPUS_COUNT=$(find "$LIBOPUS_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$LIBOPUS_COUNT" -gt 0 ]; then
+            echo "✓ libopus libraries found ($LIBOPUS_COUNT files)"
+          else
+            echo "⚠ libopus libraries not found"
+          fi
         fi
 
     - name: Generate project files
@@ -488,7 +510,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, and minimp3 libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, minimp3, and libopus libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -561,6 +583,17 @@ jobs:
           echo "✓ minimp3 header found"
         else
           echo "⚠ minimp3 header not found"
+        fi
+        
+        # Check libopus
+        LIBOPUS_LIB_DIR="Engine/Vendor/libopus/lib"
+        if [ -d "$LIBOPUS_LIB_DIR" ]; then
+          LIBOPUS_COUNT=$(find "$LIBOPUS_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$LIBOPUS_COUNT" -gt 0 ]; then
+            echo "✓ libopus libraries found ($LIBOPUS_COUNT files)"
+          else
+            echo "⚠ libopus libraries not found"
+          fi
         fi
 
     - name: Generate project files

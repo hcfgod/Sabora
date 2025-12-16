@@ -180,6 +180,13 @@ function Install-Libflac($vendorDir) {
     & (Join-Path $PSScriptRoot "build_libflac_windows.ps1")
 }
 
+# Build libopus (standalone, no dependencies)
+function Install-Libopus($vendorDir) {
+    $libopusDir = Join-Path $vendorDir "libopus"
+    Write-Host "Building libopus..."
+    & (Join-Path $PSScriptRoot "build_libopus_windows.ps1")
+}
+
 # Install shaderc and SPIRV-Cross
 Install-Shaderc $vendor
 Install-SPIRVCross $vendor
@@ -191,5 +198,6 @@ Install-Libsndfile $vendor
 Install-Libogg $vendor
 Install-Libvorbis $vendor
 Install-Libflac $vendor
+Install-Libopus $vendor
 
 Write-Host "Dependencies are ready under $vendor"

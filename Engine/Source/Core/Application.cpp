@@ -15,6 +15,7 @@
 #include <FLAC/stream_decoder.h>
 #include <FLAC/stream_encoder.h>
 #include <FLAC/format.h>
+#include <opus/opus.h>
 
 namespace Sabora 
 {
@@ -211,6 +212,32 @@ namespace Sabora
         else
         {
             SB_CORE_WARN("libFLAC encoder initialization failed");
+        }
+
+        // Test libopus - verify library is linked
+        // Initialize Opus encoder (test basic API availability)
+        int opusError = 0;
+        OpusEncoder* opusEncoder = opus_encoder_create(48000, 2, OPUS_APPLICATION_AUDIO, &opusError);
+        if (opusEncoder != nullptr && opusError == OPUS_OK)
+        {
+            SB_CORE_INFO("libopus encoder initialized successfully (sample rate: 48000, channels: 2)");
+            opus_encoder_destroy(opusEncoder);
+        }
+        else
+        {
+            SB_CORE_WARN("libopus encoder initialization failed (error code: {})", opusError);
+        }
+
+        // Test Opus decoder
+        OpusDecoder* opusDecoder = opus_decoder_create(48000, 2, &opusError);
+        if (opusDecoder != nullptr && opusError == OPUS_OK)
+        {
+            SB_CORE_INFO("libopus decoder initialized successfully");
+            opus_decoder_destroy(opusDecoder);
+        }
+        else
+        {
+            SB_CORE_WARN("libopus decoder initialization failed (error code: {})", opusError);
         }
 
         SB_CORE_INFO("Application initialization complete.");
