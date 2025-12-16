@@ -171,6 +171,15 @@ function Install-Libvorbis($vendorDir) {
     & (Join-Path $PSScriptRoot "build_libvorbis_windows.ps1")
 }
 
+# Build libFLAC (optional dependency on libogg for OGG FLAC)
+function Install-Libflac($vendorDir) {
+    $libflacDir = Join-Path $vendorDir "libflac"
+    
+    # Build libFLAC
+    Write-Host "Building libFLAC..."
+    & (Join-Path $PSScriptRoot "build_libflac_windows.ps1")
+}
+
 # Install shaderc and SPIRV-Cross
 Install-Shaderc $vendor
 Install-SPIRVCross $vendor
@@ -181,5 +190,6 @@ Install-OpenALSoft $vendor
 Install-Libsndfile $vendor
 Install-Libogg $vendor
 Install-Libvorbis $vendor
+Install-Libflac $vendor
 
 Write-Host "Dependencies are ready under $vendor"

@@ -110,7 +110,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, and minimp3 libraries..."
+        Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, and minimp3 libraries..."
         
         # Check msdf-atlas-gen
         $msdfLibDir = "Engine\Vendor\msdf-atlas-gen\lib"
@@ -164,6 +164,17 @@ jobs:
             Write-Host "✓ libvorbis libraries found ($($libvorbisLibs.Count) files)"
           } else {
             Write-Host "⚠ libvorbis libraries not found"
+          }
+        }
+        
+        # Check libFLAC
+        $libflacLibDir = "Engine\Vendor\libflac\lib"
+        if (Test-Path $libflacLibDir) {
+          $libflacLibs = Get-ChildItem -Path $libflacLibDir -Filter "*.lib" -ErrorAction SilentlyContinue
+          if ($libflacLibs.Count -gt 0) {
+            Write-Host "✓ libFLAC libraries found ($($libflacLibs.Count) files)"
+          } else {
+            Write-Host "⚠ libFLAC libraries not found"
           }
         }
         
@@ -298,7 +309,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, and minimp3 libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, and minimp3 libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -352,6 +363,17 @@ jobs:
             echo "✓ libvorbis libraries found ($LIBVORBIS_COUNT files)"
           else
             echo "⚠ libvorbis libraries not found"
+          fi
+        fi
+        
+        # Check libFLAC
+        LIBFLAC_LIB_DIR="Engine/Vendor/libflac/lib"
+        if [ -d "$LIBFLAC_LIB_DIR" ]; then
+          LIBFLAC_COUNT=$(find "$LIBFLAC_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$LIBFLAC_COUNT" -gt 0 ]; then
+            echo "✓ libFLAC libraries found ($LIBFLAC_COUNT files)"
+          else
+            echo "⚠ libFLAC libraries not found"
           fi
         fi
         
@@ -466,7 +488,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, and minimp3 libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, and minimp3 libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -520,6 +542,17 @@ jobs:
             echo "✓ libvorbis libraries found ($LIBVORBIS_COUNT files)"
           else
             echo "⚠ libvorbis libraries not found"
+          fi
+        fi
+        
+        # Check libFLAC
+        LIBFLAC_LIB_DIR="Engine/Vendor/libflac/lib"
+        if [ -d "$LIBFLAC_LIB_DIR" ]; then
+          LIBFLAC_COUNT=$(find "$LIBFLAC_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$LIBFLAC_COUNT" -gt 0 ]; then
+            echo "✓ libFLAC libraries found ($LIBFLAC_COUNT files)"
+          else
+            echo "⚠ libFLAC libraries not found"
           fi
         fi
         

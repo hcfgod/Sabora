@@ -12,6 +12,9 @@
 #include <AL/al.h>
 #define MINIMP3_IMPLEMENTATION
 #include "minimp3.h"
+#include <FLAC/stream_decoder.h>
+#include <FLAC/stream_encoder.h>
+#include <FLAC/format.h>
 
 namespace Sabora 
 {
@@ -183,6 +186,31 @@ namespace Sabora
         else
         {
             SB_CORE_WARN("minimp3 decoder test returned unexpected result");
+        }
+
+        // Test libFLAC - verify library is linked
+        // Initialize FLAC decoder (null callbacks for testing)
+        FLAC__StreamDecoder* flacDecoder = FLAC__stream_decoder_new();
+        if (flacDecoder != nullptr)
+        {
+            SB_CORE_INFO("libFLAC decoder initialized successfully");
+            FLAC__stream_decoder_delete(flacDecoder);
+        }
+        else
+        {
+            SB_CORE_WARN("libFLAC decoder initialization failed");
+        }
+
+        // Test FLAC encoder
+        FLAC__StreamEncoder* flacEncoder = FLAC__stream_encoder_new();
+        if (flacEncoder != nullptr)
+        {
+            SB_CORE_INFO("libFLAC encoder initialized successfully");
+            FLAC__stream_encoder_delete(flacEncoder);
+        }
+        else
+        {
+            SB_CORE_WARN("libFLAC encoder initialization failed");
         }
 
         SB_CORE_INFO("Application initialization complete.");

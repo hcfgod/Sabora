@@ -290,6 +290,15 @@ install_libvorbis() {
   bash "$SCRIPT_DIR/build_libvorbis_linux.sh"
 }
 
+# Build libFLAC (optional dependency on libogg for OGG FLAC)
+install_libflac() {
+  local vendor_dir="$1"
+  
+  echo "Building libFLAC..."
+  chmod +x "$SCRIPT_DIR/build_libflac_linux.sh" || true
+  bash "$SCRIPT_DIR/build_libflac_linux.sh"
+}
+
 # Install shaderc and SPIRV-Cross
 install_shaderc "$VENDOR_DIR"
 install_spirv_cross "$VENDOR_DIR"
@@ -300,6 +309,7 @@ install_openal_soft "$VENDOR_DIR"
 install_libsndfile "$VENDOR_DIR"
 install_libogg "$VENDOR_DIR"
 install_libvorbis "$VENDOR_DIR"
+install_libflac "$VENDOR_DIR"
 
 echo "Dependencies are ready under $VENDOR_DIR"
 

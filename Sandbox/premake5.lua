@@ -45,6 +45,7 @@ project "Sandbox"
         "../Engine/" .. Dependencies.Libogg.IncludePath,
         "../Engine/" .. Dependencies.Libvorbis.IncludePath,
         "../Engine/" .. Dependencies.Minimp3.IncludePath,
+        "../Engine/" .. Dependencies.Libflac.IncludePath,
     }
 
     -- Link against Engine
@@ -67,12 +68,14 @@ project "Sandbox"
         "../Engine/" .. Dependencies.Libsndfile.LibraryPath,
         "../Engine/" .. Dependencies.Libogg.LibraryPath,
         "../Engine/" .. Dependencies.Libvorbis.LibraryPath,
+        "../Engine/" .. Dependencies.Libflac.LibraryPath,
     }
 
     filter "system:windows"
         -- Windows system libraries needed by SDL3 and OpenAL Soft
         links { "setupapi", "winmm", "imm32", "version", "ole32", "oleaut32", "uuid", "avrt" }
         buildoptions { "/utf-8" }
+        defines { "FLAC__NO_DLL" }
 
     filter { "system:windows", "configurations:Debug" }
         links { 
@@ -89,6 +92,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.Libraries.windows.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.windows.Debug )
+        links ( Dependencies.Libflac.Libraries.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
@@ -106,6 +110,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.Libraries.windows.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.windows.Release )
+        links ( Dependencies.Libflac.Libraries.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -146,6 +151,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.Libraries.macosx.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Debug )
+        links ( Dependencies.Libflac.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -162,6 +168,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.Libraries.macosx.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Release )
+        links ( Dependencies.Libflac.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
@@ -187,6 +194,8 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.Libraries.linux.Debug )
         links ( Dependencies.Libogg.Libraries.linux.Debug )
         linkoptions { "-Wl,--end-group" }
+        -- libFLAC can optionally use libogg, but we link it separately
+        links ( Dependencies.Libflac.Libraries.linux.Debug )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -231,6 +240,8 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.Libraries.linux.Release )
         links ( Dependencies.Libogg.Libraries.linux.Release )
         linkoptions { "-Wl,--end-group" }
+        -- libFLAC can optionally use libogg, but we link it separately
+        links ( Dependencies.Libflac.Libraries.linux.Release )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies

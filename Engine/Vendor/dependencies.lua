@@ -424,4 +424,37 @@ Dependencies.Minimp3 = {
     IncludePath = "Vendor/minimp3"
 }
 
+-- libFLAC Configuration (static library for FLAC lossless audio codec)
+Dependencies.Libflac = {
+    -- Version string (update when pinning to specific version)
+    Version = "1.4.3",
+    HeaderOnly = false,
+    
+    -- Static runtime setting must match how libFLAC was built
+    StaticRuntime = true,
+    
+    -- Paths relative to Engine directory
+    LibraryPath = "Vendor/libflac/lib",
+    IncludePath = "Vendor/libflac/include",
+    
+    -- Library names per platform and configuration
+    -- Note: On Unix systems, specify library name without 'lib' prefix and '.a' extension
+    --       The linker will automatically add them (e.g., 'flac' becomes 'libflac.a')
+    -- Note: On Windows, specify the full library name including extension
+    Libraries = {
+        windows = {
+            Debug = "flac-debug.lib",
+            Release = "flac-release.lib"
+        },
+        macosx = {
+            Debug = "flac",
+            Release = "flac"
+        },
+        linux = {
+            Debug = "flac",
+            Release = "flac"
+        }
+    }
+}
+
 return Dependencies

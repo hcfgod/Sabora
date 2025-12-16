@@ -42,6 +42,7 @@ project "Tests"
         "../Engine/" .. Dependencies.Libogg.IncludePath,
         "../Engine/" .. Dependencies.Libvorbis.IncludePath,
         "../Engine/" .. Dependencies.Minimp3.IncludePath,
+        "../Engine/" .. Dependencies.Libflac.IncludePath,
     }
 
     -- Library directories for dependencies
@@ -54,6 +55,7 @@ project "Tests"
         "../Engine/" .. Dependencies.Libsndfile.LibraryPath,
         "../Engine/" .. Dependencies.Libogg.LibraryPath,
         "../Engine/" .. Dependencies.Libvorbis.LibraryPath,
+        "../Engine/" .. Dependencies.Libflac.LibraryPath,
     }
 
     -- Link against Engine library
@@ -65,7 +67,7 @@ project "Tests"
     filter "system:windows"
         links { "setupapi", "winmm", "imm32", "version", "ole32", "oleaut32", "uuid" }
         buildoptions { "/utf-8" }
-        defines { "_CRT_SECURE_NO_WARNINGS", "NOMINMAX", "AL_LIBTYPE_STATIC" }
+        defines { "_CRT_SECURE_NO_WARNINGS", "NOMINMAX", "AL_LIBTYPE_STATIC", "FLAC__NO_DLL" }
 
     filter { "system:windows", "configurations:Debug" }
         links { 
@@ -81,6 +83,7 @@ project "Tests"
         links ( Dependencies.Libvorbis.Libraries.windows.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.windows.Debug )
+        links ( Dependencies.Libflac.Libraries.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
@@ -97,6 +100,7 @@ project "Tests"
         links ( Dependencies.Libvorbis.Libraries.windows.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.windows.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.windows.Release )
+        links ( Dependencies.Libflac.Libraries.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -118,6 +122,7 @@ project "Tests"
         links ( Dependencies.Libvorbis.Libraries.macosx.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Debug )
+        links ( Dependencies.Libflac.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -133,6 +138,7 @@ project "Tests"
         links ( Dependencies.Libvorbis.Libraries.macosx.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.macosx.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Release )
+        links ( Dependencies.Libflac.Libraries.macosx.Release )
 
     filter "system:linux"
         defines { "AL_LIBTYPE_STATIC" }
@@ -163,6 +169,8 @@ project "Tests"
         links ( Dependencies.Libvorbis.Libraries.linux.Debug )
         links ( Dependencies.Libogg.Libraries.linux.Debug )
         linkoptions { "-Wl,--end-group" }
+        -- libFLAC can optionally use libogg, but we link it separately
+        links ( Dependencies.Libflac.Libraries.linux.Debug )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -209,6 +217,8 @@ project "Tests"
         links ( Dependencies.Libvorbis.Libraries.linux.Release )
         links ( Dependencies.Libogg.Libraries.linux.Release )
         linkoptions { "-Wl,--end-group" }
+        -- libFLAC can optionally use libogg, but we link it separately
+        links ( Dependencies.Libflac.Libraries.linux.Release )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
