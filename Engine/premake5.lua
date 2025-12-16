@@ -53,6 +53,7 @@ project "Engine"
         Dependencies.Minimp3.IncludePath,
         Dependencies.Libflac.IncludePath,
         Dependencies.Libopus.IncludePath,
+        Dependencies.Opusfile.IncludePath,
     }
 
     -- Flexible library directory path based on configuration
@@ -70,6 +71,7 @@ project "Engine"
         Dependencies.Libvorbis.LibraryPath,
         Dependencies.Libflac.LibraryPath,
         Dependencies.Libopus.LibraryPath,
+        Dependencies.Opusfile.LibraryPath,
         -- Add platform/configuration-specific paths here if needed
         -- Example: Dependencies.SDL3.LibraryPath .. "/%{cfg.platform}/%{cfg.buildcfg}"
     }
@@ -105,6 +107,7 @@ project "Engine"
                 links ( Dependencies.Libvorbis.LibrariesEnc.windows.Debug )
                 links ( Dependencies.Libflac.Libraries.windows.Debug )
                 links ( Dependencies.Libopus.Libraries.windows.Debug )
+                links ( Dependencies.Opusfile.Libraries.windows.Debug )
                 runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
@@ -124,6 +127,7 @@ project "Engine"
                 links ( Dependencies.Libvorbis.LibrariesEnc.windows.Release )
                 links ( Dependencies.Libflac.Libraries.windows.Release )
                 links ( Dependencies.Libopus.Libraries.windows.Release )
+                links ( Dependencies.Opusfile.Libraries.windows.Release )
                 runtime "Release"
 
     filter "system:macosx"
@@ -166,6 +170,7 @@ project "Engine"
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Debug )
         links ( Dependencies.Libflac.Libraries.macosx.Debug )
         links ( Dependencies.Libopus.Libraries.macosx.Debug )
+        links ( Dependencies.Opusfile.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -184,6 +189,7 @@ project "Engine"
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Release )
         links ( Dependencies.Libflac.Libraries.macosx.Release )
         links ( Dependencies.Libopus.Libraries.macosx.Release )
+        links ( Dependencies.Opusfile.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
@@ -213,6 +219,8 @@ project "Engine"
         links ( Dependencies.Libflac.Libraries.linux.Debug )
         -- libopus is standalone, link it separately
         links ( Dependencies.Libopus.Libraries.linux.Debug )
+        -- opusfile depends on libopus and libogg, link it after them
+        links ( Dependencies.Opusfile.Libraries.linux.Debug )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -261,6 +269,8 @@ project "Engine"
         links ( Dependencies.Libflac.Libraries.linux.Release )
         -- libopus is standalone, link it separately
         links ( Dependencies.Libopus.Libraries.linux.Release )
+        -- opusfile depends on libopus and libogg, link it after them
+        links ( Dependencies.Opusfile.Libraries.linux.Release )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies

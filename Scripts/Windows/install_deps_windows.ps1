@@ -187,6 +187,13 @@ function Install-Libopus($vendorDir) {
     & (Join-Path $PSScriptRoot "build_libopus_windows.ps1")
 }
 
+# Build opusfile (depends on libopus + libogg)
+function Install-Opusfile($vendorDir) {
+    $opusfileDir = Join-Path $vendorDir "opusfile"
+    Write-Host "Building opusfile..."
+    & (Join-Path $PSScriptRoot "build_opusfile_windows.ps1")
+}
+
 # Install shaderc and SPIRV-Cross
 Install-Shaderc $vendor
 Install-SPIRVCross $vendor
@@ -199,5 +206,6 @@ Install-Libogg $vendor
 Install-Libvorbis $vendor
 Install-Libflac $vendor
 Install-Libopus $vendor
+Install-Opusfile $vendor
 
 Write-Host "Dependencies are ready under $vendor"

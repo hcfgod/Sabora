@@ -47,6 +47,7 @@ project "Sandbox"
         "../Engine/" .. Dependencies.Minimp3.IncludePath,
         "../Engine/" .. Dependencies.Libflac.IncludePath,
         "../Engine/" .. Dependencies.Libopus.IncludePath,
+        "../Engine/" .. Dependencies.Opusfile.IncludePath,
     }
 
     -- Link against Engine
@@ -71,6 +72,7 @@ project "Sandbox"
         "../Engine/" .. Dependencies.Libvorbis.LibraryPath,
         "../Engine/" .. Dependencies.Libflac.LibraryPath,
         "../Engine/" .. Dependencies.Libopus.LibraryPath,
+        "../Engine/" .. Dependencies.Opusfile.LibraryPath,
     }
 
     filter "system:windows"
@@ -96,6 +98,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesEnc.windows.Debug )
         links ( Dependencies.Libflac.Libraries.windows.Debug )
         links ( Dependencies.Libopus.Libraries.windows.Debug )
+        links ( Dependencies.Opusfile.Libraries.windows.Debug )
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
@@ -115,6 +118,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesEnc.windows.Release )
         links ( Dependencies.Libflac.Libraries.windows.Release )
         links ( Dependencies.Libopus.Libraries.windows.Release )
+        links ( Dependencies.Opusfile.Libraries.windows.Release )
         runtime "Release"
 
     filter "system:macosx"
@@ -157,6 +161,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Debug )
         links ( Dependencies.Libflac.Libraries.macosx.Debug )
         links ( Dependencies.Libopus.Libraries.macosx.Debug )
+        links ( Dependencies.Opusfile.Libraries.macosx.Debug )
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -175,6 +180,7 @@ project "Sandbox"
         links ( Dependencies.Libvorbis.LibrariesEnc.macosx.Release )
         links ( Dependencies.Libflac.Libraries.macosx.Release )
         links ( Dependencies.Libopus.Libraries.macosx.Release )
+        links ( Dependencies.Opusfile.Libraries.macosx.Release )
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
@@ -204,6 +210,8 @@ project "Sandbox"
         links ( Dependencies.Libflac.Libraries.linux.Debug )
         -- libopus is standalone, link it separately
         links ( Dependencies.Libopus.Libraries.linux.Debug )
+        -- opusfile depends on libopus and libogg, link it after them
+        links ( Dependencies.Opusfile.Libraries.linux.Debug )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -252,6 +260,8 @@ project "Sandbox"
         links ( Dependencies.Libflac.Libraries.linux.Release )
         -- libopus is standalone, link it separately
         links ( Dependencies.Libopus.Libraries.linux.Release )
+        -- opusfile depends on libopus and libogg, link it after them
+        links ( Dependencies.Opusfile.Libraries.linux.Release )
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies

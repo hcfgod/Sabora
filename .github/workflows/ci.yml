@@ -110,7 +110,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, minimp3, and libopus libraries..."
+        Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, minimp3, libopus, and opusfile libraries..."
         
         # Check msdf-atlas-gen
         $msdfLibDir = "Engine\Vendor\msdf-atlas-gen\lib"
@@ -194,6 +194,17 @@ jobs:
             Write-Host "✓ libopus libraries found ($($libopusLibs.Count) files)"
           } else {
             Write-Host "⚠ libopus libraries not found"
+          }
+        }
+        
+        # Check opusfile
+        $opusfileLibDir = "Engine\Vendor\opusfile\lib"
+        if (Test-Path $opusfileLibDir) {
+          $opusfileLibs = Get-ChildItem -Path $opusfileLibDir -Filter "*.lib" -ErrorAction SilentlyContinue
+          if ($opusfileLibs.Count -gt 0) {
+            Write-Host "✓ opusfile libraries found ($($opusfileLibs.Count) files)"
+          } else {
+            Write-Host "⚠ opusfile libraries not found"
           }
         }
 
@@ -320,7 +331,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, minimp3, and libopus libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, minimp3, libopus, and opusfile libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -403,6 +414,17 @@ jobs:
             echo "✓ libopus libraries found ($LIBOPUS_COUNT files)"
           else
             echo "⚠ libopus libraries not found"
+          fi
+        fi
+        
+        # Check opusfile
+        OPUSFILE_LIB_DIR="Engine/Vendor/opusfile/lib"
+        if [ -d "$OPUSFILE_LIB_DIR" ]; then
+          OPUSFILE_COUNT=$(find "$OPUSFILE_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$OPUSFILE_COUNT" -gt 0 ]; then
+            echo "✓ opusfile libraries found ($OPUSFILE_COUNT files)"
+          else
+            echo "⚠ opusfile libraries not found"
           fi
         fi
 
@@ -510,7 +532,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, minimp3, and libopus libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, libFLAC, minimp3, libopus, and opusfile libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -593,6 +615,17 @@ jobs:
             echo "✓ libopus libraries found ($LIBOPUS_COUNT files)"
           else
             echo "⚠ libopus libraries not found"
+          fi
+        fi
+        
+        # Check opusfile
+        OPUSFILE_LIB_DIR="Engine/Vendor/opusfile/lib"
+        if [ -d "$OPUSFILE_LIB_DIR" ]; then
+          OPUSFILE_COUNT=$(find "$OPUSFILE_LIB_DIR" -name "*.a" | wc -l)
+          if [ "$OPUSFILE_COUNT" -gt 0 ]; then
+            echo "✓ opusfile libraries found ($OPUSFILE_COUNT files)"
+          else
+            echo "⚠ opusfile libraries not found"
           fi
         fi
 

@@ -490,4 +490,37 @@ Dependencies.Libopus = {
     }
 }
 
+-- opusfile Configuration (static library for reading Opus files, depends on libopus + libogg)
+Dependencies.Opusfile = {
+    -- Version string (update when pinning to specific version)
+    Version = "latest",
+    HeaderOnly = false,
+    
+    -- Static runtime setting must match how opusfile was built
+    StaticRuntime = true,
+    
+    -- Paths relative to Engine directory
+    LibraryPath = "Vendor/opusfile/lib",
+    IncludePath = "Vendor/opusfile/include",
+    
+    -- Library names per platform and configuration
+    -- Note: On Unix systems, specify library name without 'lib' prefix and '.a' extension
+    --       The linker will automatically add them (e.g., 'opusfile' becomes 'libopusfile.a')
+    -- Note: On Windows, specify the full library name including extension
+    Libraries = {
+        windows = {
+            Debug = "opusfile-debug.lib",
+            Release = "opusfile-release.lib"
+        },
+        macosx = {
+            Debug = "opusfile",
+            Release = "opusfile"
+        },
+        linux = {
+            Debug = "opusfile",
+            Release = "opusfile"
+        }
+    }
+}
+
 return Dependencies
