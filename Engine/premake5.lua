@@ -187,11 +187,14 @@ project "Engine"
         links ( Dependencies.Freetype.Libraries.linux.Debug )
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Debug )
-        -- libogg must be linked before libvorbis (dependency)
-        links ( Dependencies.Libogg.Libraries.linux.Debug )
+        -- Use --start-group/--end-group for libvorbis and libogg to handle circular dependencies
+        -- libvorbis depends on libogg, so on Unix linkers libogg must come after libvorbis
+        linkoptions { "-Wl,--start-group" }
         links ( Dependencies.Libvorbis.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.linux.Debug )
+        links ( Dependencies.Libogg.Libraries.linux.Debug )
+        linkoptions { "-Wl,--end-group" }
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -227,11 +230,14 @@ project "Engine"
         links ( Dependencies.Freetype.Libraries.linux.Release )
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Release )
-        -- libogg must be linked before libvorbis (dependency)
-        links ( Dependencies.Libogg.Libraries.linux.Release )
+        -- Use --start-group/--end-group for libvorbis and libogg to handle circular dependencies
+        -- libvorbis depends on libogg, so on Unix linkers libogg must come after libvorbis
+        linkoptions { "-Wl,--start-group" }
         links ( Dependencies.Libvorbis.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.linux.Release )
+        links ( Dependencies.Libogg.Libraries.linux.Release )
+        linkoptions { "-Wl,--end-group" }
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
