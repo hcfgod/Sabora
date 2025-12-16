@@ -387,5 +387,110 @@ TEST_SUITE("libsndfile")
         sf_close(file);
         std::filesystem::remove(testFilePath);
     }
+
+    TEST_CASE("Convert audio format")
+    {
+        // Create a test file
+        std::string testFilePath = "test_format_convert.wav";
+        std::filesystem::remove(testFilePath);
+        
+        SF_INFO sfinfo = {};
+        sfinfo.samplerate = 44100;
+        sfinfo.channels = 2;
+        sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+        
+        SNDFILE* file = sf_open(testFilePath.c_str(), SFM_WRITE, &sfinfo);
+        if (file == nullptr)
+        {
+            WARN("Could not create test WAV file for format conversion test");
+            return;
+        }
+        
+        // Write some data
+        std::vector<short> samples(1000, 0);
+        sf_write_short(file, samples.data(), 1000);
+        sf_close(file);
+        
+        // Read back with different format query
+        SF_INFO readInfo = {};
+        file = sf_open(testFilePath.c_str(), SFM_READ, &readInfo);
+        REQUIRE(file != nullptr);
+        
+        // Verify format information
+        CHECK(readInfo.samplerate == 44100);
+        CHECK(readInfo.channels == 2);
+        CHECK((readInfo.format & SF_FORMAT_WAV) == SF_FORMAT_WAV);
+        CHECK((readInfo.format & SF_FORMAT_PCM_16) == SF_FORMAT_PCM_16);
+        
+        sf_close(file);
+        std::filesystem::remove(testFilePath);
+    }
+
+    TEST_CASE("Get library capabilities")
+    {
+        // Query major format count
+        int majorCount = 0;
+        int result = sf_command(nullptr, SFC_GET_FORMAT_MAJOR_COUNT, &majorCount, sizeof(int));
+        CHECK(result == 0);
+        CHECK(majorCount > 0);
+        
+        // Query subtype count
+        int subtypeCount = 0;
+        result = sf_command(nullptr, SFC_GET_FORMAT_SUBTYPE_COUNT, &subtypeCount, sizeof(int));
+        CHECK(result == 0);
+        CHECK(subtypeCount > 0);
+        
+        // Query simple format count
+        int simpleCount = 0;
+        result = sf_command(nullptr, SFC_GET_SIMPLE_FORMAT_COUNT, &simpleCount, sizeof(int));
+        CHECK(result == 0);
+        CHECK(simpleCount > 0);
+    }
+
+    TEST_CASE("Read and write float samples")
+    {
+        std::string testFilePath = "test_float_samples.wav";
+        std::filesystem::remove(testFilePath);
+        
+        SF_INFO sfinfo = {};
+        sfinfo.samplerate = 44100;
+        sfinfo.channels = 1;
+        sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
+        
+        SNDFILE* file = sf_open(testFilePath.c_str(), SFM_WRITE, &sfinfo);
+        if (file == nullptr)
+        {
+            WARN("Could not create test WAV file for float sample test");
+            return;
+        }
+        
+        // Write float samples
+        std::vector<float> floatSamples(1000);
+        for (size_t i = 0; i < floatSamples.size(); ++i)
+        {
+            floatSamples[i] = 0.5f * sin(2.0f * 3.14159f * 440.0f * static_cast<float>(i) / 44100.0f);
+        }
+        
+        sf_count_t framesWritten = sf_write_float(file, floatSamples.data(), 1000);
+        CHECK(framesWritten == 1000);
+        sf_close(file);
+        
+        // Read back as float
+        file = sf_open(testFilePath.c_str(), SFM_READ, &sfinfo);
+        REQUIRE(file != nullptr);
+        
+        std::vector<float> readSamples(1000);
+        sf_count_t framesRead = sf_read_float(file, readSamples.data(), 1000);
+        CHECK(framesRead == 1000);
+        
+        // Verify some samples match (allowing for floating point precision)
+        for (size_t i = 0; i < 10; ++i)
+        {
+            CHECK(std::abs(readSamples[i] - floatSamples[i]) < 0.001f);
+        }
+        
+        sf_close(file);
+        std::filesystem::remove(testFilePath);
+    }
 }
 

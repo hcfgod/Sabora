@@ -228,5 +228,88 @@ TEST_SUITE("libvorbisenc")
             vorbis_info_clear(&vi);
         }
     }
+
+    TEST_CASE("Encode Vorbis audio data")
+    {
+        vorbis_info vi;
+        vorbis_info_init(&vi);
+        
+        // Set up encoding
+        int result = vorbis_encode_init_vbr(&vi, 2, 44100, 0.5f);
+        if (result == 0)
+        {
+            vorbis_dsp_state vd;
+            result = vorbis_analysis_init(&vd, &vi);
+            
+            if (result == 0)
+            {
+                vorbis_block vb;
+                result = vorbis_block_init(&vd, &vb);
+                
+                if (result == 0)
+                {
+                    // Prepare some test audio data (stereo, 1024 samples)
+                    const int samples = 1024;
+                    float** buffer = vorbis_analysis_buffer(&vd, samples);
+                    
+                    if (buffer != nullptr)
+                    {
+                        // Generate simple test tone
+                        for (int i = 0; i < samples; ++i)
+                        {
+                            float sample = 0.1f * sin(2.0f * 3.14159f * 440.0f * i / 44100.0f);
+                            buffer[0][i] = sample; // Left channel
+                            buffer[1][i] = sample; // Right channel
+                        }
+                        
+                        // Tell vorbis how many samples we wrote
+                        vorbis_analysis_wrote(&vd, samples);
+                        
+                        // Try to analyze and encode
+                        while (vorbis_analysis_blockout(&vd, &vb) == 1)
+                        {
+                            vorbis_analysis(&vb, nullptr);
+                            vorbis_bitrate_addblock(&vb);
+                            
+                            ogg_packet op;
+                            while (vorbis_bitrate_flushpacket(&vd, &op))
+                            {
+                                CHECK(op.packet != nullptr);
+                                CHECK(op.bytes > 0);
+                            }
+                        }
+                        
+                        vorbis_block_clear(&vb);
+                    }
+                    
+                    vorbis_dsp_clear(&vd);
+                }
+            }
+        }
+        
+        vorbis_info_clear(&vi);
+    }
+
+    TEST_CASE("Vorbis comment manipulation")
+    {
+        vorbis_comment vc;
+        vorbis_comment_init(&vc);
+        
+        // Add multiple comments
+        vorbis_comment_add_tag(&vc, "ARTIST", "Test Artist");
+        vorbis_comment_add_tag(&vc, "TITLE", "Test Title");
+        vorbis_comment_add_tag(&vc, "ALBUM", "Test Album");
+        vorbis_comment_add_tag(&vc, "GENRE", "Test Genre");
+        
+        CHECK(vc.comments == 4);
+        
+        // Verify we can query comments
+        if (vc.comments > 0 && vc.user_comments != nullptr)
+        {
+            CHECK(vc.user_comments[0] != nullptr);
+        }
+        
+        vorbis_comment_clear(&vc);
+    }
 }
 

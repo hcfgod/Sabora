@@ -246,5 +246,166 @@ TEST_SUITE("OpenAL Soft")
         alcDestroyContext(context);
         alcCloseDevice(device);
     }
+
+    TEST_CASE("Create and configure audio buffer")
+    {
+        ALCdevice* device = alcOpenDevice(nullptr);
+        
+        if (device == nullptr)
+        {
+            WARN("OpenAL Soft: No audio device available for testing");
+            return;
+        }
+        
+        ALCcontext* context = alcCreateContext(device, nullptr);
+        REQUIRE(context != nullptr);
+        
+        ALCboolean madeCurrent = alcMakeContextCurrent(context);
+        REQUIRE(madeCurrent == ALC_TRUE);
+        
+        // Create a buffer
+        ALuint buffer;
+        alGenBuffers(1, &buffer);
+        
+        ALenum error = alGetError();
+        CHECK(error == AL_NO_ERROR);
+        CHECK(buffer != 0);
+        
+        // Configure buffer with test data
+        const int sampleRate = 44100;
+        const int duration = 1; // 1 second
+        const int numSamples = sampleRate * duration;
+        std::vector<short> samples(numSamples);
+        
+        // Generate a simple sine wave
+        for (int i = 0; i < numSamples; ++i)
+        {
+            samples[i] = static_cast<short>(32767.0 * 0.3 * sin(2.0 * 3.14159 * 440.0 * i / sampleRate));
+        }
+        
+        alBufferData(buffer, AL_FORMAT_MONO16, samples.data(), 
+                    static_cast<ALsizei>(samples.size() * sizeof(short)), sampleRate);
+        
+        error = alGetError();
+        CHECK(error == AL_NO_ERROR);
+        
+        // Query buffer information
+        ALint size, channels, bits, frequency;
+        alGetBufferi(buffer, AL_SIZE, &size);
+        alGetBufferi(buffer, AL_CHANNELS, &channels);
+        alGetBufferi(buffer, AL_BITS, &bits);
+        alGetBufferi(buffer, AL_FREQUENCY, &frequency);
+        
+        CHECK(size > 0);
+        CHECK(channels == 1); // MONO16 format
+        CHECK(bits == 16);
+        CHECK(frequency == sampleRate);
+        
+        // Clean up
+        alDeleteBuffers(1, &buffer);
+        alcMakeContextCurrent(nullptr);
+        alcDestroyContext(context);
+        alcCloseDevice(device);
+    }
+
+    TEST_CASE("Create and configure audio source")
+    {
+        ALCdevice* device = alcOpenDevice(nullptr);
+        
+        if (device == nullptr)
+        {
+            WARN("OpenAL Soft: No audio device available for testing");
+            return;
+        }
+        
+        ALCcontext* context = alcCreateContext(device, nullptr);
+        REQUIRE(context != nullptr);
+        
+        ALCboolean madeCurrent = alcMakeContextCurrent(context);
+        REQUIRE(madeCurrent == ALC_TRUE);
+        
+        // Create a source
+        ALuint source;
+        alGenSources(1, &source);
+        
+        ALenum error = alGetError();
+        CHECK(error == AL_NO_ERROR);
+        CHECK(source != 0);
+        
+        // Configure source properties
+        alSourcef(source, AL_PITCH, 1.0f);
+        alSourcef(source, AL_GAIN, 0.5f);
+        alSource3f(source, AL_POSITION, 0.0f, 0.0f, 0.0f);
+        alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+        alSourcei(source, AL_LOOPING, AL_FALSE);
+        
+        error = alGetError();
+        CHECK(error == AL_NO_ERROR);
+        
+        // Query source properties
+        ALfloat pitch, gain;
+        ALint looping;
+        alGetSourcef(source, AL_PITCH, &pitch);
+        alGetSourcef(source, AL_GAIN, &gain);
+        alGetSourcei(source, AL_LOOPING, &looping);
+        
+        CHECK(pitch == 1.0f);
+        CHECK(gain == 0.5f);
+        CHECK(looping == AL_FALSE);
+        
+        // Clean up
+        alDeleteSources(1, &source);
+        alcMakeContextCurrent(nullptr);
+        alcDestroyContext(context);
+        alcCloseDevice(device);
+    }
+
+    TEST_CASE("Source and buffer binding")
+    {
+        ALCdevice* device = alcOpenDevice(nullptr);
+        
+        if (device == nullptr)
+        {
+            WARN("OpenAL Soft: No audio device available for testing");
+            return;
+        }
+        
+        ALCcontext* context = alcCreateContext(device, nullptr);
+        REQUIRE(context != nullptr);
+        
+        ALCboolean madeCurrent = alcMakeContextCurrent(context);
+        REQUIRE(madeCurrent == ALC_TRUE);
+        
+        // Create buffer and source
+        ALuint buffer, source;
+        alGenBuffers(1, &buffer);
+        alGenSources(1, &source);
+        
+        ALenum error = alGetError();
+        CHECK(error == AL_NO_ERROR);
+        
+        // Create minimal test data
+        std::vector<short> samples(100, 0);
+        alBufferData(buffer, AL_FORMAT_MONO16, samples.data(), 
+                    static_cast<ALsizei>(samples.size() * sizeof(short)), 44100);
+        
+        // Bind buffer to source
+        alSourcei(source, AL_BUFFER, static_cast<ALint>(buffer));
+        
+        error = alGetError();
+        CHECK(error == AL_NO_ERROR);
+        
+        // Verify binding
+        ALint boundBuffer;
+        alGetSourcei(source, AL_BUFFER, &boundBuffer);
+        CHECK(boundBuffer == static_cast<ALint>(buffer));
+        
+        // Clean up
+        alDeleteSources(1, &source);
+        alDeleteBuffers(1, &buffer);
+        alcMakeContextCurrent(nullptr);
+        alcDestroyContext(context);
+        alcCloseDevice(device);
+    }
 }
 

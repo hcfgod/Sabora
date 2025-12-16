@@ -2,16 +2,14 @@
 #include "Log.h"
 #include <SDL3/SDL.h>
 
-// Test libsndfile library
+// Audio library includes for verification
 #include <sndfile.h>
-
-// Test libogg library
 #include <ogg/ogg.h>
-
-// Test libvorbis library
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 #include <vorbis/vorbisenc.h>
+#include <AL/alc.h>
+#include <AL/al.h>
 
 namespace Sabora 
 {
@@ -103,6 +101,65 @@ namespace Sabora
         }
 
         m_SDLContext = std::move(sdlResult).Value();
+
+        // Verify audio libraries are properly linked and functional
+        SB_CORE_INFO("Verifying audio library integration...");
+
+        // Test libsndfile - get library version
+        const char* sndfileVersion = sf_version_string();
+        if (sndfileVersion != nullptr)
+        {
+            SB_CORE_INFO("libsndfile version: {}", sndfileVersion);
+        }
+        else
+        {
+            SB_CORE_WARN("Could not retrieve libsndfile version");
+        }
+
+        // Test libogg - verify library is linked
+        ogg_stream_state testStream;
+        int oggResult = ogg_stream_init(&testStream, 1);
+        if (oggResult == 0)
+        {
+            SB_CORE_INFO("libogg initialized successfully (serialno: {})", testStream.serialno);
+            ogg_stream_clear(&testStream);
+        }
+        else
+        {
+            SB_CORE_WARN("libogg stream initialization failed");
+        }
+
+        // Test libvorbis - verify library is linked
+        vorbis_info vorbisInfo;
+        vorbis_info_init(&vorbisInfo);
+        SB_CORE_INFO("libvorbis initialized successfully");
+        vorbis_info_clear(&vorbisInfo);
+
+        // Test OpenAL Soft - verify library is linked
+        ALCdevice* alDevice = alcOpenDevice(nullptr);
+        if (alDevice != nullptr)
+        {
+            ALCcontext* alContext = alcCreateContext(alDevice, nullptr);
+            if (alContext != nullptr)
+            {
+                if (alcMakeContextCurrent(alContext) == ALC_TRUE)
+                {
+                    const char* alVersion = alGetString(AL_VERSION);
+                    const char* alRenderer = alGetString(AL_RENDERER);
+                    if (alVersion != nullptr && alRenderer != nullptr)
+                    {
+                        SB_CORE_INFO("OpenAL Soft initialized - Version: {}, Renderer: {}", alVersion, alRenderer);
+                    }
+                    alcMakeContextCurrent(nullptr);
+                }
+                alcDestroyContext(alContext);
+            }
+            alcCloseDevice(alDevice);
+        }
+        else
+        {
+            SB_CORE_WARN("OpenAL Soft: No audio device available (this is acceptable in headless environments)");
+        }
 
         SB_CORE_INFO("Application initialization complete.");
         return Result<void>::Success();
