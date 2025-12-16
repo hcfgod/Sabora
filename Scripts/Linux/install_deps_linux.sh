@@ -222,6 +222,7 @@ clone_or_update "https://github.com/gabime/spdlog.git"    "$VENDOR_DIR/spdlog"
 clone_or_update "https://github.com/doctest/doctest.git"   "$VENDOR_DIR/doctest"
 clone_or_update "https://github.com/g-truc/glm.git"        "$VENDOR_DIR/glm"
 clone_or_update "https://github.com/nlohmann/json.git"     "$VENDOR_DIR/json"
+clone_or_update "https://github.com/lieff/minimp3.git"     "$VENDOR_DIR/minimp3"
 
 # Install SDL3 with custom premake5.lua
 install_sdl3 "$VENDOR_DIR"

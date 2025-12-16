@@ -413,4 +413,15 @@ Dependencies.Libvorbis = {
     }
 }
 
+-- minimp3 Configuration (header-only library for MP3 decoding)
+Dependencies.Minimp3 = {
+    -- Version string (update when pinning to specific version)
+    Version = "latest",
+    HeaderOnly = true,
+    
+    -- Path relative to Engine directory
+    -- minimp3 is a single-file header library
+    IncludePath = "Vendor/minimp3"
+}
+
 return Dependencies

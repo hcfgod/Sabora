@@ -103,6 +103,7 @@ Clone-Or-Update "https://github.com/gabime/spdlog.git"    (Join-Path $vendor "sp
 Clone-Or-Update "https://github.com/doctest/doctest.git"   (Join-Path $vendor "doctest")
 Clone-Or-Update "https://github.com/g-truc/glm.git"        (Join-Path $vendor "glm")
 Clone-Or-Update "https://github.com/nlohmann/json.git"     (Join-Path $vendor "json")
+Clone-Or-Update "https://github.com/lieff/minimp3.git"     (Join-Path $vendor "minimp3")
 
 # Install SDL3 with custom premake5.lua
 Install-SDL3 $vendor

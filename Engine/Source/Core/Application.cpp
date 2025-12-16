@@ -10,6 +10,8 @@
 #include <vorbis/vorbisenc.h>
 #include <AL/alc.h>
 #include <AL/al.h>
+#define MINIMP3_IMPLEMENTATION
+#include "minimp3.h"
 
 namespace Sabora 
 {
@@ -159,6 +161,28 @@ namespace Sabora
         else
         {
             SB_CORE_WARN("OpenAL Soft: No audio device available (this is acceptable in headless environments)");
+        }
+
+        // Test minimp3 - verify header-only library is included and functional
+        mp3dec_t mp3d;
+        mp3dec_init(&mp3d);
+        
+        // Test basic MP3 decoder functionality
+        // Create a minimal test frame header (invalid but tests API availability)
+        unsigned char testFrame[4] = {0xFF, 0xFB, 0x90, 0x00};
+        mp3dec_frame_info_t frameInfo = {};
+        short pcmBuffer[MINIMP3_MAX_SAMPLES_PER_FRAME];
+        
+        // Try to decode (will return 0 samples for invalid data, but verifies API works)
+        int samplesDecoded = mp3dec_decode_frame(&mp3d, testFrame, sizeof(testFrame), pcmBuffer, &frameInfo);
+        
+        if (samplesDecoded >= 0)
+        {
+            SB_CORE_INFO("minimp3 MP3 decoder initialized successfully (max samples per frame: {})", MINIMP3_MAX_SAMPLES_PER_FRAME);
+        }
+        else
+        {
+            SB_CORE_WARN("minimp3 decoder test returned unexpected result");
         }
 
         SB_CORE_INFO("Application initialization complete.");

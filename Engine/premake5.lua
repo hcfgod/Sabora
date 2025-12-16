@@ -50,6 +50,7 @@ project "Engine"
         Dependencies.Libsndfile.IncludePath,
         Dependencies.Libogg.IncludePath,
         Dependencies.Libvorbis.IncludePath,
+        Dependencies.Minimp3.IncludePath,
     }
 
     -- Flexible library directory path based on configuration

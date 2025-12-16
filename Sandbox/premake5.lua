@@ -44,6 +44,7 @@ project "Sandbox"
         "../Engine/" .. Dependencies.Libsndfile.IncludePath,
         "../Engine/" .. Dependencies.Libogg.IncludePath,
         "../Engine/" .. Dependencies.Libvorbis.IncludePath,
+        "../Engine/" .. Dependencies.Minimp3.IncludePath,
     }
 
     -- Link against Engine

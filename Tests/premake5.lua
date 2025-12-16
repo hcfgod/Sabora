@@ -41,6 +41,7 @@ project "Tests"
         "../Engine/" .. Dependencies.Libsndfile.IncludePath,
         "../Engine/" .. Dependencies.Libogg.IncludePath,
         "../Engine/" .. Dependencies.Libvorbis.IncludePath,
+        "../Engine/" .. Dependencies.Minimp3.IncludePath,
     }
 
     -- Library directories for dependencies

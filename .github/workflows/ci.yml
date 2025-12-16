@@ -110,7 +110,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, and libvorbis libraries..."
+        Write-Host "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, and minimp3 libraries..."
         
         # Check msdf-atlas-gen
         $msdfLibDir = "Engine\Vendor\msdf-atlas-gen\lib"
@@ -166,6 +166,14 @@ jobs:
             Write-Host "⚠ libvorbis libraries not found"
           }
         }
+        
+        # Check minimp3 (header-only library)
+        $minimp3Header = "Engine\Vendor\minimp3\minimp3.h"
+        if (Test-Path $minimp3Header) {
+          Write-Host "✓ minimp3 header found"
+        } else {
+          Write-Host "⚠ minimp3 header not found"
+        }
 
     - name: Build Tests
       run: |
@@ -197,7 +205,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        # Install vendor dependencies (spdlog, doctest, glm, json, SDL3)
+        # Install vendor dependencies (spdlog, doctest, glm, json, minimp3, SDL3)
         if [ -f "Scripts/Linux/install_deps_linux.sh" ]; then
           chmod +x Scripts/Linux/install_deps_linux.sh
           bash Scripts/Linux/install_deps_linux.sh
@@ -209,6 +217,7 @@ jobs:
           git clone --depth 1 https://github.com/doctest/doctest.git "$VENDOR_DIR/doctest"
           git clone --depth 1 https://github.com/g-truc/glm.git "$VENDOR_DIR/glm"
           git clone --depth 1 https://github.com/nlohmann/json.git "$VENDOR_DIR/json"
+          git clone --depth 1 https://github.com/lieff/minimp3.git "$VENDOR_DIR/minimp3"
           # Note: SDL3 will be built in the next step
         fi
 
@@ -289,7 +298,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, and libvorbis libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, and minimp3 libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -346,6 +355,12 @@ jobs:
           fi
         fi
         
+        # Check minimp3 (header-only library)
+        if [ -f "Engine/Vendor/minimp3/minimp3.h" ]; then
+          echo "✓ minimp3 header found"
+        else
+          echo "⚠ minimp3 header not found"
+        fi
 
     - name: Generate project files
       run: Tools/Premake/premake5 gmake2
@@ -385,7 +400,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        # Install vendor dependencies (spdlog, doctest, glm, json, SDL3)
+        # Install vendor dependencies (spdlog, doctest, glm, json, minimp3, SDL3)
         if [ -f "Scripts/macOS/install_deps_macos.sh" ]; then
           chmod +x Scripts/macOS/install_deps_macos.sh
           bash Scripts/macOS/install_deps_macos.sh
@@ -397,6 +412,7 @@ jobs:
           git clone --depth 1 https://github.com/doctest/doctest.git "$VENDOR_DIR/doctest"
           git clone --depth 1 https://github.com/g-truc/glm.git "$VENDOR_DIR/glm"
           git clone --depth 1 https://github.com/nlohmann/json.git "$VENDOR_DIR/json"
+          git clone --depth 1 https://github.com/lieff/minimp3.git "$VENDOR_DIR/minimp3"
           # Note: SDL3 will be built in the next step
         fi
 
@@ -450,7 +466,7 @@ jobs:
 
     - name: Verify New Libraries Build
       run: |
-        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, and libvorbis libraries..."
+        echo "Checking for msdf-atlas-gen, OpenAL Soft, libsndfile, libogg, libvorbis, and minimp3 libraries..."
         
         # Check msdf-atlas-gen
         MSDF_LIB_DIR="Engine/Vendor/msdf-atlas-gen/lib"
@@ -507,6 +523,12 @@ jobs:
           fi
         fi
         
+        # Check minimp3 (header-only library)
+        if [ -f "Engine/Vendor/minimp3/minimp3.h" ]; then
+          echo "✓ minimp3 header found"
+        else
+          echo "⚠ minimp3 header not found"
+        fi
 
     - name: Generate project files
       run: Tools/Premake/premake5 gmake2
