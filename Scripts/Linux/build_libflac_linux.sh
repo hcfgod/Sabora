@@ -166,7 +166,12 @@ FLAC_DEBUG_LIB=$(find "$BUILD_DIR_DEBUG" -name "libFLAC.a" -o -name "libFLACd.a"
 
 if [[ -n "$FLAC_DEBUG_LIB" && -f "$FLAC_DEBUG_LIB" ]]; then
     cp "$FLAC_DEBUG_LIB" "$LIB_DIR/flac-debug.a"
+    # Create symlink with expected name for linker (points to debug version)
+    # This allows the linker to find libflac.a when using -lflac
+    rm -f "$LIB_DIR/libflac.a"
+    ln -sf "flac-debug.a" "$LIB_DIR/libflac.a"
     echo "Copied libFLAC (Debug) to $LIB_DIR/flac-debug.a" >&2
+    echo "Created symlink: libflac.a -> flac-debug.a" >&2
 else
     echo "Error: libFLAC Debug library not found!" >&2
     exit 1
@@ -182,6 +187,21 @@ else
     echo "Error: libFLAC Release library not found!" >&2
     exit 1
 fi
+
+# Verify symlink exists and is correct
+if [[ ! -L "$LIB_DIR/libflac.a" ]] || [[ ! -f "$LIB_DIR/libflac.a" ]]; then
+    echo "Error: libflac.a symlink is missing or broken!" >&2
+    exit 1
+fi
+
+# Verify symlink points to the debug version
+SYMLINK_TARGET=$(readlink -f "$LIB_DIR/libflac.a")
+if [[ "$SYMLINK_TARGET" != "$(cd "$LIB_DIR" && pwd)/flac-debug.a" ]]; then
+    echo "Error: libflac.a symlink points to wrong target!" >&2
+    exit 1
+fi
+
+echo "Verified libflac symlink is correct (points to flac-debug.a)" >&2
 
 # Copy headers
 HEADER_SOURCE_DIR="$LIBFLAC_DIR/include"
