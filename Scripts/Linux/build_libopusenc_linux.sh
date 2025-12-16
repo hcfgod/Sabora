@@ -114,6 +114,25 @@ OPUS_RELEASE_LIB="$LIBOPUS_LIB_DIR/opus-release.a"
 
 LIBOPUS_INCLUDE_DIR="$LIBOPUS_DIR/include"
 
+# Ensure pkg-config metadata for libopus exists (configure uses pkg-config)
+PKGCONFIG_DIR="$LIBOPUS_LIB_DIR/pkgconfig"
+mkdir -p "$PKGCONFIG_DIR"
+OPUS_PC_FILE="$PKGCONFIG_DIR/opus.pc"
+if [[ ! -f "$OPUS_PC_FILE" ]]; then
+    cat > "$OPUS_PC_FILE" <<EOF
+prefix=$LIBOPUS_DIR
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: Opus
+Description: Opus audio codec library
+Version: 1.5.2
+Libs: -L\${libdir} -lopus
+Cflags: -I\${includedir}
+EOF
+fi
+
 # Get number of cores for parallel builds
 NUM_CORES=$(nproc 2>/dev/null || echo 4)
 
