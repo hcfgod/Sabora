@@ -187,12 +187,13 @@ project "Engine"
         links ( Dependencies.Freetype.Libraries.linux.Debug )
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Debug )
-        -- Use --start-group/--end-group for libvorbis and libogg to handle circular dependencies
-        -- libvorbis depends on libogg, so on Unix linkers libogg must come after libvorbis
+        -- Use --start-group/--end-group for libvorbis libraries and libogg to handle dependencies
+        -- Order: libvorbisfile/libvorbisenc depend on libvorbis, which depends on libogg
+        -- On Unix linkers, dependencies must come after the libraries that need them
         linkoptions { "-Wl,--start-group" }
-        links ( Dependencies.Libvorbis.Libraries.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Debug )
         links ( Dependencies.Libvorbis.LibrariesEnc.linux.Debug )
+        links ( Dependencies.Libvorbis.Libraries.linux.Debug )
         links ( Dependencies.Libogg.Libraries.linux.Debug )
         linkoptions { "-Wl,--end-group" }
         -- Switch back to dynamic linking for system libraries
@@ -230,12 +231,13 @@ project "Engine"
         links ( Dependencies.Freetype.Libraries.linux.Release )
         -- Explicitly link libsndfile static library to avoid system library
         links ( Dependencies.Libsndfile.Libraries.linux.Release )
-        -- Use --start-group/--end-group for libvorbis and libogg to handle circular dependencies
-        -- libvorbis depends on libogg, so on Unix linkers libogg must come after libvorbis
+        -- Use --start-group/--end-group for libvorbis libraries and libogg to handle dependencies
+        -- Order: libvorbisfile/libvorbisenc depend on libvorbis, which depends on libogg
+        -- On Unix linkers, dependencies must come after the libraries that need them
         linkoptions { "-Wl,--start-group" }
-        links ( Dependencies.Libvorbis.Libraries.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesFile.linux.Release )
         links ( Dependencies.Libvorbis.LibrariesEnc.linux.Release )
+        links ( Dependencies.Libvorbis.Libraries.linux.Release )
         links ( Dependencies.Libogg.Libraries.linux.Release )
         linkoptions { "-Wl,--end-group" }
         -- Switch back to dynamic linking for system libraries
