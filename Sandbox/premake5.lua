@@ -75,6 +75,8 @@ project "Sandbox"
         "../Engine/" .. Dependencies.Libopus.LibraryPath,
         "../Engine/" .. Dependencies.Libopusenc.LibraryPath,
         "../Engine/" .. Dependencies.Opusfile.LibraryPath,
+        "../Engine/" .. Dependencies.Jolt.LibraryPath,
+        "../Engine/" .. Dependencies.Box2D.LibraryPath,
     }
 
     filter "system:windows"
@@ -190,7 +192,11 @@ project "Sandbox"
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
-        linkoptions { "-Wl,-Bstatic" }
+        -- Add -L flags BEFORE -Wl,-Bstatic to ensure our library directories are searched first
+        linkoptions {
+            "-L../Engine/" .. Dependencies.Jolt.LibraryPath,
+            "-Wl,-Bstatic"
+        }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
         links { 
@@ -219,6 +225,9 @@ project "Sandbox"
         links ( Dependencies.Libopus.Libraries.linux.Debug )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Debug )
+        -- Link Jolt Physics static library
+        links { Dependencies.Jolt.Libraries.linux.Debug }
+        -- Box2D built from source inside Engine on non-Windows
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -241,7 +250,11 @@ project "Sandbox"
 
     filter { "system:linux", "configurations:Release" }
         -- Prefer static libraries over shared libraries for our dependencies
-        linkoptions { "-Wl,-Bstatic" }
+        -- Add -L flags BEFORE -Wl,-Bstatic to ensure our library directories are searched first
+        linkoptions {
+            "-L../Engine/" .. Dependencies.Jolt.LibraryPath,
+            "-Wl,-Bstatic"
+        }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
         links { 
@@ -270,6 +283,9 @@ project "Sandbox"
         links ( Dependencies.Libopus.Libraries.linux.Release )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Release )
+        -- Link Jolt Physics static library
+        links { Dependencies.Jolt.Libraries.linux.Release }
+        -- Box2D built from source inside Engine on non-Windows
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies

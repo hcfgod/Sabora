@@ -66,6 +66,8 @@ project "Tests"
         "../Engine/" .. Dependencies.Libopus.LibraryPath,
         "../Engine/" .. Dependencies.Libopusenc.LibraryPath,
         "../Engine/" .. Dependencies.Opusfile.LibraryPath,
+        "../Engine/" .. Dependencies.Jolt.LibraryPath,
+        "../Engine/" .. Dependencies.Box2D.LibraryPath,
     }
 
     -- Link against Engine library
