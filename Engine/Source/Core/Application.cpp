@@ -18,8 +18,7 @@
 #include <opus/opus.h>
 #include <opus/opusfile.h>
 #include <opus/opusenc.h>
-
-
+#include <imgui.h>
 #include <stb_image.h>
 
 #include <vector>
@@ -335,6 +334,19 @@ namespace Sabora
         {
             SB_CORE_WARN("libopusenc comments initialization failed");
         }
+
+        // Test ImGui (docking branch) - create context and log version
+        ImGui::CreateContext();
+        const char* imguiVersion = ImGui::GetVersion();
+        if (imguiVersion != nullptr)
+        {
+            SB_CORE_INFO("ImGui (docking) initialized - Version: {}", imguiVersion);
+        }
+        else
+        {
+            SB_CORE_WARN("ImGui version string unavailable");
+        }
+        ImGui::DestroyContext();
 
         // Test stb_image - verify header-only image loader is functional
         int imageWidth = 0;

@@ -114,6 +114,18 @@ function Write-StbImageTranslationUnit($rootDir) {
     $content | Set-Content -Encoding UTF8 -Path $tuPath
 }
 
+function Install-ImGuiDocking($vendorDir) {
+    $imguiDir = Join-Path $vendorDir "ImGui"
+
+    if (Test-Path $imguiDir) {
+        Write-Host "Removing existing ImGui directory..." -ForegroundColor Yellow
+        Remove-Item -Recurse -Force $imguiDir
+    }
+
+    Write-Host "Cloning ImGui (docking branch)..." -ForegroundColor Green
+    git clone --branch docking --depth 1 "https://github.com/ocornut/imgui.git" $imguiDir
+}
+
 function Install-SDL3($vendorDir) {
     $sdlDir = Join-Path $vendorDir "SDL"
     
@@ -138,6 +150,7 @@ Clone-Or-Update "https://github.com/g-truc/glm.git"        (Join-Path $vendor "g
 Clone-Or-Update "https://github.com/nlohmann/json.git"     (Join-Path $vendor "json")
 Clone-Or-Update "https://github.com/lieff/minimp3.git"     (Join-Path $vendor "minimp3")
 Install-StbImage $vendor
+Install-ImGuiDocking $vendor
 Write-StbImageTranslationUnit $root
 
 # Install SDL3 with custom premake5.lua

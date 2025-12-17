@@ -43,6 +43,7 @@ project "Tests"
         "../Engine/" .. Dependencies.Libvorbis.IncludePath,
         "../Engine/" .. Dependencies.Minimp3.IncludePath,
         "../Engine/" .. Dependencies.StbImage.IncludePath,
+        "../Engine/" .. Dependencies.ImGui.IncludePath,
         "../Engine/" .. Dependencies.Libflac.IncludePath,
         "../Engine/" .. Dependencies.Libopus.IncludePath,
         "../Engine/" .. Dependencies.Libopusenc.IncludePath,

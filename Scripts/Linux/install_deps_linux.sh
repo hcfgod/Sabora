@@ -208,6 +208,15 @@ install_stb_image() {
   curl -L "https://raw.githubusercontent.com/nothings/stb/master/LICENSE" -o "$stb_dir/LICENSE"
 }
 
+install_imgui_docking() {
+  local vendor_dir="$1"
+  local imgui_dir="$vendor_dir/ImGui"
+
+  rm -rf "$imgui_dir"
+  echo "Cloning ImGui (docking branch)..." >&2
+  git clone --branch docking --depth 1 "https://github.com/ocornut/imgui.git" "$imgui_dir"
+}
+
 write_stb_image_translation_unit() {
   local root_dir="$1"
   local stb_dir="$root_dir/Engine/Vendor/stb"
@@ -250,6 +259,7 @@ clone_or_update "https://github.com/g-truc/glm.git"        "$VENDOR_DIR/glm"
 clone_or_update "https://github.com/nlohmann/json.git"     "$VENDOR_DIR/json"
 clone_or_update "https://github.com/lieff/minimp3.git"     "$VENDOR_DIR/minimp3"
 install_stb_image "$VENDOR_DIR"
+install_imgui_docking "$VENDOR_DIR"
 write_stb_image_translation_unit "$ROOT_DIR"
 
 # Install SDL3 with custom premake5.lua

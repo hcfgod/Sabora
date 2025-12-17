@@ -434,6 +434,13 @@ Dependencies.StbImage = {
     IncludePath = "Vendor/stb"
 }
 
+-- Dear ImGui Configuration (docking branch, immediate-mode GUI)
+Dependencies.ImGui = {
+    Version = "docking",
+    HeaderOnly = false,
+    IncludePath = "Vendor/ImGui"
+}
+
 -- libFLAC Configuration (static library for FLAC lossless audio codec)
 Dependencies.Libflac = {
     -- Version string (update when pinning to specific version)
