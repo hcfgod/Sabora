@@ -81,6 +81,39 @@ function Clone-Or-Update($url, $targetDir) {
     }
 }
 
+function Install-StbImage($vendorDir) {
+    $stbDir = Join-Path $vendorDir "stb"
+    if (-not (Test-Path $stbDir)) {
+        New-Item -ItemType Directory -Force -Path $stbDir | Out-Null
+    }
+
+    $stbHeader = Join-Path $stbDir "stb_image.h"
+    $stbLicense = Join-Path $stbDir "LICENSE"
+    Write-Host "Fetching stb_image (header-only)..." -ForegroundColor Green
+
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nothings/stb/master/stb_image.h" -OutFile $stbHeader
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nothings/stb/master/LICENSE" -OutFile $stbLicense
+}
+
+function Write-StbImageTranslationUnit($rootDir) {
+    $stbDir = Join-Path $rootDir "Engine\Vendor\stb"
+    if (-not (Test-Path $stbDir)) {
+        New-Item -ItemType Directory -Force -Path $stbDir | Out-Null
+    }
+
+    $tuPath = Join-Path $stbDir "stb_image.cpp"
+    $content = @"
+// stb_image implementation translation unit
+// Keep this as the single place where STB_IMAGE_IMPLEMENTATION is defined.
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+"@
+
+    Write-Host "Ensuring stb_image translation unit at $tuPath ..." -ForegroundColor Green
+    $content | Set-Content -Encoding UTF8 -Path $tuPath
+}
+
 function Install-SDL3($vendorDir) {
     $sdlDir = Join-Path $vendorDir "SDL"
     
@@ -104,6 +137,8 @@ Clone-Or-Update "https://github.com/doctest/doctest.git"   (Join-Path $vendor "d
 Clone-Or-Update "https://github.com/g-truc/glm.git"        (Join-Path $vendor "glm")
 Clone-Or-Update "https://github.com/nlohmann/json.git"     (Join-Path $vendor "json")
 Clone-Or-Update "https://github.com/lieff/minimp3.git"     (Join-Path $vendor "minimp3")
+Install-StbImage $vendor
+Write-StbImageTranslationUnit $root
 
 # Install SDL3 with custom premake5.lua
 Install-SDL3 $vendor

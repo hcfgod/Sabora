@@ -32,6 +32,12 @@ project "Engine"
         "Vendor/**.cpp",
         "Vendor/**.cc",
         "Vendor/**.c",
+        "!Vendor/stb/stb_image.cpp",
+    }
+
+    -- Explicitly compile the stb_image implementation unit (header-only library)
+    files {
+        "Vendor/stb/stb_image.cpp"
     }
 
     includedirs {
@@ -51,6 +57,7 @@ project "Engine"
         Dependencies.Libogg.IncludePath,
         Dependencies.Libvorbis.IncludePath,
         Dependencies.Minimp3.IncludePath,
+        Dependencies.StbImage.IncludePath,
         Dependencies.Libflac.IncludePath,
         Dependencies.Libopus.IncludePath,
         Dependencies.Libopusenc.IncludePath,

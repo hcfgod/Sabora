@@ -19,6 +19,9 @@
 #include <opus/opusfile.h>
 #include <opus/opusenc.h>
 
+
+#include <stb_image.h>
+
 #include <vector>
 
 namespace Sabora 
@@ -43,6 +46,20 @@ namespace Sabora
         {
             return 0;
         }
+
+        // Minimal 1x1 transparent PNG (RGBA = 0,0,0,0) for stb_image verification
+        // Source: canonical tiny PNG fixture for decoder smoke tests.
+        static const unsigned char kPng1x1Transparent[] = {
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+            0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
+            0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
+            0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+            0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
+            0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
+            0x42, 0x60, 0x82
+        };
     } // namespace
 
     //==========================================================================
@@ -317,6 +334,36 @@ namespace Sabora
         else
         {
             SB_CORE_WARN("libopusenc comments initialization failed");
+        }
+
+        // Test stb_image - verify header-only image loader is functional
+        int imageWidth = 0;
+        int imageHeight = 0;
+        int imageChannels = 0;
+        unsigned char* imageData = stbi_load_from_memory(
+            kPng1x1Transparent,
+            static_cast<int>(sizeof(kPng1x1Transparent)),
+            &imageWidth,
+            &imageHeight,
+            &imageChannels,
+            4); // force RGBA output
+
+        if (imageData != nullptr)
+        {
+            SB_CORE_INFO(
+                "stb_image decoded tiny PNG ({}x{}, channels={}, rgba=[{}, {}, {}, {}])",
+                imageWidth,
+                imageHeight,
+                imageChannels,
+                imageData[0],
+                imageData[1],
+                imageData[2],
+                imageData[3]);
+            stbi_image_free(imageData);
+        }
+        else
+        {
+            SB_CORE_WARN("stb_image failed to decode tiny PNG fixture");
         }
 
         SB_CORE_INFO("Application initialization complete.");

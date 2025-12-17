@@ -198,6 +198,32 @@ clone_or_update() {
   fi
 }
 
+install_stb_image() {
+  local vendor_dir="$1"
+  local stb_dir="$vendor_dir/stb"
+
+  mkdir -p "$stb_dir"
+  echo "Fetching stb_image (header-only)..." >&2
+  curl -L "https://raw.githubusercontent.com/nothings/stb/master/stb_image.h" -o "$stb_dir/stb_image.h"
+  curl -L "https://raw.githubusercontent.com/nothings/stb/master/LICENSE" -o "$stb_dir/LICENSE"
+}
+
+write_stb_image_translation_unit() {
+  local root_dir="$1"
+  local stb_dir="$root_dir/Engine/Vendor/stb"
+  local tu_path="$stb_dir/stb_image.cpp"
+
+  mkdir -p "$stb_dir"
+  cat > "$tu_path" <<'EOF'
+// stb_image implementation translation unit
+// Keep this as the single place where STB_IMAGE_IMPLEMENTATION is defined.
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+EOF
+  echo "Ensured stb_image translation unit at $tu_path" >&2
+}
+
 install_sdl3() {
   local vendor_dir="$1"
   local sdl_dir="$vendor_dir/SDL"
@@ -223,6 +249,8 @@ clone_or_update "https://github.com/doctest/doctest.git"   "$VENDOR_DIR/doctest"
 clone_or_update "https://github.com/g-truc/glm.git"        "$VENDOR_DIR/glm"
 clone_or_update "https://github.com/nlohmann/json.git"     "$VENDOR_DIR/json"
 clone_or_update "https://github.com/lieff/minimp3.git"     "$VENDOR_DIR/minimp3"
+install_stb_image "$VENDOR_DIR"
+write_stb_image_translation_unit "$ROOT_DIR"
 
 # Install SDL3 with custom premake5.lua
 install_sdl3 "$VENDOR_DIR"

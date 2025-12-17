@@ -424,6 +424,16 @@ Dependencies.Minimp3 = {
     IncludePath = "Vendor/minimp3"
 }
 
+-- stb_image Configuration (header-only image loader for common formats)
+Dependencies.StbImage = {
+    -- Version string (update when pinning to specific version)
+    Version = "2.30",
+    HeaderOnly = true,
+
+    -- Path relative to Engine directory
+    IncludePath = "Vendor/stb"
+}
+
 -- libFLAC Configuration (static library for FLAC lossless audio codec)
 Dependencies.Libflac = {
     -- Version string (update when pinning to specific version)
