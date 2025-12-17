@@ -34,6 +34,7 @@ project "Engine"
         "Vendor/**.c",
         "!Vendor/stb/stb_image.cpp",
         "!Vendor/ImGui/**.cpp",
+        "!Vendor/Box2D/**.c",
     }
 
     -- Explicitly compile the stb_image implementation unit (header-only library)
@@ -45,6 +46,13 @@ project "Engine"
         "Vendor/ImGui/imgui_widgets.cpp",
         "Vendor/ImGui/imgui_demo.cpp"
     }
+
+    -- Build Box2D from source on non-Windows to avoid missing archives on CI
+    filter "system:not windows"
+        files {
+            "Vendor/Box2D/src/**.c"
+        }
+    filter {}
 
     includedirs {
         "Source",
@@ -196,7 +204,6 @@ project "Engine"
         links ( Dependencies.Libopus.Libraries.macosx.Debug )
         links ( Dependencies.Libopusenc.Libraries.macosx.Debug )
         links ( Dependencies.Opusfile.Libraries.macosx.Debug )
-        links { Dependencies.Box2D.Libraries.macosx.Debug }
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -217,7 +224,6 @@ project "Engine"
         links ( Dependencies.Libopus.Libraries.macosx.Release )
         links ( Dependencies.Libopusenc.Libraries.macosx.Release )
         links ( Dependencies.Opusfile.Libraries.macosx.Release )
-        links { Dependencies.Box2D.Libraries.macosx.Release }
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
@@ -250,7 +256,6 @@ project "Engine"
         links ( Dependencies.Libopus.Libraries.linux.Debug )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Debug )
-        links { Dependencies.Box2D.Libraries.linux.Debug }
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -302,7 +307,6 @@ project "Engine"
         links ( Dependencies.Libopus.Libraries.linux.Release )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Release )
-        links { Dependencies.Box2D.Libraries.linux.Release }
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies

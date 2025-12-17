@@ -145,7 +145,7 @@ project "Tests"
         links ( Dependencies.Libopus.Libraries.macosx.Debug )
         links ( Dependencies.Libopusenc.Libraries.macosx.Debug )
         links ( Dependencies.Opusfile.Libraries.macosx.Debug )
-        links { Dependencies.Box2D.Libraries.macosx.Debug }
+        -- Box2D built from source inside Engine on non-Windows
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -165,7 +165,7 @@ project "Tests"
         links ( Dependencies.Libopus.Libraries.macosx.Release )
         links ( Dependencies.Libopusenc.Libraries.macosx.Release )
         links ( Dependencies.Opusfile.Libraries.macosx.Release )
-        links { Dependencies.Box2D.Libraries.macosx.Release }
+        -- Box2D built from source inside Engine on non-Windows
 
     filter "system:linux"
         defines { "AL_LIBTYPE_STATIC" }
@@ -203,7 +203,7 @@ project "Tests"
         links ( Dependencies.Libopus.Libraries.linux.Debug )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Debug )
-        links { Dependencies.Box2D.Libraries.linux.Debug }
+        -- Box2D built from source inside Engine on non-Windows
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -257,7 +257,7 @@ project "Tests"
         links ( Dependencies.Libopus.Libraries.linux.Release )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Release )
-        links { Dependencies.Box2D.Libraries.linux.Release }
+        -- Box2D built from source inside Engine on non-Windows
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
