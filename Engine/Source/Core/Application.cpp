@@ -21,8 +21,112 @@
 #include <box2d/box2d.h>
 #include <imgui.h>
 #include <stb_image.h>
+#include <Jolt/Jolt.h>
+#include <Jolt/RegisterTypes.h>
+#include <Jolt/Core/Factory.h>
+#include <Jolt/Core/TempAllocator.h>
+#include <Jolt/Core/JobSystemThreadPool.h>
+#include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
+#include <Jolt/Physics/Collision/ObjectLayer.h>
 
 #include <vector>
+#include <cstdarg>
+#include <cstdio>
+
+// Jolt Physics helper classes for initialization test
+namespace
+{
+    using namespace JPH;
+    
+    // Jolt trace callback - routes to engine logging system
+    static void JoltTraceImpl(const char* inFMT, ...)
+    {
+        va_list args;
+        va_start(args, inFMT);
+        char buffer[1024];
+        vsnprintf(buffer, sizeof(buffer), inFMT, args);
+        va_end(args);
+        
+        // Route to engine logging system
+        Sabora::Log::Info(Sabora::LogCategory::Physics, buffer);
+    }
+    
+#ifdef JPH_ENABLE_ASSERTS
+    // Jolt assert callback - routes to engine logging system
+    static bool JoltAssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, uint inLine)
+    {
+        char buffer[2048];
+        int len = snprintf(buffer, sizeof(buffer), "Jolt Assertion failed: %s in %s:%u", inExpression, inFile, inLine);
+        if (inMessage != nullptr && len < static_cast<int>(sizeof(buffer)) - 1)
+        {
+            snprintf(buffer + len, sizeof(buffer) - len, " - %s", inMessage);
+        }
+        Sabora::Log::Error(Sabora::LogCategory::Physics, buffer);
+        
+        // Return true to trigger breakpoint (only in debug builds)
+        return true;
+    }
+#endif // JPH_ENABLE_ASSERTS
+    
+    // Simple layer setup for Jolt test
+    namespace JoltTestLayers
+    {
+        static constexpr ObjectLayer NON_MOVING = 0;
+        static constexpr ObjectLayer MOVING = 1;
+        static constexpr ObjectLayer NUM_LAYERS = 2;
+    }
+    
+    namespace JoltTestBroadPhaseLayers
+    {
+        static constexpr BroadPhaseLayer NON_MOVING(0);
+        static constexpr BroadPhaseLayer MOVING(1);
+        static constexpr uint NUM_LAYERS(2);
+    }
+    
+    // Minimal layer interface implementations for Jolt test
+    class JoltTestBPLayerInterfaceImpl final : public BroadPhaseLayerInterface
+    {
+    public:
+        JoltTestBPLayerInterfaceImpl()
+        {
+            mObjectToBroadPhase[JoltTestLayers::NON_MOVING] = JoltTestBroadPhaseLayers::NON_MOVING;
+            mObjectToBroadPhase[JoltTestLayers::MOVING] = JoltTestBroadPhaseLayers::MOVING;
+        }
+        
+        virtual uint GetNumBroadPhaseLayers() const override
+        {
+            return JoltTestBroadPhaseLayers::NUM_LAYERS;
+        }
+        
+        virtual BroadPhaseLayer GetBroadPhaseLayer(ObjectLayer inLayer) const override
+        {
+            JPH_ASSERT(inLayer < JoltTestLayers::NUM_LAYERS);
+            return mObjectToBroadPhase[inLayer];
+        }
+        
+    private:
+        BroadPhaseLayer mObjectToBroadPhase[JoltTestLayers::NUM_LAYERS];
+    };
+    
+    class JoltTestObjectVsBroadPhaseLayerFilterImpl : public ObjectVsBroadPhaseLayerFilter
+    {
+    public:
+        virtual bool ShouldCollide(ObjectLayer inLayer1, BroadPhaseLayer inLayer2) const override
+        {
+            return true;
+        }
+    };
+    
+    class JoltTestObjectLayerPairFilterImpl : public ObjectLayerPairFilter
+    {
+    public:
+        virtual bool ShouldCollide(ObjectLayer inObject1, ObjectLayer inObject2) const override
+        {
+            return true;
+        }
+    };
+}
 
 namespace Sabora 
 {
@@ -356,6 +460,55 @@ namespace Sabora
         {
             SB_CORE_WARN("Box2D world creation failed");
         }
+
+        // Test Jolt Physics - create physics system and step once
+        using namespace JPH;
+        
+        // Register allocation hook
+        RegisterDefaultAllocator();
+        
+        // Install trace and assert callbacks before using Jolt
+        Trace = JoltTraceImpl;
+        JPH_IF_ENABLE_ASSERTS(AssertFailed = JoltAssertFailedImpl;)
+        
+        // Create factory
+        Factory::sInstance = new Factory();
+        
+        // Register all physics types
+        RegisterTypes();
+        
+        // Create temp allocator
+        TempAllocatorImpl temp_allocator(1024 * 1024); // 1 MB
+        
+        // Create job system
+        JobSystemThreadPool job_system(cMaxPhysicsJobs, cMaxPhysicsBarriers, 1);
+        
+        // Create layer interfaces
+        JoltTestBPLayerInterfaceImpl broad_phase_layer_interface;
+        JoltTestObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
+        JoltTestObjectLayerPairFilterImpl object_vs_object_layer_filter;
+        
+        // Create and initialize physics system
+        PhysicsSystem physics_system;
+        physics_system.Init(
+            1024,  // max bodies
+            0,     // num body mutexes (auto-detect)
+            1024,  // max body pairs
+            1024,  // max contact constraints
+            broad_phase_layer_interface,
+            object_vs_broadphase_layer_filter,
+            object_vs_object_layer_filter
+        );
+        
+        // Step the physics system once
+        physics_system.Update(1.0f / 60.0f, 1, &temp_allocator, &job_system);
+        
+        SB_CORE_INFO("Jolt Physics initialized and stepped a frame");
+        
+        // Cleanup
+        UnregisterTypes();
+        delete Factory::sInstance;
+        Factory::sInstance = nullptr;
 
         // Test ImGui (docking branch) - create context and log version
         ImGui::CreateContext();

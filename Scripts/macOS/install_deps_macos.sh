@@ -169,12 +169,16 @@ clone_or_update "https://github.com/g-truc/glm.git"        "$VENDOR_DIR/glm"
 clone_or_update "https://github.com/nlohmann/json.git"     "$VENDOR_DIR/json"
 clone_or_update "https://github.com/lieff/minimp3.git"     "$VENDOR_DIR/minimp3"
 clone_or_update "https://github.com/erincatto/box2d.git"   "$VENDOR_DIR/Box2D"
+clone_or_update "https://github.com/jrouwe/JoltPhysics.git" "$VENDOR_DIR/Jolt"
 install_stb_image "$VENDOR_DIR"
 install_imgui_docking "$VENDOR_DIR"
 write_stb_image_translation_unit "$ROOT_DIR"
 echo "Building Box2D (static)..."
 chmod +x "$SCRIPT_DIR/build_box2d_macos.sh" || true
 bash "$SCRIPT_DIR/build_box2d_macos.sh"
+echo "Building Jolt (static)..."
+chmod +x "$SCRIPT_DIR/build_jolt_macos.sh" || true
+bash "$SCRIPT_DIR/build_jolt_macos.sh"
 
 # Install SDL3 with custom premake5.lua
 install_sdl3 "$VENDOR_DIR"

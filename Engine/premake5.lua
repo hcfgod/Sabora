@@ -34,7 +34,6 @@ project "Engine"
         "Vendor/**.c",
         "!Vendor/stb/stb_image.cpp",
         "!Vendor/ImGui/**.cpp",
-        "!Vendor/Box2D/**.c",
     }
 
     -- Explicitly compile the stb_image implementation unit (header-only library)
@@ -47,12 +46,12 @@ project "Engine"
         "Vendor/ImGui/imgui_demo.cpp"
     }
 
-    -- Build Box2D from source on non-Windows to avoid missing archives on CI
-    filter "system:not windows"
-        files {
-            "Vendor/Box2D/src/**.c"
-        }
-    filter {}
+-- On non-Windows, compile Box2D sources directly (avoid missing archives on CI)
+filter "system:not windows"
+    files {
+        "Vendor/Box2D/src/**.c"
+    }
+filter {}
 
     includedirs {
         "Source",
@@ -73,6 +72,7 @@ project "Engine"
         Dependencies.Minimp3.IncludePath,
         Dependencies.StbImage.IncludePath,
         Dependencies.ImGui.IncludePath,
+        Dependencies.Jolt.IncludePath,
         Dependencies.Box2D.IncludePath,
         Dependencies.Libflac.IncludePath,
         Dependencies.Libopus.IncludePath,
@@ -97,6 +97,7 @@ project "Engine"
         Dependencies.Libopus.LibraryPath,
         Dependencies.Libopusenc.LibraryPath,
         Dependencies.Opusfile.LibraryPath,
+        Dependencies.Jolt.LibraryPath,
         Dependencies.Box2D.LibraryPath,
         -- Add platform/configuration-specific paths here if needed
         -- Example: Dependencies.SDL3.LibraryPath .. "/%{cfg.platform}/%{cfg.buildcfg}"
@@ -118,10 +119,11 @@ project "Engine"
 
     filter { "system:windows", "configurations:Debug" }
         libdirs { Dependencies.Box2D.LibraryPath .. "/Debug" }
+    libdirs { Dependencies.Jolt.LibraryPath .. "/Debug" }
         links { 
             Dependencies.SDL3.Libraries.windows.Debug,
             Dependencies.shaderc.Libraries.windows.Debug,
-            Dependencies.OpenALSoft.Libraries.windows.Debug
+        Dependencies.OpenALSoft.Libraries.windows.Debug
         }
         links ( Dependencies.SPIRVCross.Libraries.windows.Debug )
         links ( Dependencies.msdfAtlasGen.Libraries.windows.Debug )
@@ -135,16 +137,18 @@ project "Engine"
                 links ( Dependencies.Libflac.Libraries.windows.Debug )
                 links ( Dependencies.Libopus.Libraries.windows.Debug )
                 links ( Dependencies.Libopusenc.Libraries.windows.Debug )
-                links ( Dependencies.Opusfile.Libraries.windows.Debug )
+        links ( Dependencies.Opusfile.Libraries.windows.Debug )
         links { Dependencies.Box2D.Libraries.windows.Debug }
+        links { Dependencies.Jolt.Libraries.windows.Debug }
                 runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
         libdirs { Dependencies.Box2D.LibraryPath .. "/Release" }
+    libdirs { Dependencies.Jolt.LibraryPath .. "/Release" }
         links { 
             Dependencies.SDL3.Libraries.windows.Release,
             Dependencies.shaderc.Libraries.windows.Release,
-            Dependencies.OpenALSoft.Libraries.windows.Release
+        Dependencies.OpenALSoft.Libraries.windows.Release
         }
         links ( Dependencies.SPIRVCross.Libraries.windows.Release )
         links ( Dependencies.msdfAtlasGen.Libraries.windows.Release )
@@ -158,8 +162,9 @@ project "Engine"
                 links ( Dependencies.Libflac.Libraries.windows.Release )
                 links ( Dependencies.Libopus.Libraries.windows.Release )
                 links ( Dependencies.Libopusenc.Libraries.windows.Release )
-                links ( Dependencies.Opusfile.Libraries.windows.Release )
+        links ( Dependencies.Opusfile.Libraries.windows.Release )
         links { Dependencies.Box2D.Libraries.windows.Release }
+        links { Dependencies.Jolt.Libraries.windows.Release }
                 runtime "Release"
 
     filter "system:macosx"

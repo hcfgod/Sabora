@@ -44,6 +44,7 @@ project "Tests"
         "../Engine/" .. Dependencies.Minimp3.IncludePath,
         "../Engine/" .. Dependencies.StbImage.IncludePath,
         "../Engine/" .. Dependencies.ImGui.IncludePath,
+        "../Engine/" .. Dependencies.Jolt.IncludePath,
         "../Engine/" .. Dependencies.Box2D.IncludePath,
         "../Engine/" .. Dependencies.Libflac.IncludePath,
         "../Engine/" .. Dependencies.Libopus.IncludePath,
@@ -80,6 +81,7 @@ project "Tests"
 
     filter { "system:windows", "configurations:Debug" }
         libdirs { "../Engine/" .. Dependencies.Box2D.LibraryPath .. "/Debug" }
+    libdirs { "../Engine/" .. Dependencies.Jolt.LibraryPath .. "/Debug" }
         links { 
             Dependencies.shaderc.Libraries.windows.Debug,
             Dependencies.OpenALSoft.Libraries.windows.Debug
@@ -98,10 +100,12 @@ project "Tests"
         links ( Dependencies.Libopusenc.Libraries.windows.Debug )
         links ( Dependencies.Opusfile.Libraries.windows.Debug )
         links { Dependencies.Box2D.Libraries.windows.Debug }
+        links { Dependencies.Jolt.Libraries.windows.Debug }
         runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
         libdirs { "../Engine/" .. Dependencies.Box2D.LibraryPath .. "/Release" }
+    libdirs { "../Engine/" .. Dependencies.Jolt.LibraryPath .. "/Release" }
         links { 
             Dependencies.shaderc.Libraries.windows.Release,
             Dependencies.OpenALSoft.Libraries.windows.Release
@@ -120,6 +124,7 @@ project "Tests"
         links ( Dependencies.Libopusenc.Libraries.windows.Release )
         links ( Dependencies.Opusfile.Libraries.windows.Release )
         links { Dependencies.Box2D.Libraries.windows.Release }
+        links { Dependencies.Jolt.Libraries.windows.Release }
         runtime "Release"
 
     filter "system:macosx"

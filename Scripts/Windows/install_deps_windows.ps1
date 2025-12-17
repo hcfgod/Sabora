@@ -150,11 +150,14 @@ Clone-Or-Update "https://github.com/g-truc/glm.git"        (Join-Path $vendor "g
 Clone-Or-Update "https://github.com/nlohmann/json.git"     (Join-Path $vendor "json")
 Clone-Or-Update "https://github.com/lieff/minimp3.git"     (Join-Path $vendor "minimp3")
 Clone-Or-Update "https://github.com/erincatto/box2d.git"   (Join-Path $vendor "Box2D")
+Clone-Or-Update "https://github.com/jrouwe/JoltPhysics.git" (Join-Path $vendor "Jolt")
 Install-StbImage $vendor
 Install-ImGuiDocking $vendor
 Write-StbImageTranslationUnit $root
 Write-Host "Building Box2D (static)..." -ForegroundColor Green
 & (Join-Path $PSScriptRoot "build_box2d_windows.ps1")
+Write-Host "Building Jolt (static)..." -ForegroundColor Green
+& (Join-Path $PSScriptRoot "build_jolt_windows.ps1")
 
 # Install SDL3 with custom premake5.lua
 Install-SDL3 $vendor

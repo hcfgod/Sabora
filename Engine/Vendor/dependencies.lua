@@ -460,6 +460,32 @@ Dependencies.Box2D = {
     }
 }
 
+-- Jolt Physics Configuration (static library for 3D physics)
+Dependencies.Jolt = {
+    Version = "latest",
+    HeaderOnly = false,
+
+    -- Paths relative to Engine directory
+    LibraryPath = "Vendor/Jolt/lib",
+    IncludePath = "Vendor/Jolt",
+
+    -- Library names per platform and configuration
+    Libraries = {
+        windows = {
+            Debug = "Jolt_debug.lib",
+            Release = "Jolt.lib"
+        },
+        macosx = {
+            Debug = "Jolt",
+            Release = "Jolt"
+        },
+        linux = {
+            Debug = "Jolt",
+            Release = "Jolt"
+        }
+    }
+}
+
 -- Dear ImGui Configuration (docking branch, immediate-mode GUI)
 Dependencies.ImGui = {
     Version = "docking",
