@@ -150,6 +150,8 @@ project "Tests"
         links ( Dependencies.Libopus.Libraries.macosx.Debug )
         links ( Dependencies.Libopusenc.Libraries.macosx.Debug )
         links ( Dependencies.Opusfile.Libraries.macosx.Debug )
+        -- Link Jolt Physics static library
+        links { Dependencies.Jolt.Libraries.macosx.Debug }
         -- Box2D built from source inside Engine on non-Windows
 
     filter { "system:macosx", "configurations:Release" }
@@ -170,6 +172,8 @@ project "Tests"
         links ( Dependencies.Libopus.Libraries.macosx.Release )
         links ( Dependencies.Libopusenc.Libraries.macosx.Release )
         links ( Dependencies.Opusfile.Libraries.macosx.Release )
+        -- Link Jolt Physics static library
+        links { Dependencies.Jolt.Libraries.macosx.Release }
         -- Box2D built from source inside Engine on non-Windows
 
     filter "system:linux"
@@ -208,6 +212,8 @@ project "Tests"
         links ( Dependencies.Libopus.Libraries.linux.Debug )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Debug )
+        -- Link Jolt Physics static library
+        links { Dependencies.Jolt.Libraries.linux.Debug }
         -- Box2D built from source inside Engine on non-Windows
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
@@ -262,6 +268,8 @@ project "Tests"
         links ( Dependencies.Libopus.Libraries.linux.Release )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Release )
+        -- Link Jolt Physics static library
+        links { Dependencies.Jolt.Libraries.linux.Release }
         -- Box2D built from source inside Engine on non-Windows
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }

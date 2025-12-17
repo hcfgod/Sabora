@@ -476,11 +476,11 @@ Dependencies.Jolt = {
             Release = "Jolt.lib"
         },
         macosx = {
-            Debug = "Jolt",
+            Debug = "Jolt_debug",
             Release = "Jolt"
         },
         linux = {
-            Debug = "Jolt",
+            Debug = "Jolt_debug",
             Release = "Jolt"
         }
     }
