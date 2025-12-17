@@ -169,6 +169,8 @@ project "Sandbox"
         links ( Dependencies.Libopus.Libraries.macosx.Debug )
         links ( Dependencies.Libopusenc.Libraries.macosx.Debug )
         links ( Dependencies.Opusfile.Libraries.macosx.Debug )
+        -- Link Jolt Physics static library
+        links { Dependencies.Jolt.Libraries.macosx.Debug }
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -189,6 +191,8 @@ project "Sandbox"
         links ( Dependencies.Libopus.Libraries.macosx.Release )
         links ( Dependencies.Libopusenc.Libraries.macosx.Release )
         links ( Dependencies.Opusfile.Libraries.macosx.Release )
+        -- Link Jolt Physics static library
+        links { Dependencies.Jolt.Libraries.macosx.Release }
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
