@@ -434,6 +434,32 @@ Dependencies.StbImage = {
     IncludePath = "Vendor/stb"
 }
 
+-- Box2D Configuration (static library for 2D physics)
+Dependencies.Box2D = {
+    Version = "latest",
+    HeaderOnly = false,
+
+    -- Paths relative to Engine directory
+    LibraryPath = "Vendor/Box2D/lib",
+    IncludePath = "Vendor/Box2D/include",
+
+    -- Library names per platform and configuration
+    Libraries = {
+        windows = {
+            Debug = "box2dd.lib",
+            Release = "box2d.lib"
+        },
+        macosx = {
+            Debug = "box2d-debug",
+            Release = "box2d-release"
+        },
+        linux = {
+            Debug = "box2d-debug",
+            Release = "box2d-release"
+        }
+    }
+}
+
 -- Dear ImGui Configuration (docking branch, immediate-mode GUI)
 Dependencies.ImGui = {
     Version = "docking",

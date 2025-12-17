@@ -18,6 +18,7 @@
 #include <opus/opus.h>
 #include <opus/opusfile.h>
 #include <opus/opusenc.h>
+#include <box2d/box2d.h>
 #include <imgui.h>
 #include <stb_image.h>
 
@@ -333,6 +334,27 @@ namespace Sabora
         else
         {
             SB_CORE_WARN("libopusenc comments initialization failed");
+        }
+
+        // Test Box2D - create a world and step once
+        const b2Version box2dVersion = b2GetVersion();
+        b2WorldDef worldDef = b2DefaultWorldDef();
+        worldDef.gravity = b2Vec2{ 0.0f, -9.8f };
+
+        b2WorldId world = b2CreateWorld( &worldDef );
+        if (b2World_IsValid( world ))
+        {
+            b2World_Step( world, 1.0f / 60.0f, 4 );
+            SB_CORE_INFO(
+                "Box2D initialized (v{}.{}.{}) and stepped a frame",
+                box2dVersion.major,
+                box2dVersion.minor,
+                box2dVersion.revision );
+            b2DestroyWorld( world );
+        }
+        else
+        {
+            SB_CORE_WARN("Box2D world creation failed");
         }
 
         // Test ImGui (docking branch) - create context and log version

@@ -65,6 +65,7 @@ project "Engine"
         Dependencies.Minimp3.IncludePath,
         Dependencies.StbImage.IncludePath,
         Dependencies.ImGui.IncludePath,
+        Dependencies.Box2D.IncludePath,
         Dependencies.Libflac.IncludePath,
         Dependencies.Libopus.IncludePath,
         Dependencies.Libopusenc.IncludePath,
@@ -88,6 +89,7 @@ project "Engine"
         Dependencies.Libopus.LibraryPath,
         Dependencies.Libopusenc.LibraryPath,
         Dependencies.Opusfile.LibraryPath,
+        Dependencies.Box2D.LibraryPath,
         -- Add platform/configuration-specific paths here if needed
         -- Example: Dependencies.SDL3.LibraryPath .. "/%{cfg.platform}/%{cfg.buildcfg}"
     }
@@ -107,6 +109,7 @@ project "Engine"
         defines { "_CRT_SECURE_NO_WARNINGS", "NOMINMAX", "FLAC__NO_DLL" }
 
     filter { "system:windows", "configurations:Debug" }
+        libdirs { Dependencies.Box2D.LibraryPath .. "/Debug" }
         links { 
             Dependencies.SDL3.Libraries.windows.Debug,
             Dependencies.shaderc.Libraries.windows.Debug,
@@ -125,9 +128,11 @@ project "Engine"
                 links ( Dependencies.Libopus.Libraries.windows.Debug )
                 links ( Dependencies.Libopusenc.Libraries.windows.Debug )
                 links ( Dependencies.Opusfile.Libraries.windows.Debug )
+        links { Dependencies.Box2D.Libraries.windows.Debug }
                 runtime "Debug"
 
     filter { "system:windows", "configurations:Release" }
+        libdirs { Dependencies.Box2D.LibraryPath .. "/Release" }
         links { 
             Dependencies.SDL3.Libraries.windows.Release,
             Dependencies.shaderc.Libraries.windows.Release,
@@ -146,6 +151,7 @@ project "Engine"
                 links ( Dependencies.Libopus.Libraries.windows.Release )
                 links ( Dependencies.Libopusenc.Libraries.windows.Release )
                 links ( Dependencies.Opusfile.Libraries.windows.Release )
+        links { Dependencies.Box2D.Libraries.windows.Release }
                 runtime "Release"
 
     filter "system:macosx"
@@ -190,6 +196,7 @@ project "Engine"
         links ( Dependencies.Libopus.Libraries.macosx.Debug )
         links ( Dependencies.Libopusenc.Libraries.macosx.Debug )
         links ( Dependencies.Opusfile.Libraries.macosx.Debug )
+        links { Dependencies.Box2D.Libraries.macosx.Debug }
 
     filter { "system:macosx", "configurations:Release" }
         links { 
@@ -210,6 +217,7 @@ project "Engine"
         links ( Dependencies.Libopus.Libraries.macosx.Release )
         links ( Dependencies.Libopusenc.Libraries.macosx.Release )
         links ( Dependencies.Opusfile.Libraries.macosx.Release )
+        links { Dependencies.Box2D.Libraries.macosx.Release }
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
@@ -242,6 +250,7 @@ project "Engine"
         links ( Dependencies.Libopus.Libraries.linux.Debug )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Debug )
+        links { Dependencies.Box2D.Libraries.linux.Debug }
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
@@ -293,6 +302,7 @@ project "Engine"
         links ( Dependencies.Libopus.Libraries.linux.Release )
         -- opusfile depends on libopus and libogg, link it after them
         links ( Dependencies.Opusfile.Libraries.linux.Release )
+        links { Dependencies.Box2D.Libraries.linux.Release }
         -- Switch back to dynamic linking for system libraries
         linkoptions { "-Wl,-Bdynamic" }
         -- Now link all SDL3 dependencies
