@@ -185,6 +185,7 @@ project "Tests"
         linkoptions {
             "-L../Engine/" .. Dependencies.Libogg.LibraryPath,
             "-L../Engine/" .. Dependencies.Libvorbis.LibraryPath,
+            "-L../Engine/" .. Dependencies.Jolt.LibraryPath,
             "-Wl,-Bstatic"
         }
         links { 
@@ -241,6 +242,7 @@ project "Tests"
         linkoptions {
             "-L../Engine/" .. Dependencies.Libogg.LibraryPath,
             "-L../Engine/" .. Dependencies.Libvorbis.LibraryPath,
+            "-L../Engine/" .. Dependencies.Jolt.LibraryPath,
             "-Wl,-Bstatic"
         }
         links { 

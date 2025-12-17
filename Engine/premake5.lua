@@ -236,7 +236,11 @@ filter {}
 
     filter { "system:linux", "configurations:Debug" }
         -- Prefer static libraries over shared libraries for our dependencies
-        linkoptions { "-Wl,-Bstatic" }
+        -- Add -L flags BEFORE -Wl,-Bstatic to ensure our library directories are searched first
+        linkoptions {
+            "-L" .. Dependencies.Jolt.LibraryPath,
+            "-Wl,-Bstatic"
+        }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
         links { 
@@ -289,7 +293,11 @@ filter {}
 
     filter { "system:linux", "configurations:Release" }
         -- Prefer static libraries over shared libraries for our dependencies
-        linkoptions { "-Wl,-Bstatic" }
+        -- Add -L flags BEFORE -Wl,-Bstatic to ensure our library directories are searched first
+        linkoptions {
+            "-L" .. Dependencies.Jolt.LibraryPath,
+            "-Wl,-Bstatic"
+        }
         -- Link SDL3 FIRST, then its dependencies
         -- On Linux, static libraries must be linked before their dependencies
         links { 
