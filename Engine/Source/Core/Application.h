@@ -6,6 +6,8 @@
 #include <string>
 
 #include "Result.h"
+#include "Window.h"
+#include "Event.h"
 
 namespace Sabora 
 {
@@ -18,50 +20,7 @@ namespace Sabora
     struct ApplicationConfig 
     {
         std::string name = "Sabora Application";
-    };
-
-    /**
-     * @brief RAII wrapper for SDL initialization and cleanup.
-     * 
-     * Ensures SDL is properly initialized in the constructor and
-     * cleaned up in the destructor, following RAII principles.
-     * This guarantees proper resource management even in the
-     * presence of exceptions or early returns.
-     */
-    class SDLContext
-    {
-    public:
-        /**
-         * @brief Initialize SDL with the specified subsystems.
-         * @param flags SDL initialization flags (e.g., SDL_INIT_VIDEO | SDL_INIT_AUDIO).
-         * @return Result indicating success or failure with error details.
-         */
-        [[nodiscard]] static Result<std::unique_ptr<SDLContext>> Create(uint32_t flags);
-
-        // Non-copyable, movable
-        SDLContext(const SDLContext&) = delete;
-        SDLContext& operator=(const SDLContext&) = delete;
-        SDLContext(SDLContext&& other) noexcept;
-        SDLContext& operator=(SDLContext&& other) noexcept;
-
-        /**
-         * @brief Destructor - calls SDL_Quit() if this instance owns SDL.
-         */
-        ~SDLContext();
-
-        /**
-         * @brief Check if SDL is currently initialized.
-         * @return True if SDL is initialized and owned by this context.
-         */
-        [[nodiscard]] bool IsInitialized() const noexcept { return m_Initialized; }
-
-    private:
-        /**
-         * @brief Private constructor - use Create() factory method.
-         */
-        explicit SDLContext() noexcept;
-
-        bool m_Initialized = false;
+        WindowConfig windowConfig;
     };
 
     /**
@@ -78,7 +37,7 @@ namespace Sabora
          * @param config Application configuration settings.
          * 
          * @note This constructor initializes the logging system but does NOT
-         *       initialize SDL. Call Initialize() to set up platform systems.
+         *       initialize SDL or create a window. Call Initialize() to set up platform systems.
          */
         explicit Application(const ApplicationConfig& config);
 
@@ -95,7 +54,7 @@ namespace Sabora
          * @brief Initialize the application and platform systems.
          * @return Result indicating success or failure with error details.
          * 
-         * This method initializes SDL and other platform-specific systems.
+         * This method initializes SDL, creates a window, and sets up the event system.
          * Must be called before Run().
          */
         [[nodiscard]] Result<void> Initialize();
@@ -122,11 +81,40 @@ namespace Sabora
          */
         [[nodiscard]] bool IsRunning() const noexcept { return m_Running.load(); }
 
-    private:
-        std::atomic<bool> m_Running{false};
+        /**
+         * @brief Get the application window.
+         * @return Pointer to the window, or nullptr if not initialized.
+         */
+        [[nodiscard]] Window* GetWindow() const noexcept { return m_Window.get(); }
 
-        // RAII wrapper for SDL - ensures proper initialization and cleanup
-        std::unique_ptr<SDLContext> m_SDLContext;
+        /**
+         * @brief Get the event dispatcher.
+         * @return Reference to the event dispatcher.
+         */
+        [[nodiscard]] EventDispatcher& GetEventDispatcher() noexcept { return m_EventDispatcher; }
+
+    protected:
+        /**
+         * @brief Called once per frame before event processing.
+         * @param deltaTime Time elapsed since last frame in seconds.
+         */
+        virtual void OnUpdate([[maybe_unused]] float deltaTime) {}
+
+        /**
+         * @brief Called when a window close event is received.
+         * @param event The window close event.
+         */
+        virtual void OnWindowClose([[maybe_unused]] WindowCloseEvent& event) {}
+
+    private:
+        void SetupEventHandlers();
+
+        std::atomic<bool> m_Running{false};
+        ApplicationConfig m_Config;
+
+        // Window and event system
+        std::unique_ptr<Window> m_Window;
+        EventDispatcher m_EventDispatcher;
 
         // Timing for delta time calculations
         using Clock = std::chrono::high_resolution_clock;

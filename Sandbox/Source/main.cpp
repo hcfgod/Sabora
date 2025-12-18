@@ -28,15 +28,6 @@ int main()
         SB_CORE_CRITICAL("Failed to initialize application: {}", initResult.GetError().ToString());
         return 1;
     }
-
-    // Test the logging system
-    SB_INFO("Sandbox application started successfully!");
-    SB_CORE_INFO("Core system is running");
-    SB_RENDERER_INFO("Renderer system initialized");
-    SB_AUDIO_DEBUG("Audio system debug message");
-    SB_PHYSICS_WARN("Physics system warning");
-    SB_INPUT_ERROR("Input system error occurred");
-    SB_SCENE_CRITICAL("Critical scene error!");
     
     // Test format-based logging
     SB_INFO("Application config: {}", appCfg.name);
