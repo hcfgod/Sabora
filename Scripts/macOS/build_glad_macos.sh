@@ -65,7 +65,11 @@ fi
 echo "Python is available!" >&2
 
 # Create a virtual environment for GLAD dependencies (required on macOS due to PEP 668)
-VENV_DIR="$GLAD_DIR/venv"
+# Place venv outside GLAD_DIR to avoid deletion when re-cloning
+VENDOR_DIR="$ROOT_DIR/Engine/Vendor"
+VENV_DIR="$VENDOR_DIR/glad-venv"
+mkdir -p "$VENDOR_DIR"
+
 echo "Creating Python virtual environment for GLAD..." >&2
 python3 -m venv "$VENV_DIR"
 
@@ -92,9 +96,6 @@ echo "GLAD Python dependencies installed successfully" >&2
 # Check if GLAD directory exists
 if [[ ! -d "$GLAD_DIR" ]] || [[ ! -f "$GLAD_DIR/glad/__main__.py" ]]; then
     echo "GLAD not found. Cloning GLAD..." >&2
-    
-    VENDOR_DIR="$ROOT_DIR/Engine/Vendor"
-    mkdir -p "$VENDOR_DIR"
     
     if [[ ! -d "$GLAD_DIR" ]]; then
         cd "$VENDOR_DIR"
