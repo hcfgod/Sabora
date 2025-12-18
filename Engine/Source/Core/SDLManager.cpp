@@ -12,7 +12,8 @@ namespace Sabora
     {
         if (s_Initialized)
         {
-            return Result<void>::Failure(
+            return Result<void>::Failure
+            (
                 ErrorCode::CoreAlreadyExists,
                 "SDL is already initialized. Shutdown before re-initializing."
             );
@@ -25,7 +26,8 @@ namespace Sabora
         // SDL_Init returns true on success, false on failure
         if (!SDL_Init(flags))
         {
-            return Result<void>::Failure(
+            return Result<void>::Failure
+            (
                 ErrorCode::PlatformSDLError,
                 fmt::format("SDL3 could not initialize! SDL_Error: {}", SDL_GetError())
             );
@@ -60,6 +62,7 @@ namespace Sabora
         {
             return "";
         }
+
         return SDL_GetRevision();
     }
 

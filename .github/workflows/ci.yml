@@ -17,11 +17,30 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Cache vendor libraries
+      id: cache-vendor
+      uses: actions/cache@v4
+      with:
+        path: Engine/Vendor
+        key: vendor-windows-${{ hashFiles('Engine/Vendor/dependencies.lua') }}-${{ hashFiles('Scripts/Windows/**') }}
+        restore-keys: |
+          vendor-windows-
+
+    - name: Cache Premake
+      id: cache-premake
+      uses: actions/cache@v4
+      with:
+        path: Tools/Premake
+        key: premake-windows-${{ hashFiles('Scripts/Windows/install_premake_windows.ps1') }}
+        restore-keys: premake-windows-
+
     - name: Setup Premake
+      if: steps.cache-premake.outputs.cache-hit != 'true'
       run: |
         powershell -ExecutionPolicy Bypass -File Scripts\Windows\install_premake_windows.ps1
 
     - name: Install Dependencies
+      if: steps.cache-vendor.outputs.cache-hit != 'true'
       run: |
         # Ensure Git is available (should be on GitHub Actions runners)
         if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
@@ -237,17 +256,43 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Cache apt packages
+      uses: actions/cache@v4
+      with:
+        path: /var/cache/apt
+        key: apt-${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+        restore-keys: apt-${{ runner.os }}-
+
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential cmake git python3
 
+    - name: Cache vendor libraries
+      id: cache-vendor
+      uses: actions/cache@v4
+      with:
+        path: Engine/Vendor
+        key: vendor-linux-${{ hashFiles('Engine/Vendor/dependencies.lua') }}-${{ hashFiles('Scripts/Linux/**') }}
+        restore-keys: |
+          vendor-linux-
+
+    - name: Cache Premake
+      id: cache-premake
+      uses: actions/cache@v4
+      with:
+        path: Tools/Premake
+        key: premake-linux-${{ hashFiles('Scripts/Linux/install_premake_linux.sh') }}
+        restore-keys: premake-linux-
+
     - name: Setup Premake
+      if: steps.cache-premake.outputs.cache-hit != 'true'
       run: |
         chmod +x Scripts/Linux/install_premake_linux.sh
         bash Scripts/Linux/install_premake_linux.sh
 
     - name: Install Dependencies
+      if: steps.cache-vendor.outputs.cache-hit != 'true'
       run: |
         # Install vendor dependencies (spdlog, doctest, glm, json, minimp3, SDL3)
         if [ -f "Scripts/Linux/install_deps_linux.sh" ]; then
@@ -477,16 +522,52 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Cache Homebrew packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Caches/Homebrew
+          /usr/local/Homebrew/Library/Homebrew/vendor
+        key: brew-${{ runner.os }}-${{ hashFiles('**/Brewfile') }}
+        restore-keys: brew-${{ runner.os }}-
+
     - name: Install dependencies
       run: |
         brew install cmake git python3 libusb
 
+    - name: Cache vendor libraries
+      id: cache-vendor
+      uses: actions/cache@v4
+      with:
+        path: Engine/Vendor
+        key: vendor-macos-${{ hashFiles('Engine/Vendor/dependencies.lua') }}-${{ hashFiles('Scripts/macOS/**') }}
+        restore-keys: |
+          vendor-macos-
+
+    - name: Cache Python venv for GLAD
+      id: cache-glad-venv
+      uses: actions/cache@v4
+      with:
+        path: Engine/Vendor/glad-venv
+        key: glad-venv-macos-${{ hashFiles('Scripts/macOS/build_glad_macos.sh') }}
+        restore-keys: glad-venv-macos-
+
+    - name: Cache Premake
+      id: cache-premake
+      uses: actions/cache@v4
+      with:
+        path: Tools/Premake
+        key: premake-macos-${{ hashFiles('Scripts/macOS/install_premake_macos.sh') }}
+        restore-keys: premake-macos-
+
     - name: Setup Premake
+      if: steps.cache-premake.outputs.cache-hit != 'true'
       run: |
         chmod +x Scripts/macOS/install_premake_macos.sh
         bash Scripts/macOS/install_premake_macos.sh
 
     - name: Install Dependencies
+      if: steps.cache-vendor.outputs.cache-hit != 'true'
       run: |
         # Install vendor dependencies (spdlog, doctest, glm, json, minimp3, SDL3)
         if [ -f "Scripts/macOS/install_deps_macos.sh" ]; then

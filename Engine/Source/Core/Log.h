@@ -8,7 +8,8 @@
 namespace Sabora 
 {
     // Log levels for the engine
-    enum class LogLevel : uint8_t {
+    enum class LogLevel : uint8_t 
+    {
         Trace = 0,
         Debug = 1,
         Info = 2,
@@ -18,7 +19,8 @@ namespace Sabora
     };
 
     // Log categories for different engine systems
-    enum class LogCategory : uint8_t {
+    enum class LogCategory : uint8_t 
+    {
         Core = 0,
         Renderer = 1,
         Audio = 2,

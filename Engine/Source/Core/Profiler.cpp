@@ -71,6 +71,7 @@ namespace Sabora
     PerformanceStats Profiler::GetStats(const std::string& name)
     {
         std::lock_guard<std::mutex> lock(s_Mutex);
+
         return GetStatsLocked(name);
     }
 
@@ -193,10 +194,7 @@ namespace Sabora
     }
 
     // ScopedTimer implementation
-    ScopedTimer::ScopedTimer(const std::string& name)
-        : m_Name(name)
-        , m_StartTime(Profiler::GetHighResolutionTime())
-        , m_Stopped(false)
+    ScopedTimer::ScopedTimer(const std::string& name) : m_Name(name) , m_StartTime(Profiler::GetHighResolutionTime()) , m_Stopped(false)
     {
     }
 
@@ -218,6 +216,7 @@ namespace Sabora
         const auto endTime = Profiler::GetHighResolutionTime();
         const auto duration = endTime - m_StartTime;
         Profiler::RecordMeasurement(m_Name, duration);
+
         m_Stopped = true;
     }
 

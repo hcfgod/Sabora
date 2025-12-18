@@ -7,8 +7,7 @@
 
 namespace Sabora
 {
-    Application::Application(const ApplicationConfig& config)
-        : m_Config(config)
+    Application::Application(const ApplicationConfig& config) : m_Config(config)
     {
         // Initialize logging system first (needed for error reporting)
         Sabora::Log::Initialize();
@@ -91,7 +90,8 @@ namespace Sabora
     void Application::SetupEventHandlers()
     {
         // Subscribe to window close events
-        [[maybe_unused]] auto subscriptionId = m_EventDispatcher.Subscribe<WindowCloseEvent>([this](const WindowCloseEvent& event) {
+        [[maybe_unused]] auto windowCloseSubId = m_EventDispatcher.Subscribe<WindowCloseEvent>([this](const WindowCloseEvent& event) 
+        {
             WindowCloseEvent& mutableEvent = const_cast<WindowCloseEvent&>(event);
             OnWindowClose(mutableEvent);
             if (!mutableEvent.IsHandled())

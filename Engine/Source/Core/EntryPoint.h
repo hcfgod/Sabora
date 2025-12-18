@@ -6,14 +6,12 @@
  * This function is provided by the engine. It handles the application lifecycle.
  * The application must provide a CreateApplication() function that returns an Application instance.
  */
-extern Sabora::Application* CreateApplication();
+extern Sabora::Application* Sabora::CreateApplication();
 
 int main()
 {
-    using namespace Sabora;
-    
     // Create the application instance
-    Application* app = Sabora::CreateApplication();
+    Sabora::Application* app = Sabora::CreateApplication();
     if (app == nullptr)
     {
         return 1;

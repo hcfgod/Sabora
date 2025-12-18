@@ -292,6 +292,7 @@ namespace Sabora
 
         // Run benchmark
         const auto totalStart = GetHighResolutionTime();
+
         for (std::uint64_t i = 0; i < iterations; ++i)
         {
             const auto iterStart = GetHighResolutionTime();
@@ -300,6 +301,7 @@ namespace Sabora
             const double iterMs = ToMilliseconds(iterEnd - iterStart);
             measurements.push_back(iterMs);
         }
+
         const auto totalEnd = GetHighResolutionTime();
 
         results.TotalTimeMs = ToMilliseconds(totalEnd - totalStart);
@@ -315,11 +317,13 @@ namespace Sabora
             // Calculate standard deviation
             const double mean = results.AverageTimeMs;
             double variance = 0.0;
+
             for (double value : measurements)
             {
                 const double diff = value - mean;
                 variance += diff * diff;
             }
+
             results.StdDevMs = std::sqrt(variance / static_cast<double>(iterations));
 
             // Calculate throughput (operations per second)
@@ -333,4 +337,3 @@ namespace Sabora
     }
 
 } // namespace Sabora
-

@@ -5,9 +5,7 @@
 
 namespace Sabora
 {
-    Window::Window(SDL_Window* window, const WindowConfig& config) noexcept
-        : m_Window(window)
-        , m_Config(config)
+    Window::Window(SDL_Window* window, const WindowConfig& config) noexcept : m_Window(window), m_Config(config)
     {
     }
 
@@ -21,9 +19,7 @@ namespace Sabora
         }
     }
 
-    Window::Window(Window&& other) noexcept
-        : m_Window(other.m_Window)
-        , m_Config(std::move(other.m_Config))
+    Window::Window(Window&& other) noexcept : m_Window(other.m_Window), m_Config(std::move(other.m_Config))
     {
         other.m_Window = nullptr;
     }
@@ -42,6 +38,7 @@ namespace Sabora
             m_Config = std::move(other.m_Config);
             other.m_Window = nullptr;
         }
+
         return *this;
     }
 
@@ -80,7 +77,8 @@ namespace Sabora
 
         if (sdlWindow == nullptr)
         {
-            return Result<std::unique_ptr<Window>>::Failure(
+            return Result<std::unique_ptr<Window>>::Failure
+            (
                 ErrorCode::PlatformWindowCreationFailed,
                 fmt::format("Failed to create window: {}", SDL_GetError())
             );
@@ -114,6 +112,7 @@ namespace Sabora
         {
             return false;
         }
+
         return SDL_GetWindowFlags(m_Window) & SDL_WINDOW_HIDDEN ? false : true;
     }
 
@@ -127,6 +126,7 @@ namespace Sabora
         int32_t width = 0;
         int32_t height = 0;
         SDL_GetWindowSize(m_Window, &width, &height);
+
         return width;
     }
 
@@ -140,6 +140,7 @@ namespace Sabora
         int32_t width = 0;
         int32_t height = 0;
         SDL_GetWindowSize(m_Window, &width, &height);
+
         return height;
     }
 
