@@ -1,299 +1,194 @@
 # Sabora Engine Architecture
 
-This document provides an overview of the Sabora Engine architecture, design principles, and system organization.
+This document explains how Sabora is structured and why it's designed the way it is. If you're new to the codebase, this is a good place to start understanding the big picture.
 
-## Table of Contents
+## Design Philosophy
 
-1. [Overview](#overview)
-2. [Design Principles](#design-principles)
-3. [Core Systems](#core-systems)
-4. [Module Organization](#module-organization)
-5. [Build System](#build-system)
-6. [Dependencies](#dependencies)
+Sabora is built around a few core ideas that guide every design decision:
 
-## Overview
+**Resource Safety** - Resources are managed automatically through RAII. You never manually free memory or close handles. When an object goes out of scope, its resources are cleaned up automatically.
 
-Sabora is a modern C++ game engine designed with performance, maintainability, and extensibility in mind. The engine follows a modular architecture where core systems are separated into distinct modules with well-defined interfaces.
+**Explicit Error Handling** - Operations that can fail return a Result type. You check for success or failure explicitly. No exceptions are thrown, which means no hidden control flow and predictable performance.
 
-### Key Characteristics
+**Thread Safety Where It Matters** - Core systems like logging and configuration are thread-safe. Most systems run on the main thread, but the architecture supports multi-threading where needed.
 
-- **Modern C++20**: Leverages latest C++ features for type safety and performance
-- **RAII-based Resource Management**: Automatic resource cleanup through smart pointers and RAII patterns
-- **Explicit Error Handling**: Uses Result<T> type for error handling instead of exceptions
-- **Thread-Safe Core Systems**: Critical systems use mutexes for thread safety
-- **Layered Configuration**: Default + user override configuration system
-- **Comprehensive Logging**: Category-based logging with multiple output targets
-
-## Design Principles
-
-### 1. Resource Management
-
-The engine follows RAII (Resource Acquisition Is Initialization) principles:
-
-- **Smart Pointers**: Use `std::unique_ptr` and `std::shared_ptr` for automatic memory management
-- **RAII Wrappers**: Platform resources (like SDL) are wrapped in RAII classes
-- **Automatic Cleanup**: Destructors handle all resource cleanup
-
-**Example**: `SDLContext` ensures SDL is properly initialized and cleaned up:
-
-```cpp
-class SDLContext {
-    ~SDLContext() {
-        if (m_Initialized) {
-            SDL_Quit();
-        }
-    }
-};
-```
-
-### 2. Error Handling
-
-The engine uses a `Result<T>` type for explicit error handling consistently throughout:
-
-- **No Exceptions**: All error handling uses `Result<T>` - no exceptions are thrown
-- **Type-Safe Errors**: Error codes are strongly typed with categories
-- **Error Propagation**: Chainable operations with `AndThen()`, `Map()`, `OrElse()`
-- **Source Location Tracking**: Errors capture where they occurred for debugging
-- **Consistent API**: All I/O operations, initialization, and critical paths return `Result<T>`
-
-**Example**:
-```cpp
-Result<void> Initialize() {
-    auto sdlResult = SDLContext::Create(SDL_INIT_VIDEO);
-    if (sdlResult.IsFailure()) {
-        return Result<void>::Failure(sdlResult.GetError());
-    }
-    m_SDLContext = std::move(sdlResult).Value();
-    return Result<void>::Success();
-}
-
-// File I/O also uses Result<T>
-auto fileResult = AsyncIO::ReadTextFile("config.txt");
-if (fileResult.IsSuccess()) {
-    auto contents = fileResult.Value();
-    // Use contents...
-}
-```
-
-### 3. Thread Safety
-
-Core systems are designed for thread-safe access:
-
-- **Mutex Protection**: Shared state is protected with `std::mutex` or `std::scoped_lock`
-- **Immutable Access**: Read operations return copies when possible
-- **Lock-Free Where Possible**: Atomic operations for simple flags
-
-**Example**: `ConfigurationManager` uses mutexes for thread-safe access:
-
-```cpp
-nlohmann::json ConfigurationManager::Get() const {
-    std::scoped_lock lock(m_mutex);
-    return MergeJson(m_defaultConfig, m_userOverrides);
-}
-```
-
-### 4. Configuration Management
-
-Layered configuration system:
-
-- **Default Config**: Read-only defaults (typically in application directory)
-- **User Overrides**: User-specific settings (typically in user data directory)
-- **Deep Merging**: Nested objects are recursively merged
-- **JSON Pointer Access**: Use JSON pointers for precise value access
-
-**Example**:
-```cpp
-ConfigurationManager config("defaults.json", "user.json");
-config.Initialize();
-config.SetValue("/window/width", 1920);  // User override
-auto merged = config.Get();  // Merged view
-```
+**Layered Configuration** - Default settings are provided, but users can override them. The system merges these layers automatically, so you always get sensible defaults with the ability to customize.
 
 ## Core Systems
 
-### Application
+### Application Lifecycle
 
-The `Application` class manages the engine lifecycle:
+The Application class manages the entire engine lifecycle. The engine provides `main()` automatically through EntryPoint.h—you only need to provide a `CreateApplication()` function that returns your Application instance.
 
-- **Initialization**: Sets up logging, SDL, and platform systems
-- **Main Loop**: Handles events, updates, and rendering
-- **Shutdown**: Cleanup in reverse order of initialization
+When you create an Application, it initializes logging. When you call Initialize(), it sets up platform systems through SDLManager, creates a window, and connects the EventManager. Run() starts the main loop, and the destructor cleans everything up in reverse order.
 
-**Lifecycle**:
-1. Constructor: Initialize logging
-2. `Initialize()`: Set up platform systems (SDL, etc.)
-3. `Run()`: Main application loop
-4. Destructor: Cleanup all resources
+This ensures resources are always cleaned up, even if something goes wrong. The RAII pattern means you can't forget to shut down SDL or close a window.
 
-### Logging System
-
-Built on spdlog with engine-specific features:
-
-- **Categories**: Separate log streams for different systems (Core, Renderer, Audio, etc.)
-- **Levels**: Trace, Debug, Info, Warn, Error, Critical
-- **Multiple Outputs**: Console (with colors) and file logging
-- **Per-Category Filtering**: Set different log levels per category
-
-**Usage**:
+**Entry Point Pattern:**
 ```cpp
-SB_CORE_INFO("Engine initialized");
-SB_RENDERER_DEBUG("Rendering frame {}", frameNumber);
-SB_PHYSICS_WARN("Low physics timestep");
+class MyApp : public Application { /* ... */ };
+
+Application* CreateApplication() { return new MyApp(); }
+// No main() needed - engine provides it!
 ```
 
-### Configuration Manager
+### Logging
 
-Thread-safe configuration management:
+The logging system is built on spdlog but adds engine-specific features. Logs are organized by category (Core, Renderer, Audio, etc.) so you can filter what you see. Each category can have its own log level, so you might want verbose renderer logs but only warnings from the audio system.
 
-- **Layered Configs**: Default + user override merging
-- **JSON-Based**: Uses nlohmann/json for parsing and storage
-- **JSON Pointer API**: Precise value access and modification
-- **Automatic Persistence**: Save/load configuration files
+Logs go to both the console (with colors) and files. The file logging is automatically rotated to prevent huge log files.
 
-### AsyncIO
+### Error Handling
 
-File I/O utilities with async support:
+Every operation that can fail returns a Result type. This is similar to Rust's Result or Haskell's Either type. A Result either contains a value (success) or an error (failure).
 
-- **Synchronous Operations**: Blocking file read/write
-- **Asynchronous Operations**: Non-blocking with `std::future`
-- **JSON Support**: Built-in JSON parsing and serialization
-- **Filesystem Helpers**: Directory creation, file listing, existence checks
+You can chain operations together:
 
-### Result Type
-
-Type-safe error handling system:
-
-- **Result<T>**: Holds either a value or an error
-- **Error Codes**: Categorized error codes (Core, Platform, Graphics, etc.)
-- **Error Details**: Code, message, and source location
-- **Functional Operations**: `Map()`, `AndThen()`, `OrElse()` for chaining
-
-```
-Application
-    ├── Log
-    ├── Result
-    └── SDL (via SDLContext)
-
-ConfigurationManager
-    ├── AsyncIO
-    └── nlohmann/json
-
-AsyncIO
-    └── std::filesystem
-
-Log
-    └── spdlog
+```cpp
+auto result = OpenFile("config.txt")
+    .AndThen([](FileHandle& h) { return ReadData(h); })
+    .Map([](Data& d) { return ProcessData(d); });
 ```
 
-### Naming Conventions
+Errors include a code, a message, and the source location where they occurred. This makes debugging much easier than cryptic error codes or exception stack traces.
 
-- **Files**: PascalCase for headers/source files (e.g., `Application.h`)
-- **Classes**: PascalCase (e.g., `ConfigurationManager`)
-- **Functions**: PascalCase (e.g., `Initialize()`, `ReadTextFile()`)
-- **Variables**: camelCase with prefix for members (e.g., `m_mutex`, `m_defaultConfig`)
-- **Constants**: UPPER_SNAKE_CASE (e.g., `SB_CORE_INFO`)
+### Configuration
 
-## Build System
+Configuration uses JSON files with a two-layer system. Default configuration provides sensible values, and user configuration overrides specific settings. The system merges these automatically, so you can override just the window width without redefining everything.
 
-The engine uses **Premake5** for cross-platform build generation:
+Configuration is thread-safe, so you can read settings from any thread. Changes are persisted automatically.
 
-### Supported Platforms
+### Platform Management
 
-- **Windows**: Visual Studio projects (.vcxproj, .sln)
-- **Linux**: Makefiles or other generators
-- **macOS**: Xcode projects
+**SDLManager** handles SDL initialization and lifecycle. It's a singleton-like static interface that ensures SDL is initialized once and cleaned up properly. You never interact with SDL directly—SDLManager wraps all SDL operations.
 
-### Build Configuration
+**Window Management** is handled by the Window class, which wraps SDL's window functionality with a cleaner interface. Windows are created automatically during Application initialization based on the WindowConfig you provide. The Window class handles creation, showing, hiding, and cleanup automatically.
 
-- **Debug**: Development builds with symbols and assertions
-- **Release**: Optimized production builds
+Windows are created through a factory method that returns a Result, so you can handle creation failures gracefully. The Application class owns the window and provides access to it.
 
-### Project Structure
+### Event System
 
-- **Engine**: Static library containing core engine code
-- **Sandbox**: Executable application for testing engine features
+The event system consists of three layers:
 
-## Dependencies
+**Event Classes** - Base Event class with derived types for different event categories (WindowCloseEvent, KeyEvent, MouseButtonEvent, etc.). Events can be marked as handled to prevent further processing.
 
-### Core Dependencies
+**EventDispatcher** - The core event routing system. It manages subscriptions and dispatches events to registered listeners. The Application class owns an EventDispatcher instance.
 
-- **spdlog**: Fast, header-only logging library
-- **GLM**: OpenGL Mathematics library for vector/matrix operations
-- **nlohmann/json**: Modern C++ JSON library
-- **SDL3**: Cross-platform multimedia library (windowing, input, audio)
+**EventManager** - A singleton wrapper around EventDispatcher that provides global, easy-to-use access to the event system. You can subscribe to and dispatch events from anywhere using `EventManager::Get()`.
 
-### Development Dependencies
+SDL events are automatically converted to engine events each frame, so you work with a consistent interface regardless of the underlying platform. The EventManager is connected to the Application's EventDispatcher during initialization, so it's ready to use after `Application::Initialize()` succeeds.
 
-- **doctest**: Lightweight unit testing framework
-- **Premake5**: Build system generator
+## Resource Management
 
-### Dependency Management
+Sabora uses RAII (Resource Acquisition Is Initialization) throughout. This means resources are acquired in constructors and released in destructors. Smart pointers (unique_ptr and shared_ptr) manage memory automatically.
 
-Dependencies are included as git submodules or vendor libraries in `Engine/Vendor/`. This ensures:
+Platform resources are wrapped in manager classes:
+- **SDLManager** handles SDL initialization and shutdown
+- **Window** handles window creation and destruction
+- **Application** coordinates all platform systems
 
-- **Version Control**: Specific versions are tracked
-- **No External Builds**: Dependencies are built with the engine
-- **Cross-Platform**: Works on all supported platforms
+You never call SDL_Quit() or SDL_DestroyWindow() directly—the wrapper classes do it automatically.
 
-## Future Architecture Considerations
+This approach eliminates entire classes of bugs: no double-free errors, no leaked resources, no forgetting to clean up.
 
-### Planned Systems
+## Error Handling Strategy
 
-1. **Rendering System**: Graphics API abstraction (Vulkan/DirectX/OpenGL)
-2. **Scene Management**: Entity-Component-System (ECS) architecture
-3. **Resource Management**: Asset loading and caching system
-4. **Input System**: Unified input handling across platforms
-5. **Audio System**: 3D audio and sound effect management
-6. **Physics System**: Integration with physics engine
-7. **Scripting System**: Lua or similar scripting support
+The engine uses Result types instead of exceptions for several reasons:
 
-### Extension Points
+**Performance** - No exception overhead in the hot path. Error handling is explicit and fast.
 
-The architecture is designed to support:
+**Predictability** - You can see all error paths in your code. No hidden control flow from exceptions.
 
-- **Plugin System**: Loadable modules for engine extensions
-- **Custom Renderers**: Pluggable rendering backends
-- **Asset Importers**: Extensible asset loading pipeline
-- **Editor Integration**: Tools for game development
+**Debugging** - Errors include source location information, making it easy to find where problems occur.
 
-## Performance Considerations
+**Composability** - Results can be chained together naturally, making complex operations readable.
 
-### Design Decisions
-
-1. **Header-Only Libraries**: Where possible, use header-only libraries (spdlog, GLM, nlohmann/json) to reduce build times
-2. **Move Semantics**: Prefer move over copy for large objects
-3. **RAII**: Zero-cost abstractions for resource management
-4. **No Virtual Calls in Hot Paths**: Minimize virtual function calls in performance-critical code
-5. **Explicit Error Handling**: Avoid exception overhead in critical paths
-
-### Memory Management
-
-- **Stack Allocation**: Prefer stack allocation for small, short-lived objects
-- **Smart Pointers**: Use `unique_ptr` for exclusive ownership, `shared_ptr` for shared ownership
-- **No Raw Pointers**: Avoid raw pointers for ownership - use smart pointers or references
+Every I/O operation, initialization call, and critical system operation returns a Result. You check for success and handle failures explicitly.
 
 ## Threading Model
 
-### Current State
+Most engine systems run on the main thread. The main application loop processes events, updates systems, and renders frames sequentially.
 
-- **Main Thread**: Application loop, rendering, and most engine systems
-- **Async I/O**: File operations can run on background threads via `AsyncIO`
-- **Thread-Safe Core**: Configuration and logging are thread-safe
+File I/O can run asynchronously through the AsyncIO system. This allows loading assets without blocking the main thread.
 
-### Future Considerations
+Core systems like logging and configuration are thread-safe, so you can use them from any thread safely. Most other systems assume single-threaded access and should only be used from the main thread.
 
-- **Job System**: Multi-threaded task execution for parallel processing
-- **Render Thread**: Separate thread for rendering operations
-- **Asset Loading Thread**: Background asset loading and processing
+Future versions may add a job system for parallel processing, but the current architecture focuses on correctness and simplicity.
+
+## Build System
+
+Sabora uses Premake5 to generate platform-specific project files. This means you can work in Visual Studio on Windows, Xcode on macOS, or Makefiles on Linux, all from the same source.
+
+Dependencies are built from source and statically linked. This ensures consistent behavior across platforms and makes distribution easier. You don't need to worry about users having the right DLLs or shared libraries installed.
+
+## Module Organization
+
+The engine is organized into clear modules:
+
+**Core** - Fundamental systems like logging, error handling, configuration, and application lifecycle.
+
+**Platform** - Platform-specific code wrapped in clean interfaces:
+- **SDLManager** - Singleton-like static interface for SDL initialization and lifecycle management
+- **Window** - High-level window creation and management, wraps SDL window functionality
+- **Event System** - Type-safe event handling with three layers:
+  - `Event` base class and derived event types (WindowCloseEvent, KeyEvent, etc.)
+  - `EventDispatcher` - Core routing system owned by Application
+  - `EventManager` - Singleton wrapper providing global access to events
+- **EntryPoint** - Header-only entry point that provides `main()` function
+
+**Utilities** - Helper functions and classes used throughout the engine.
+
+Each module has a clear responsibility and minimal dependencies on other modules. This makes the codebase easier to understand and modify.
+
+### Entry Point Pattern
+
+The engine uses a header-only entry point pattern. `EntryPoint.h` defines `main()` in the global namespace. When you include `Sabora.h`, you get `main()` automatically. You only need to provide `CreateApplication()`:
+
+```cpp
+Application* CreateApplication() { return new MyApp(); }
+// main() is provided by EntryPoint.h
+```
+
+This pattern keeps application code simple and focused. The engine handles all the boilerplate of creating, initializing, running, and cleaning up the application.
+
+## Naming Conventions
+
+The project follows consistent naming to make code easier to read:
+
+- **Files**: PascalCase (Application.h, not application.h)
+- **Classes**: PascalCase (ConfigurationManager)
+- **Functions**: PascalCase (Initialize, ReadTextFile)
+- **Variables**: camelCase with m_ prefix for members (m_window, m_config)
+- **Constants**: UPPER_SNAKE_CASE (SB_CORE_INFO)
+
+These conventions are enforced throughout the codebase to maintain consistency.
+
+## Future Directions
+
+The current architecture provides a solid foundation. Planned additions include:
+
+- Rendering system with graphics API abstraction
+- Scene management using an Entity-Component-System
+- Resource management for assets
+- Input system unification
+- Audio system with 3D positioning
+- Physics integration
+- Scripting support
+
+The modular design makes it straightforward to add these systems without disrupting existing code.
+
+## Performance Considerations
+
+Performance is considered at every level:
+
+- Header-only libraries reduce build times
+- Move semantics avoid unnecessary copies
+- RAII has zero runtime overhead
+- Explicit error handling avoids exception costs
+- Minimal virtual function calls in hot paths
+
+The goal is to provide powerful abstractions without sacrificing performance. So you get the benefits of modern C++.
 
 ## Conclusion
 
-The Sabora Engine architecture prioritizes:
-
-1. **Maintainability**: Clear separation of concerns, well-documented interfaces
-2. **Performance**: Zero-cost abstractions, explicit error handling
-3. **Extensibility**: Modular design allows easy addition of new systems
-4. **Reliability**: RAII, explicit error handling, thread-safe core systems
-
-This architecture provides a solid foundation for building a modern game engine while maintaining code quality and performance.
-
+Sabora's architecture prioritizes clarity, safety, and performance. Every design decision is made with these goals in mind. The result is an engine that's both powerful and understandable, making it easier to build great games.

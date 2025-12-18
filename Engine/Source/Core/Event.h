@@ -216,6 +216,17 @@ namespace Sabora
         }
 
         /**
+         * @brief Unsubscribe from events of type T using a subscription ID.
+         * @param subscriptionId ID returned from Subscribe().
+         */
+        template<typename T>
+        void Unsubscribe(size_t subscriptionId)
+        {
+            static_assert(std::is_base_of_v<Event, T>, "T must inherit from Event");
+            Unsubscribe(std::type_index(typeid(T)), subscriptionId);
+        }
+
+        /**
          * @brief Dispatch an event to all subscribed listeners.
          * @param event The event to dispatch.
          * @return True if the event was handled by at least one listener.

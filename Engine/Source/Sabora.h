@@ -5,3 +5,5 @@
 #include "Core/AsyncIO.h"
 #include "Core/ConfigurationManager.h"
 #include "Core/Application.h"
+#include "Core/EventManager.h"
+#include "Core/EntryPoint.h"

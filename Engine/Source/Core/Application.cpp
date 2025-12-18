@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "SDLManager.h"
+#include "EventManager.h"
 #include "Log.h"
 #include <SDL3/SDL.h>
 
@@ -36,6 +37,9 @@ namespace Sabora
 
         m_Window = std::move(windowResult).Value();
         m_Window->Show();
+
+        // Setup EventManager with our dispatcher
+        EventManager::Get().SetDispatcher(m_EventDispatcher);
 
         // Setup event handlers
         SetupEventHandlers();

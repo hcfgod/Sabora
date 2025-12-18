@@ -1,112 +1,261 @@
 # Sabora Engine
 
-A modern C++ game engine built with performance and ease of use in mind.
+Sabora is a modern C++ game engine designed for developers who want performance, clarity, and control. Built with C++20 and a focus on clean architecture, it provides the foundation for creating games and interactive applications across Windows, Linux, and macOS.
 
-## Features
+## What Makes Sabora Different
 
-- **Modern C++20** - Leveraging the latest C++ features
-- **Comprehensive Logging System** - Built on top of spdlog with game engine specific features
-- **Cross-Platform Build System** - Using Premake5 for easy project generation
-- **Modular Architecture** - Clean separation of concerns with well-defined interfaces
+Sabora prioritizes developer experience without sacrificing performance. Every system is designed with explicit error handling, comprehensive logging, and clear interfaces. You won't find magic happening behind the scenes—everything is transparent and controllable.
 
-## Logging System
+The engine uses modern C++ patterns throughout: RAII for resource management, Result types for error handling instead of exceptions, and a modular architecture that makes it easy to understand and extend.
 
-The Sabora Engine includes a powerful logging system built on top of spdlog, similar to the Cherno game engine series.
+## Getting Started
 
-### Basic Usage
+### Prerequisites
+
+You'll need a C++20 compatible compiler and a few build tools. The setup scripts will help you install everything you need automatically.
+
+**Windows:**
+- Visual Studio 2022 or later (with C++ desktop development workload)
+- PowerShell 5.1 or later
+
+**Linux:**
+- GCC 10+ or Clang 12+
+- CMake 3.20+
+- Git
+
+**macOS:**
+- Xcode 13+ (with command line tools)
+- Homebrew (installed automatically if needed)
+
+### Quick Start
+
+Clone the repository and run the setup script for your platform:
+
+**Windows:**
+```powershell or command prompt
+.\Setup.bat
+```
+
+**Linux:**
+```bash
+./Setup_linux.sh
+```
+
+**macOS:**
+```bash
+./Setup_macos.sh
+```
+
+The setup scripts will automatically install any missing dependencies, build the required libraries, and generate project files. Once complete, you can open the generated solution or project files in your IDE and start building.
+
+### Building Your First Application
+
+After setup, create a simple application. The engine handles `main()` for you—just provide your application class:
 
 ```cpp
 #include "Sabora.h"
+#include <SDL3/SDL.h>
 
-// Simple logging
-SB_INFO("Application started");
-SB_WARN("This is a warning");
-SB_ERROR("An error occurred");
+class MyApp : public Sabora::Application
+{
+public:
+    MyApp() : Application({ "My Game", Sabora::WindowConfig{ "My Game", 1280, 720 } })
+    {
+        // Subscribe to events using EventManager
+        EventManager::Get().Subscribe<KeyEvent>(
+            [this](const KeyEvent& e) {
+                if (e.GetKey() == SDLK_ESCAPE && e.IsPressed())
+                {
+                    RequestClose();
+                }
+            }
+        );
+    }
+    
+    void OnUpdate(float deltaTime) override
+    {
+        // Your game logic here
+    }
+};
 
-// Category-based logging
-SB_CORE_INFO("Core system initialized");
-SB_RENDERER_DEBUG("Rendering frame");
-SB_PHYSICS_WARN("Physics simulation warning");
-SB_AUDIO_ERROR("Audio system error");
+// Provide CreateApplication() - engine handles the rest
+Sabora::Application* CreateApplication()
+{
+    return new MyApp();
+}
 ```
 
-### Log Levels
+That's it. No `main()` function needed—the engine provides it automatically. Just include `Sabora.h` and provide `CreateApplication()`.
 
-- `TRACE` - Detailed trace information
-- `DEBUG` - Debug information
-- `INFO` - General information
-- `WARN` - Warning messages
-- `ERROR` - Error messages
-- `CRITICAL` - Critical errors
+## Core Systems
 
-### Log Categories
+### Entry Point
 
-- `CORE` - Core engine systems
-- `RENDERER` - Graphics and rendering
-- `AUDIO` - Audio systems
-- `PHYSICS` - Physics simulation
-- `INPUT` - Input handling
-- `SCENE` - Scene management
-- `SCRIPT` - Scripting systems
-- `NETWORK` - Networking
-- `EDITOR` - Editor tools
-- `CLIENT` - Client application
+The engine provides `main()` automatically. You don't write a `main()` function—just provide `CreateApplication()` and the engine handles the rest. This keeps your application code focused on game logic rather than boilerplate.
 
-### Format-based Logging
+Simply include `Sabora.h` (which includes `EntryPoint.h`) and define `CreateApplication()`. The engine's `main()` will call it, initialize your application, run the main loop, and clean up automatically.
+
+### Logging
+
+Sabora includes a comprehensive logging system built on spdlog. Logs are organized by category, making it easy to filter and debug specific systems.
 
 ```cpp
-// Format strings with arguments
-SB_INFO("Player {} joined at position ({:.2f}, {:.2f})", playerName, x, y);
-SB_CORE_DEBUG("Frame time: {:.3f}ms", frameTime);
+SB_CORE_INFO("Engine initialized successfully");
+SB_RENDERER_DEBUG("Rendered frame in {:.2f}ms", frameTime);
+SB_PHYSICS_WARN("Physics timestep is too large");
 ```
 
-## Building
+Categories include Core, Renderer, Audio, Physics, Input, Scene, Script, Network, Editor, and Client. Each category supports all standard log levels from Trace to Critical.
 
-### Windows
+### Error Handling
 
-```powershell
-# Using PowerShell
-.\Setup.bat -Configuration Debug
+The engine uses a Result type for explicit error handling. No exceptions are thrown—every operation that can fail returns a Result that you can inspect and handle explicitly.
 
-# Or double-click build.bat
+```cpp
+auto windowResult = Window::Create(config);
+if (windowResult.IsFailure())
+{
+    SB_CORE_ERROR("Window creation failed: {}", windowResult.GetError().ToString());
+    return;
+}
+auto window = std::move(windowResult).Value();
 ```
 
-### Linux
+### Window Management
+
+Windows are created automatically when you initialize your Application. The Window class handles all platform-specific details while providing a clean, consistent interface. Access the window through your Application instance:
+
+```cpp
+auto* window = app.GetWindow();
+window->SetTitle("New Title");
+int32_t width = window->GetWidth();
+```
+
+Window configuration is provided when creating your Application:
+
+```cpp
+WindowConfig config;
+config.title = "My Game";
+config.width = 1920;
+config.height = 1080;
+config.resizable = true;
+
+Application app({ "My Game", config });
+```
+
+### Event System
+
+The event system provides type-safe event handling through the EventManager singleton. Subscribe to events from anywhere in your code. EventManager is automatically connected during Application initialization, so it's ready to use in your Application constructor:
+
+```cpp
+class MyApp : public Application
+{
+public:
+    MyApp() : Application({ "My Game", WindowConfig{...} })
+    {
+        // EventManager is ready to use here
+        EventManager::Get().Subscribe<WindowCloseEvent>([](const WindowCloseEvent& e) {
+            // Handle window close
+        });
+
+        EventManager::Get().Subscribe<KeyEvent>([](const KeyEvent& e) {
+            if (e.GetKey() == SDLK_ESCAPE && e.IsPressed())
+            {
+                // Handle escape key
+            }
+        });
+    }
+};
+
+// Dispatch custom events from anywhere
+MyCustomEvent event(data);
+EventManager::Get().Dispatch(event);
+```
+
+Events are automatically processed each frame. SDL events are converted to engine events transparently, so you work with a consistent interface regardless of platform.
+
+### Configuration Management
+
+Configuration files use JSON with a layered system: default values merged with user overrides. Thread-safe and easy to use.
+
+```cpp
+ConfigurationManager config("defaults.json", "user.json");
+config.Initialize();
+config.SetValue("/window/width", 1920);
+auto merged = config.Get();
+```
+
+## Integrated Libraries
+
+Sabora includes a comprehensive set of libraries for game development:
+
+**Graphics & Rendering:**
+- GLAD (OpenGL 4.6 Core loader)
+- GLM (mathematics library)
+- Shaderc (shader compilation)
+- SPIRV-Cross (shader reflection)
+- MSDF-Atlas-Gen (signed distance field font rendering)
+- stb_image (image loading)
+
+**Audio:**
+- OpenAL Soft (3D audio)
+- libsndfile (audio file I/O)
+- libogg, libvorbis (Ogg Vorbis support)
+- libFLAC (FLAC support)
+- libopus, libopusenc, opusfile (Opus codec support)
+- minimp3 (MP3 decoding)
+
+**Physics:**
+- Jolt Physics (3D physics simulation)
+- Box2D (2D physics)
+
+**UI & Tools:**
+- ImGui (immediate mode GUI)
+- Freetype (font rendering)
+- msdf-atlas-gen
+
+**Platform:**
+- SDL3 (windowing, input, audio)
+
+**Utilities:**
+- spdlog (logging)
+- nlohmann/json (JSON parsing)
+- doctest (unit testing)
+
+All libraries are built from source and statically linked, ensuring consistent behavior across platforms.
+
+## Testing
+
+The engine includes a comprehensive test suite using doctest. Run tests to verify everything is working correctly:
 
 ```bash
-./Setup_linux.sh --config Debug --platforms x64
+# After building
+./Build/bin/Debug_x64/Tests/Tests
 ```
 
-### macOS
-
-```bash
-./Setup_macos.sh --config Debug --platforms x64
-```
-
-## Project Structure
-
-```
-Sabora/
-├── Engine/           # Core engine code
-│   ├── Source/      # Source files
-│   └── Vendor/      # Third-party libraries
-├── Sandbox/         # Test application
-├── Scripts/         # Build scripts
-└── Tools/           # Development tools
-```
-
-## Dependencies
-
-- **spdlog** - Fast logging library
-- **GLM** - Mathematics library
-- **nlohmann/json** - JSON parsing
-- **doctest** - Unit testing framework
+Tests cover all core systems and library integrations. See the Tests directory for more information.
 
 ## Documentation
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)**: Detailed architecture documentation, design principles, and system organization
-- **[CONTRIBUTING.md](CONTRIBUTING.md)**: Guidelines for contributing to the project
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Deep dive into the engine's design and architecture
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guidelines for contributing to the project
+
+## Development Philosophy
+
+Sabora follows a few core principles:
+
+**Explicit over Implicit** - No hidden behavior or magic. If something happens, you can see why and how.
+
+**Performance by Design** - Zero-cost abstractions where possible. RAII ensures resources are managed efficiently without runtime overhead.
+
+**Developer Experience** - Clear APIs, comprehensive logging, and helpful error messages make development pleasant and productive.
+
+**Modularity** - Systems are independent and can be understood in isolation. Dependencies are explicit and minimal.
 
 ## License
 
 [Add your license here]
+
+## Acknowledgments
+
+Sabora builds on the excellent work of many open-source projects. Special thanks to all the library maintainers who make this possible.

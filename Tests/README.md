@@ -1,84 +1,81 @@
-# Sabora Engine Tests
+# Test Suite
 
-This directory contains the test suite for the Sabora Engine using doctest.
-
-## Structure
-
-- `Source/main.cpp` - Test runner entry point
-- `Source/Test*.cpp` - Unit tests for individual components
-- `Source/TestIntegration.cpp` - Integration tests
+The Tests directory contains the engine's test suite, built with doctest. These tests verify that all systems work correctly and help catch regressions when making changes.
 
 ## Running Tests
 
-### Windows
+After building the project, you can run tests from the command line:
+
+**Windows:**
 ```powershell
-# Generate project files
-Tools\Premake\premake5.exe vs2022
-
-# Build tests
-msbuild Build\Sabora.sln /p:Configuration=Debug /p:Platform=x64 /p:Project=Tests
-
-# Run tests
-Build\bin\Debug_x64\Tests\Tests.exe
+.\Build\bin\Debug_x64\Tests\Tests.exe
 ```
 
-### Linux
+**Linux/macOS:**
 ```bash
-# Generate project files
-Tools/Premake/premake5 gmake2
-
-# Build tests
-cd Build
-make Tests config=debug_x64 -j$(nproc)
-
-# Run tests
-./bin/Debug_x64/Tests/Tests
+./Build/bin/Debug_x64/Tests/Tests
 ```
 
-### macOS
-```bash
-# Generate project files
-Tools/Premake/premake5 gmake2
+Tests will run automatically and report results. You'll see which tests passed, which failed, and any assertion messages from failures.
 
-# Build tests
-cd Build
-make Tests config=debug_x64 -j$(sysctl -n hw.ncpu)
+## Test Organization
 
-# Run tests
-./bin/Debug_x64/Tests/Tests
-```
+Tests are organized by component. Each test file covers a specific system:
 
-## Test Options
+- `TestLog.cpp` - Logging system tests
+- `TestResult.cpp` - Error handling tests
+- `TestConfigurationManager.cpp` - Configuration system tests
+- `TestAsyncIO.cpp` - File I/O tests
+- `TestGLAD.cpp` - OpenGL loader tests
+- And more...
 
-doctest supports various command-line options:
-
-- `--success` - Show successful test cases
-- `--no-exitcode` - Don't return exit code based on test results
-- `--reporters=xml` - Output results in XML format
-- `--help` - Show all available options
+Integration tests verify that multiple systems work together correctly.
 
 ## Writing Tests
 
-Tests are organized by component. Each test file should:
+When adding new features or fixing bugs, add tests. A good test:
 
-1. Include `doctest/doctest.h`
-2. Include the component being tested
-3. Use `TEST_SUITE` to group related tests
-4. Use `TEST_CASE` for individual test cases
-5. Use `CHECK`, `REQUIRE`, etc. for assertions
+- Has a clear, descriptive name
+- Tests one specific thing
+- Uses appropriate assertions (CHECK for non-critical, REQUIRE for critical)
+- Is independent of other tests
 
 Example:
+
 ```cpp
-#include <doctest/doctest.h>
+#include "doctest.h"
 #include "MyComponent.h"
 
 TEST_SUITE("MyComponent")
 {
-    TEST_CASE("Feature works correctly")
+    TEST_CASE("Initializes with default values")
     {
         MyComponent component;
-        CHECK(component.DoSomething() == true);
+        CHECK(component.GetValue() == 0);
+    }
+    
+    TEST_CASE("Handles invalid input gracefully")
+    {
+        MyComponent component;
+        auto result = component.Process(-1);
+        REQUIRE(result.IsFailure());
     }
 }
 ```
 
+## Test Options
+
+doctest supports various command-line options for controlling test execution:
+
+- `--success` - Show successful test output
+- `--no-exitcode` - Don't return error code on failure
+- `--reporters=xml` - Output results in XML format
+- `--help` - Show all available options
+
+Run tests with `--help` to see all options.
+
+## Continuous Integration
+
+Tests run automatically on every pull request via GitHub Actions. All tests must pass before code can be merged. This ensures the codebase stays stable and working.
+
+If you're making changes, make sure tests pass locally before submitting a pull request. This saves time and keeps the CI pipeline green.

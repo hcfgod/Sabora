@@ -26,6 +26,11 @@ project "Sandbox"
         "Source/**.cpp",
         "Source/**.cc",
     }
+    
+    -- Exclude main.cpp if it exists (engine handles main now via EntryPoint.h)
+    excludes {
+        "Source/main.cpp",
+    }
 
     includedirs {
         "Source",
