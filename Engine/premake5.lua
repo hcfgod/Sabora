@@ -153,7 +153,8 @@ filter {}
     defines { "AL_LIBTYPE_STATIC" }
 
     -- PCH support for GCC/Clang (MSVC handles PCH automatically)
-    filter { "toolset:gcc or toolset:clang" }
+    -- Only apply to C++ files, not C files (Box2D, glad)
+    filter { "toolset:gcc or toolset:clang", "files:**.cpp or files:**.cc" }
         buildoptions { "-include", "pch.h" }
     filter {}
 
