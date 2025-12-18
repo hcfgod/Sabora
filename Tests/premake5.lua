@@ -50,6 +50,7 @@ project "Tests"
         "../Engine/" .. Dependencies.Libopus.IncludePath,
         "../Engine/" .. Dependencies.Libopusenc.IncludePath,
         "../Engine/" .. Dependencies.Opusfile.IncludePath,
+        "../Engine/" .. Dependencies.GLAD.IncludePath,
     }
 
     -- Library directories for dependencies

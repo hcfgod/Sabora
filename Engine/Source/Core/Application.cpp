@@ -21,6 +21,7 @@
 #include <box2d/box2d.h>
 #include <imgui.h>
 #include <stb_image.h>
+#include <glad/gl.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
@@ -552,6 +553,12 @@ namespace Sabora
         {
             SB_CORE_WARN("stb_image failed to decode tiny PNG fixture");
         }
+
+        // Test GLAD - verify OpenGL loader is available
+        // Note: GLAD requires an OpenGL context to load functions, so we just verify headers compile
+        // Full initialization with gladLoadGL() requires a valid OpenGL context from SDL3
+        SB_CORE_INFO("GLAD OpenGL loader headers verified (OpenGL 4.6 Core profile)");
+        SB_CORE_INFO("Note: gladLoadGL() requires an OpenGL context - call after creating window with SDL3");
 
         SB_CORE_INFO("Application initialization complete.");
         return Result<void>::Success();

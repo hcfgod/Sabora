@@ -279,6 +279,14 @@ install_libopusenc() {
   bash "$SCRIPT_DIR/build_libopusenc_macos.sh"
 }
 
+# Build GLAD (OpenGL loader generator)
+install_glad() {
+  local vendor_dir="$1"
+  echo "Building GLAD..."
+  chmod +x "$SCRIPT_DIR/build_glad_macos.sh" || true
+  bash "$SCRIPT_DIR/build_glad_macos.sh"
+}
+
 # Install shaderc and SPIRV-Cross
 install_shaderc "$VENDOR_DIR"
 install_spirv_cross "$VENDOR_DIR"
@@ -293,5 +301,6 @@ install_libflac "$VENDOR_DIR"
 install_libopus "$VENDOR_DIR"
 install_libopusenc "$VENDOR_DIR"
 install_opusfile "$VENDOR_DIR"
+install_glad "$VENDOR_DIR"
 
 echo "Dependencies are ready under $VENDOR_DIR"

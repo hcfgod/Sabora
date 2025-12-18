@@ -34,6 +34,7 @@ project "Engine"
         "Vendor/**.c",
         "!Vendor/stb/stb_image.cpp",
         "!Vendor/ImGui/**.cpp",
+        "!Vendor/glad/Source/gl.c",
     }
 
     -- Explicitly compile the stb_image implementation unit (header-only library)
@@ -43,7 +44,8 @@ project "Engine"
         "Vendor/ImGui/imgui_draw.cpp",
         "Vendor/ImGui/imgui_tables.cpp",
         "Vendor/ImGui/imgui_widgets.cpp",
-        "Vendor/ImGui/imgui_demo.cpp"
+        "Vendor/ImGui/imgui_demo.cpp",
+        "Vendor/glad/Source/gl.c",
     }
 
 -- On non-Windows, compile Box2D sources directly (avoid missing archives on CI)
@@ -78,6 +80,7 @@ filter {}
         Dependencies.Libopus.IncludePath,
         Dependencies.Libopusenc.IncludePath,
         Dependencies.Opusfile.IncludePath,
+        Dependencies.GLAD.IncludePath,
     }
 
     -- Flexible library directory path based on configuration

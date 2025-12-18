@@ -486,6 +486,18 @@ Dependencies.Jolt = {
     }
 }
 
+-- GLAD Configuration (header-only OpenGL loader, generated code)
+Dependencies.GLAD = {
+    -- Version string (update when pinning to specific version)
+    Version = "latest",
+    HeaderOnly = true,
+    
+    -- Paths relative to Engine directory
+    -- GLAD generates code that goes into include/ and Source/
+    IncludePath = "Vendor/glad/include",
+    SourcePath = "Vendor/glad/Source"
+}
+
 -- Dear ImGui Configuration (docking branch, immediate-mode GUI)
 Dependencies.ImGui = {
     Version = "docking",

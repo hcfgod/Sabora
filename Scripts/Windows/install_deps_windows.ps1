@@ -255,6 +255,13 @@ function Install-Libopusenc($vendorDir) {
     & (Join-Path $PSScriptRoot "build_libopusenc_windows.ps1")
 }
 
+# Build GLAD (OpenGL loader generator)
+function Install-GLAD($vendorDir) {
+    $gladDir = Join-Path $vendorDir "glad"
+    Write-Host "Building GLAD..."
+    & (Join-Path $PSScriptRoot "build_glad_windows.ps1")
+}
+
 # Install shaderc and SPIRV-Cross
 Install-Shaderc $vendor
 Install-SPIRVCross $vendor
@@ -269,5 +276,6 @@ Install-Libflac $vendor
 Install-Libopus $vendor
 Install-Libopusenc $vendor
 Install-Opusfile $vendor
+Install-GLAD $vendor
 
 Write-Host "Dependencies are ready under $vendor"
