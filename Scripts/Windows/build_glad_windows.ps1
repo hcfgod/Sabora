@@ -35,6 +35,17 @@ if (-not (Test-Command python)) {
 
 Write-Host "Python is available!" -ForegroundColor Green
 
+# Install GLAD dependencies (jinja2 is required for GLAD 2.0)
+Write-Host "Installing GLAD Python dependencies..." -ForegroundColor Green
+python -m pip install --upgrade pip --quiet
+python -m pip install jinja2 --quiet
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to install GLAD Python dependencies"
+}
+
+Write-Host "GLAD Python dependencies installed successfully" -ForegroundColor Green
+
 $root = (Resolve-Path "$PSScriptRoot\..\..").Path
 $gladDir = Join-Path $root "Engine\Vendor\glad"
 $gladIncludeDir = Join-Path $gladDir "include"

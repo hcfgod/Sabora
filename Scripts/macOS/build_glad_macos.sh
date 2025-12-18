@@ -64,6 +64,18 @@ fi
 
 echo "Python is available!" >&2
 
+# Install GLAD dependencies (jinja2 is required for GLAD 2.0)
+echo "Installing GLAD Python dependencies..." >&2
+python3 -m pip install --upgrade pip --quiet >&2
+python3 -m pip install jinja2 --quiet >&2
+
+if [[ $? -ne 0 ]]; then
+    echo "Error: Failed to install GLAD Python dependencies" >&2
+    exit 1
+fi
+
+echo "GLAD Python dependencies installed successfully" >&2
+
 # Check if GLAD directory exists
 if [[ ! -d "$GLAD_DIR" ]] || [[ ! -f "$GLAD_DIR/glad/__main__.py" ]]; then
     echo "GLAD not found. Cloning GLAD..." >&2
