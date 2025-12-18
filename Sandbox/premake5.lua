@@ -26,11 +26,6 @@ project "Sandbox"
         "Source/**.cpp",
         "Source/**.cc",
     }
-    
-    -- Exclude main.cpp if it exists (engine handles main now via EntryPoint.h)
-    excludes {
-        "Source/main.cpp",
-    }
 
     includedirs {
         "Source",
@@ -59,6 +54,9 @@ project "Sandbox"
     -- Link against Engine
     links { "Engine" }
 
+    -- Enable engine entry point (provides main() function)
+    defines { "SABORA_USE_ENTRY_POINT" }
+    
     -- SDL3 static linking - must be linked directly since Engine is a static library
     defines { "SDL_STATIC" }
     
