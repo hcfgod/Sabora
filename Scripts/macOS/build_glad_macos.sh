@@ -64,6 +64,19 @@ fi
 
 echo "Python is available!" >&2
 
+# Create a virtual environment for GLAD dependencies (required on macOS due to PEP 668)
+VENV_DIR="$GLAD_DIR/venv"
+echo "Creating Python virtual environment for GLAD..." >&2
+python3 -m venv "$VENV_DIR"
+
+if [[ $? -ne 0 ]]; then
+    echo "Error: Failed to create Python virtual environment" >&2
+    exit 1
+fi
+
+# Activate virtual environment
+source "$VENV_DIR/bin/activate"
+
 # Install GLAD dependencies (jinja2 is required for GLAD 2.0)
 echo "Installing GLAD Python dependencies..." >&2
 python3 -m pip install --upgrade pip --quiet >&2
