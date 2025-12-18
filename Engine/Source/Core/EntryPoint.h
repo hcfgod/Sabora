@@ -1,23 +1,19 @@
-#pragma once
-
-#include "Application.h"
-#include "Log.h"
-
-// Forward declaration - must be provided by the application
-extern Sabora::Application* CreateApplication();
+#include "Sabora.h"
 
 /**
- * @brief Application entry point.
+ * @brief Application entry point implementation.
  * 
  * This function is provided by the engine. It handles the application lifecycle.
  * The application must provide a CreateApplication() function that returns an Application instance.
  */
+extern Sabora::Application* CreateApplication();
+
 int main()
 {
     using namespace Sabora;
     
     // Create the application instance
-    Application* app = CreateApplication();
+    Application* app = Sabora::CreateApplication();
     if (app == nullptr)
     {
         return 1;

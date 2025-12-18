@@ -74,6 +74,11 @@ project "Tests"
     -- Link against Engine library
     links { "Engine" }
 
+    -- PCH support for GCC/Clang (MSVC handles PCH automatically)
+    filter { "toolset:gcc or toolset:clang" }
+        buildoptions { "-include", "pch.h" }
+    filter {}
+
     -- Note: DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN is defined in main.cpp, not here
     -- to avoid redefinition warnings
 

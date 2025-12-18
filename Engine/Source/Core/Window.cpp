@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Window.h"
 #include "Log.h"
 #include <SDL3/SDL.h>

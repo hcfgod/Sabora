@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Sabora.h"
 #include <SDL3/SDL.h>
 
@@ -60,7 +61,7 @@ public:
  * This function is called by EntryPoint::Main() to create your application.
  * Simply return a new instance of your Application-derived class.
  */
-Application* CreateApplication()
+Sabora::Application* Sabora::CreateApplication()
 {
     return new SandboxApp();
 }

@@ -19,6 +19,10 @@ project "Engine"
     targetdir ("%{wks.location}/bin/%{cfg.buildcfg}_%{cfg.platform}/%{prj.name}")
     objdir    ("%{wks.location}/obj/%{cfg.buildcfg}_%{cfg.platform}/%{prj.name}")
 
+    -- Precompiled header configuration
+    pchheader "pch.h"
+    pchsource "Source/pch.cpp"
+
     files {
         "Source/**.h",
         "Source/**.hpp",
@@ -47,6 +51,39 @@ project "Engine"
         "Vendor/ImGui/imgui_demo.cpp",
         "Vendor/glad/Source/gl.c",
     }
+
+    -- Disable PCH for vendor files (they should not use engine PCH)
+    filter { "files:Vendor/stb/stb_image.cpp" }
+        flags { "NoPCH" }
+    filter {}
+    
+    filter { "files:Vendor/ImGui/imgui.cpp" }
+        flags { "NoPCH" }
+    filter {}
+    
+    filter { "files:Vendor/ImGui/imgui_draw.cpp" }
+        flags { "NoPCH" }
+    filter {}
+    
+    filter { "files:Vendor/ImGui/imgui_tables.cpp" }
+        flags { "NoPCH" }
+    filter {}
+    
+    filter { "files:Vendor/ImGui/imgui_widgets.cpp" }
+        flags { "NoPCH" }
+    filter {}
+    
+    filter { "files:Vendor/ImGui/imgui_demo.cpp" }
+        flags { "NoPCH" }
+    filter {}
+    
+    filter { "files:Vendor/glad/Source/gl.c" }
+        flags { "NoPCH" }
+    filter {}
+    
+    filter { "files:Vendor/Box2D/src/**.c" }
+        flags { "NoPCH" }
+    filter {}
 
 -- On non-Windows, compile Box2D sources directly (avoid missing archives on CI)
 filter "system:not windows"
@@ -114,6 +151,11 @@ filter {}
     
     -- OpenAL Soft static linking
     defines { "AL_LIBTYPE_STATIC" }
+
+    -- PCH support for GCC/Clang (MSVC handles PCH automatically)
+    filter { "toolset:gcc or toolset:clang" }
+        buildoptions { "-include", "pch.h" }
+    filter {}
 
     filter "system:windows"
         links { "setupapi", "winmm", "imm32", "version", "ole32", "oleaut32", "uuid", "avrt" }

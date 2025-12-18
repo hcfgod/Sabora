@@ -19,12 +19,17 @@ project "Sandbox"
     targetdir ("%{wks.location}/bin/%{cfg.buildcfg}_%{cfg.platform}/%{prj.name}")
     objdir    ("%{wks.location}/obj/%{cfg.buildcfg}_%{cfg.platform}/%{prj.name}")
 
+    -- Precompiled header configuration (uses Engine's PCH)
+    pchheader "pch.h"
+    pchsource "../Engine/Source/pch.cpp"
+
     files {
         "Source/**.h",
         "Source/**.hpp",
         "Source/**.inl",
         "Source/**.cpp",
         "Source/**.cc",
+        "../Engine/Source/pch.cpp",  -- Include PCH source file
     }
 
     includedirs {
@@ -62,6 +67,11 @@ project "Sandbox"
     
     -- OpenAL Soft static linking
     defines { "AL_LIBTYPE_STATIC" }
+
+    -- PCH support for GCC/Clang (MSVC handles PCH automatically)
+    filter { "toolset:gcc or toolset:clang" }
+        buildoptions { "-include", "pch.h" }
+    filter {}
     
     -- Library directory for SDL3 and shader libraries (relative to Sandbox, so we need to go up to Engine)
     libdirs { 

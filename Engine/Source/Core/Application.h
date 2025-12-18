@@ -121,4 +121,5 @@ namespace Sabora
         Clock::time_point m_LastFrame;
     };
 
+    Application* CreateApplication();
 } // namespace Sabora
