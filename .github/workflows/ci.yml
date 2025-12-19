@@ -266,7 +266,18 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake git python3
+        sudo apt-get install -y build-essential cmake git python3 \
+          # X11 development libraries
+          libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
+          libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libxtst-dev libxrender-dev \
+          # Wayland development libraries
+          libwayland-dev libwayland-egl1 libwayland-cursor0 libxkbcommon-dev \
+          # Graphics libraries (EGL/GLES/DRM/GBM)
+          libegl1-mesa-dev libgles2-mesa-dev libdrm-dev libgbm-dev \
+          # Audio libraries
+          libasound2-dev libpulse-dev libjack-jackd2-dev libpipewire-0.3-dev \
+          # USB and system libraries
+          libusb-1.0-0-dev libdbus-1-dev libudev-dev
 
     - name: Cache vendor libraries
       id: cache-vendor

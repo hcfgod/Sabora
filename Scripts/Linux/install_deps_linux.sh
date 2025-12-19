@@ -105,11 +105,11 @@ install_sdl3_dependencies() {
             sudo apt-get update
             sudo apt-get install -y \
                 libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
-                libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libxtst-dev \
-                libwayland-dev libxkbcommon-dev wayland-protocols \
+                libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libxtst-dev libxrender-dev \
+                libwayland-dev libwayland-egl1 libwayland-cursor0 libxkbcommon-dev wayland-protocols \
                 libegl1-mesa-dev libgles2-mesa-dev \
-                libasound2-dev libpulse-dev libjack-dev libpipewire-0.3-dev \
-                libdbus-1-dev libibus-1.0-dev \
+                libasound2-dev libpulse-dev libjack-jackd2-dev libpipewire-0.3-dev \
+                libdbus-1-dev \
                 libudev-dev libusb-1.0-0-dev \
                 libdrm-dev libgbm-dev
             ;;

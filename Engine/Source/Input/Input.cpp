@@ -7,7 +7,7 @@ namespace Sabora
 {
     bool Input::IsKeyPressed(Scancode scancode) const noexcept
     {
-        if (scancode >= MAX_SCANCODES)
+        if (scancode < 0 || static_cast<size_t>(scancode) >= MAX_SCANCODES)
         {
             return false;
         }
@@ -16,7 +16,7 @@ namespace Sabora
 
     bool Input::IsKeyDown(Scancode scancode) const noexcept
     {
-        if (scancode >= MAX_SCANCODES)
+        if (scancode < 0 || static_cast<size_t>(scancode) >= MAX_SCANCODES)
         {
             return false;
         }
@@ -25,7 +25,7 @@ namespace Sabora
 
     bool Input::IsKeyUp(Scancode scancode) const noexcept
     {
-        if (scancode >= MAX_SCANCODES)
+        if (scancode < 0 || static_cast<size_t>(scancode) >= MAX_SCANCODES)
         {
             return false;
         }
@@ -180,7 +180,7 @@ namespace Sabora
 
     void Input::OnKeyPressed(Scancode scancode, bool isRepeat)
     {
-        if (scancode >= MAX_SCANCODES)
+        if (scancode < 0 || static_cast<size_t>(scancode) >= MAX_SCANCODES)
         {
             return;
         }
@@ -210,7 +210,7 @@ namespace Sabora
 
     void Input::OnKeyReleased(Scancode scancode)
     {
-        if (scancode >= MAX_SCANCODES)
+        if (scancode < 0 || static_cast<size_t>(scancode) >= MAX_SCANCODES)
         {
             return;
         }
