@@ -1,9 +1,11 @@
 #pragma once
 
-// Include chrono first to avoid conflicts with system time.h on Windows
-// Note: On Windows, file system is case-insensitive, so Time.h might conflict with system time.h
-// We ensure chrono is included explicitly before any potential conflicts
+// CRITICAL: Include chrono FIRST before any other headers to avoid Windows case-insensitivity conflicts
+// On Windows, file system is case-insensitive, so Time.h might conflict with system time.h
+// We must include chrono before any system headers that might pull in time.h
 #include <chrono>
+
+// Now include other headers
 #include <cstdint>
 #include <algorithm>
 #include <cmath>
@@ -205,7 +207,8 @@ namespace Sabora
         static size_t s_DeltaTimeHistoryIndex;
 
         // High-precision clock for realtime tracking
-        using Clock = std::chrono::high_resolution_clock;
+        // Use fully qualified name to avoid any potential conflicts
+        using Clock = ::std::chrono::high_resolution_clock;
         static Clock::time_point s_StartTime;
 
         // Helper to clamp delta time

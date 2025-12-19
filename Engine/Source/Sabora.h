@@ -1,5 +1,8 @@
 #pragma once
 
+// Include chrono early to prevent Windows time.h conflicts when including Time.h
+#include <chrono>
+
 #include "Core/Log.h"
 #include "Core/Result.h"
 #include "Core/AsyncIO.h"

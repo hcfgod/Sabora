@@ -16,7 +16,7 @@ namespace Sabora
     float Time::s_SmoothDeltaTime = 0.0f;
     float Time::s_DeltaTimeHistory[SMOOTH_DELTA_TIME_SAMPLES] = {};
     size_t Time::s_DeltaTimeHistoryIndex = 0;
-    Time::Clock::time_point Time::s_StartTime = Time::Clock::now();
+    Time::Clock::time_point Time::s_StartTime = ::std::chrono::high_resolution_clock::now();
 
     void Time::Update(float unscaledDeltaTime)
     {
@@ -28,7 +28,7 @@ namespace Sabora
 
         // Update realtime since startup using high-precision clock
         const auto now = Clock::now();
-        const auto duration = std::chrono::duration<float>(now - s_StartTime);
+        const auto duration = ::std::chrono::duration<float>(now - s_StartTime);
         s_RealtimeSinceStartup = duration.count();
 
         // Calculate scaled delta time (affected by timeScale)
@@ -96,7 +96,7 @@ namespace Sabora
         }
 
         // Reset start time
-        s_StartTime = Clock::now();
+        s_StartTime = ::std::chrono::high_resolution_clock::now();
     }
 
     float Time::ClampDeltaTime(float deltaTime) noexcept
