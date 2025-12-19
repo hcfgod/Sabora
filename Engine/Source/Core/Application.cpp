@@ -3,6 +3,7 @@
 #include "SDLManager.h"
 #include "EventManager.h"
 #include "Input/Input.h"
+#include "Time.h"
 #include "Log.h"
 #include <SDL3/SDL.h>
 
@@ -67,8 +68,11 @@ namespace Sabora
         {
             // Calculate delta time
             const auto now = Clock::now();
-            const float deltaTime = std::chrono::duration<float>(now - m_LastFrame).count();
+            const float unscaledDeltaTime = std::chrono::duration<float>(now - m_LastFrame).count();
             m_LastFrame = now;
+
+            // Update Time system (must be done before OnUpdate so Time is available)
+            Time::Update(unscaledDeltaTime);
 
             // Begin frame for Input system (resets frame-specific state)
             Input::Get().BeginFrame();
@@ -78,8 +82,9 @@ namespace Sabora
             // Events correctly set both held state (IsKeyPressed) and frame-specific state (IsKeyDown/IsKeyUp)
             m_EventDispatcher.ProcessSDLEvents();
 
-            // Update application
-            OnUpdate(deltaTime);
+            // Update application (still pass deltaTime for backward compatibility)
+            // Users can also use Time::GetDeltaTime() or Time::GetUnscaledDeltaTime() inside OnUpdate
+            OnUpdate(Time::GetDeltaTime());
 
             // Future: Render frame
         }

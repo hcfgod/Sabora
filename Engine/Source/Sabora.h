@@ -6,6 +6,7 @@
 #include "Core/ConfigurationManager.h"
 #include "Core/Application.h"
 #include "Core/EventManager.h"
+#include "Core/Time.h"
 #include "Input/KeyCode.h"
 #include "Input/Input.h"
 

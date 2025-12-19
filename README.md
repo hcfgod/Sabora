@@ -74,7 +74,34 @@ public:
     
     void OnUpdate(float deltaTime) override
     {
-        // Your game logic here
+        // You can use the deltaTime parameter, or access Time directly (Unity-style)
+        // Both approaches work:
+        
+        // Using the parameter (backward compatible)
+        position += velocity * deltaTime;
+        
+        // Using Time class (Unity-style, more convenient)
+        position += velocity * Time::GetDeltaTime();
+        
+        // Access other time information
+        if (Time::GetTime() > 10.0f)
+        {
+            // 10 seconds have passed (scaled by timeScale)
+        }
+        
+        // Pause/slow motion
+        if (Input::Get().IsKeyDown(KeyCode::P))
+        {
+            Time::SetTimeScale(0.0f); // Pause
+        }
+        else if (Input::Get().IsKeyDown(KeyCode::S))
+        {
+            Time::SetTimeScale(0.5f); // Slow motion
+        }
+        else
+        {
+            Time::SetTimeScale(1.0f); // Normal speed
+        }
     }
 };
 
@@ -173,6 +200,46 @@ EventManager::Get().Dispatch(event);
 ```
 
 Events are automatically processed each frame. SDL events are converted to engine events transparently, so you work with a consistent interface regardless of platform.
+
+### Time Management
+
+The engine provides a Unity-style Time class for convenient access to time-related information. Access time data from anywhere in your code.
+
+```cpp
+// Get delta time (scaled by timeScale)
+float speed = 5.0f * Time::GetDeltaTime();
+position += velocity * Time::GetDeltaTime();
+
+// Get unscaled delta time (real-time, unaffected by timeScale)
+float uiAnimationSpeed = 10.0f * Time::GetUnscaledDeltaTime();
+
+// Get elapsed time
+if (Time::GetTime() > 10.0f)
+{
+    // 10 seconds have passed (scaled)
+}
+
+// Pause/slow motion
+Time::SetTimeScale(0.0f);  // Pause
+Time::SetTimeScale(0.5f);  // Half speed
+Time::SetTimeScale(2.0f);  // Double speed
+Time::SetTimeScale(1.0f);  // Normal speed
+
+// Access other time information
+uint64_t frameCount = Time::GetFrameCount();
+float realtime = Time::GetRealtimeSinceStartup();
+float smoothDelta = Time::GetSmoothDeltaTime(); // Smoothed for UI animations
+```
+
+The Time class provides:
+- **GetDeltaTime()** - Scaled delta time (affected by timeScale)
+- **GetUnscaledDeltaTime()** - Real delta time (unaffected by timeScale)
+- **GetTime()** - Scaled elapsed time since start
+- **GetUnscaledTime()** - Real elapsed time since start
+- **GetRealtimeSinceStartup()** - High-precision realtime
+- **GetFrameCount()** - Number of frames processed
+- **GetTimeScale() / SetTimeScale()** - Control time speed (pause, slow-mo, etc.)
+- **GetSmoothDeltaTime()** - Smoothed delta time for UI animations
 
 ### Configuration Management
 
