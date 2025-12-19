@@ -1,15 +1,12 @@
 #pragma once
 
-// Include chrono early to prevent Windows time.h conflicts when including Time.h
-#include <chrono>
-
 #include "Core/Log.h"
 #include "Core/Result.h"
 #include "Core/AsyncIO.h"
 #include "Core/ConfigurationManager.h"
 #include "Core/Application.h"
 #include "Core/EventManager.h"
-#include "Core/Time.h"
+#include "Core/GameTime.h"
 #include "Input/KeyCode.h"
 #include "Input/Input.h"
 

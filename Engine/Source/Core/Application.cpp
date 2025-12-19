@@ -3,7 +3,7 @@
 #include "SDLManager.h"
 #include "EventManager.h"
 #include "Input/Input.h"
-#include "Time.h"
+#include "GameTime.h"
 #include "Log.h"
 #include <SDL3/SDL.h>
 
