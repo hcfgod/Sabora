@@ -32,6 +32,7 @@ project "Tests"
         "../Engine/Vendor/doctest/doctest",
         "../Engine/Vendor/spdlog/include",
         "../Engine/Vendor/json/include",
+        "../Engine/" .. Dependencies.SDL3.IncludePath,
         "../Engine/" .. Dependencies.shaderc.IncludePath,
         "../Engine/" .. Dependencies.SPIRVCross.IncludePath,
         "../Engine/" .. Dependencies.msdfAtlasGen.IncludePath,
@@ -55,6 +56,7 @@ project "Tests"
 
     -- Library directories for dependencies
     libdirs {
+        "../Engine/" .. Dependencies.SDL3.LibraryPath,
         "../Engine/" .. Dependencies.shaderc.LibraryPath,
         "../Engine/" .. Dependencies.SPIRVCross.LibraryPath,
         "../Engine/" .. Dependencies.msdfAtlasGen.LibraryPath,
@@ -82,6 +84,9 @@ project "Tests"
     -- Note: DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN is defined in main.cpp, not here
     -- to avoid redefinition warnings
 
+    -- SDL3 static linking - must be linked directly since Engine is a static library
+    defines { "SDL_STATIC" }
+
     filter "system:windows"
         links { "setupapi", "winmm", "imm32", "version", "ole32", "oleaut32", "uuid" }
         buildoptions { "/utf-8" }
@@ -91,6 +96,7 @@ project "Tests"
         libdirs { "../Engine/" .. Dependencies.Box2D.LibraryPath .. "/Debug" }
     libdirs { "../Engine/" .. Dependencies.Jolt.LibraryPath .. "/Debug" }
         links { 
+            Dependencies.SDL3.Libraries.windows.Debug,
             Dependencies.shaderc.Libraries.windows.Debug,
             Dependencies.OpenALSoft.Libraries.windows.Debug
         }
@@ -115,6 +121,7 @@ project "Tests"
         libdirs { "../Engine/" .. Dependencies.Box2D.LibraryPath .. "/Release" }
     libdirs { "../Engine/" .. Dependencies.Jolt.LibraryPath .. "/Release" }
         links { 
+            Dependencies.SDL3.Libraries.windows.Release,
             Dependencies.shaderc.Libraries.windows.Release,
             Dependencies.OpenALSoft.Libraries.windows.Release
         }
@@ -142,6 +149,7 @@ project "Tests"
 
     filter { "system:macosx", "configurations:Debug" }
         links { 
+            Dependencies.SDL3.Libraries.macosx.Debug,
             Dependencies.shaderc.Libraries.macosx.Debug,
             Dependencies.OpenALSoft.Libraries.macosx.Debug
         }
@@ -164,6 +172,7 @@ project "Tests"
 
     filter { "system:macosx", "configurations:Release" }
         links { 
+            Dependencies.SDL3.Libraries.macosx.Release,
             Dependencies.shaderc.Libraries.macosx.Release,
             Dependencies.OpenALSoft.Libraries.macosx.Release
         }
@@ -191,12 +200,16 @@ project "Tests"
         -- Prefer static libraries over shared libraries for our dependencies
         -- Add -L flags BEFORE -Wl,-Bstatic to ensure our library directories are searched first
         linkoptions {
+            "-L../Engine/" .. Dependencies.SDL3.LibraryPath,
             "-L../Engine/" .. Dependencies.Libogg.LibraryPath,
             "-L../Engine/" .. Dependencies.Libvorbis.LibraryPath,
             "-L../Engine/" .. Dependencies.Jolt.LibraryPath,
             "-Wl,-Bstatic"
         }
+        -- Link SDL3 FIRST, then its dependencies
+        -- On Linux, static libraries must be linked before their dependencies
         links { 
+            Dependencies.SDL3.Libraries.linux.Debug,
             Dependencies.shaderc.Libraries.linux.Debug,
             Dependencies.OpenALSoft.Libraries.linux.Debug
         }
@@ -248,12 +261,16 @@ project "Tests"
         -- Prefer static libraries over shared libraries for our dependencies
         -- Add -L flags BEFORE -Wl,-Bstatic to ensure our library directories are searched first
         linkoptions {
+            "-L../Engine/" .. Dependencies.SDL3.LibraryPath,
             "-L../Engine/" .. Dependencies.Libogg.LibraryPath,
             "-L../Engine/" .. Dependencies.Libvorbis.LibraryPath,
             "-L../Engine/" .. Dependencies.Jolt.LibraryPath,
             "-Wl,-Bstatic"
         }
+        -- Link SDL3 FIRST, then its dependencies
+        -- On Linux, static libraries must be linked before their dependencies
         links { 
+            Dependencies.SDL3.Libraries.linux.Release,
             Dependencies.shaderc.Libraries.linux.Release,
             Dependencies.OpenALSoft.Libraries.linux.Release
         }
