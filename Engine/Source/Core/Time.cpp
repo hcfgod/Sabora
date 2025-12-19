@@ -1,7 +1,5 @@
 #include "pch.h"
 #include "Time.h"
-#include <algorithm>
-#include <cmath>
 
 namespace Sabora
 {

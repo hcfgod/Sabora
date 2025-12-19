@@ -1,7 +1,12 @@
 #pragma once
 
+// Include chrono first to avoid conflicts with system time.h on Windows
+// Note: On Windows, file system is case-insensitive, so Time.h might conflict with system time.h
+// We ensure chrono is included explicitly before any potential conflicts
 #include <chrono>
 #include <cstdint>
+#include <algorithm>
+#include <cmath>
 
 namespace Sabora
 {
