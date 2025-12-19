@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Sabora.h"
+#include "Input/KeyCode.h"
 #include <SDL3/SDL.h>
 
 using namespace Sabora;
@@ -25,10 +26,11 @@ public:
         (
             [this](const KeyEvent& event) 
             {
-                // Example: Handle key events
-                if (event.GetKey() == SDLK_ESCAPE && event.IsPressed())
+                // Handle key events
+                // Convert SDL keycode to KeyCode for comparison
+                KeyCode keyCode = SDLToKeyCode(static_cast<SDL_Keycode>(event.GetKey()));
+                if (keyCode == KeyCode::Escape && event.IsPressed())
                 {
-                    SB_CORE_INFO("Escape key pressed - closing application");
                     RequestClose();
                 }
             }
@@ -37,14 +39,7 @@ public:
 
     void OnUpdate(float deltaTime) override
     {
-        // Example: Log frame time occasionally
-        static float timeSinceLastLog = 0.0f;
-        timeSinceLastLog += deltaTime;
-        if (timeSinceLastLog >= 1.0f)
-        {
-            SB_CORE_DEBUG("Frame time: {:.3f}ms", deltaTime * 1000.0f);
-            timeSinceLastLog = 0.0f;
-        }
+        // Application update logic goes here
     }
 
     void OnWindowClose(WindowCloseEvent& event) override

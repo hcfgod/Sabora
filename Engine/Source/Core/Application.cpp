@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "SDLManager.h"
 #include "EventManager.h"
+#include "Input/Input.h"
 #include "Log.h"
 #include <SDL3/SDL.h>
 
@@ -69,7 +70,12 @@ namespace Sabora
             const float deltaTime = std::chrono::duration<float>(now - m_LastFrame).count();
             m_LastFrame = now;
 
-            // Process events
+            // Begin frame for Input system (resets frame-specific state)
+            Input::Get().BeginFrame();
+
+            // Process events (this also updates Input system)
+            // Event-based tracking is the primary method - events update Input state directly
+            // Events correctly set both held state (IsKeyPressed) and frame-specific state (IsKeyDown/IsKeyUp)
             m_EventDispatcher.ProcessSDLEvents();
 
             // Update application
