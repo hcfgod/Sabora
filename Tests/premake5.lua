@@ -143,9 +143,27 @@ project "Tests"
         runtime "Release"
 
     filter "system:macosx"
-        -- macOS system libraries if needed
+        -- macOS system libraries and frameworks needed by SDL3
         -- CoreFoundation is required by OpenAL Soft on macOS
-        links { "CoreFoundation.framework", "CoreAudio.framework", "AudioToolbox.framework" }
+        links { "CoreFoundation.framework",
+                "CoreAudio.framework",
+                "CoreVideo.framework",
+                "IOKit.framework",
+                "Cocoa.framework",
+                "Carbon.framework",
+                "ForceFeedback.framework",
+                "AVFoundation.framework",
+                "Metal.framework",
+                "QuartzCore.framework",
+                "AudioToolbox.framework",
+                "CoreHaptics.framework",
+                "CoreMedia.framework",
+                "GameController.framework",
+                "UniformTypeIdentifiers.framework",
+                "iconv" }
+        -- Link libusb (installed via homebrew on macOS)
+        libdirs { "/opt/homebrew/lib", "/usr/local/lib" }
+        links { "usb-1.0" }
 
     filter { "system:macosx", "configurations:Debug" }
         links { 
