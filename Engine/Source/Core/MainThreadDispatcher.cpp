@@ -1,8 +1,18 @@
 #include "pch.h"
 #include "MainThreadDispatcher.h"
+#include <thread>
 
 namespace Sabora
 {
+    MainThreadDispatcher::MainThreadDispatcher() : m_MainThreadId(std::this_thread::get_id())
+    {
+    }
+
+    bool MainThreadDispatcher::IsMainThread() const noexcept
+    {
+        return std::this_thread::get_id() == m_MainThreadId;
+    }
+
     void MainThreadDispatcher::Dispatch(std::function<void()> func)
     {
         if (!func)
@@ -18,6 +28,13 @@ namespace Sabora
     {
         if (!func)
         {
+            return;
+        }
+
+        // If we're already on the main thread, execute directly to avoid deadlock
+        if (IsMainThread())
+        {
+            func();
             return;
         }
 

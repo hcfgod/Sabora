@@ -6,6 +6,11 @@
 #include "GameTime.h"
 #include "MainThreadDispatcher.h"
 #include "Assets/AssetManager.h"
+#include "Renderer/RendererManager.h"
+#include "Renderer/Events/RendererEvents.h"
+#include "Renderer/Core/RendererTypes.h"
+#include "Renderer/Shaders/ShaderLoader.h"
+#include "Renderer/Textures/TextureLoader.h"
 #include "Log.h"
 #include <SDL3/SDL.h>
 
@@ -30,6 +35,12 @@ namespace Sabora
             return Result<void>::Failure(sdlResult.GetError());
         }
 
+        // Set default renderer API if not specified (must be done before window creation)
+        if (m_Config.windowConfig.preferredRendererAPI == RendererAPI::None)
+        {
+            m_Config.windowConfig.preferredRendererAPI = RendererAPI::OpenGL; // Default to OpenGL
+        }
+
         // Create window
         auto windowResult = Window::Create(m_Config.windowConfig);
         if (windowResult.IsFailure())
@@ -47,6 +58,46 @@ namespace Sabora
 
         // Initialize AssetManager with event dispatcher
         AssetManager::Get().Initialize({}, &m_EventDispatcher);
+
+        // Initialize renderer (use preferred API from window config, which was set above if needed)
+        auto rendererResult = RendererManager::Get().Initialize(m_Window.get(), m_Config.windowConfig.preferredRendererAPI);
+        if (rendererResult.IsFailure())
+        {
+            SB_CORE_ERROR("Failed to initialize renderer: {}", rendererResult.GetError().ToString());
+            // Don't fail initialization - renderer is optional for some applications
+            // But dispatch error event
+            RendererErrorEvent errorEvent(rendererResult.GetError());
+            m_EventDispatcher.Dispatch(errorEvent);
+        }
+        else
+        {
+            // Register renderer-specific asset loaders
+            RegisterRendererLoaders();
+
+            // Set initial viewport to match window size
+            auto* renderer = RendererManager::Get().GetRenderer();
+            if (renderer && m_Window)
+            {
+                Viewport viewport;
+                viewport.x = 0.0f;
+                viewport.y = 0.0f;
+                viewport.width = static_cast<float>(m_Window->GetWidth());
+                viewport.height = static_cast<float>(m_Window->GetHeight());
+                viewport.minDepth = 0.0f;
+                viewport.maxDepth = 1.0f;
+                
+                auto viewportResult = renderer->SetViewport(viewport);
+                if (viewportResult.IsFailure())
+                {
+                    SB_CORE_WARN("Failed to set initial viewport: {}", viewportResult.GetError().ToString());
+                }
+            }
+
+            // Dispatch renderer initialized event
+            RendererInitializedEvent initEvent(RendererManager::Get().GetAPI());
+            m_EventDispatcher.Dispatch(initEvent);
+            SB_CORE_INFO("Renderer initialized successfully");
+        }
 
         // Setup event handlers
         SetupEventHandlers();
@@ -94,11 +145,34 @@ namespace Sabora
             // Update AssetManager (process loading queue, check for hot reloads)
             AssetManager::Get().Update();
 
+            // Begin render frame
+            auto* renderer = RendererManager::Get().GetRenderer();
+            if (renderer)
+            {
+                auto beginResult = renderer->BeginFrame();
+                if (beginResult.IsFailure())
+                {
+                    SB_RENDERER_ERROR("Failed to begin frame: {}", beginResult.GetError().ToString());
+                    RendererErrorEvent errorEvent(beginResult.GetError());
+                    m_EventDispatcher.Dispatch(errorEvent);
+                }
+            }
+
             // Update application (still pass deltaTime for backward compatibility)
             // Users can also use Time::GetDeltaTime() or Time::GetUnscaledDeltaTime() inside OnUpdate
             OnUpdate(Time::GetDeltaTime());
 
-            // Future: Render frame
+            // End render frame and present
+            if (renderer)
+            {
+                auto endResult = renderer->EndFrame();
+                if (endResult.IsFailure())
+                {
+                    SB_RENDERER_ERROR("Failed to end frame: {}", endResult.GetError().ToString());
+                    RendererErrorEvent errorEvent(endResult.GetError());
+                    m_EventDispatcher.Dispatch(errorEvent);
+                }
+            }
         }
 
         SB_CORE_INFO("Exited main application loop.");
@@ -122,11 +196,64 @@ namespace Sabora
                 RequestClose();
             }
         });
+
+        // Subscribe to window resize events - automatically update viewport
+        [[maybe_unused]] auto windowResizeSubId = m_EventDispatcher.Subscribe<WindowResizeEvent>([this](const WindowResizeEvent& event) 
+        {
+            // Automatically update viewport to match window size
+            auto* renderer = GetRenderer();
+            if (renderer && m_Window)
+            {
+                Viewport viewport;
+                viewport.x = 0.0f;
+                viewport.y = 0.0f;
+                viewport.width = static_cast<float>(event.GetWidth());
+                viewport.height = static_cast<float>(event.GetHeight());
+                viewport.minDepth = 0.0f;
+                viewport.maxDepth = 1.0f;
+                
+                auto result = renderer->SetViewport(viewport);
+                if (result.IsFailure())
+                {
+                    SB_CORE_WARN("Failed to update viewport on window resize: {}", result.GetError().ToString());
+                }
+            }
+        });
+    }
+
+    void Application::RegisterRendererLoaders()
+    {
+        // Register shader loader
+        AssetManager::Get().RegisterLoader<OpenGLShaderProgram>(
+            std::make_unique<ShaderLoader>(330) // Target GLSL 330
+        );
+        SB_CORE_INFO("Registered ShaderLoader with AssetManager");
+
+        // Register texture loader
+        AssetManager::Get().RegisterLoader<OpenGLTexture>(
+            std::make_unique<TextureLoader>(true) // Generate mipmaps by default
+        );
+        SB_CORE_INFO("Registered TextureLoader with AssetManager");
+    }
+
+    Renderer* Application::GetRenderer() const noexcept
+    {
+        return RendererManager::Get().GetRenderer();
     }
 
     Application::~Application()
     {
         SB_CORE_INFO("Application shutting down...");
+
+        // Dispatch renderer shutdown event
+        if (RendererManager::Get().IsInitialized())
+        {
+            RendererShutdownEvent shutdownEvent;
+            m_EventDispatcher.Dispatch(shutdownEvent);
+        }
+
+        // Shutdown renderer
+        RendererManager::Get().Shutdown();
 
         // Shutdown AssetManager
         AssetManager::Get().Shutdown();

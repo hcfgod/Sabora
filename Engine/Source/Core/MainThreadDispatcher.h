@@ -107,7 +107,7 @@ namespace Sabora
         void ClearQueue();
 
     private:
-        MainThreadDispatcher() = default;
+        MainThreadDispatcher();
         ~MainThreadDispatcher() = default;
 
         // Non-copyable, non-movable
@@ -116,9 +116,18 @@ namespace Sabora
         MainThreadDispatcher(MainThreadDispatcher&&) = delete;
         MainThreadDispatcher& operator=(MainThreadDispatcher&&) = delete;
 
+        /**
+         * @brief Check if the current thread is the main thread.
+         * @return True if we're on the main thread.
+         */
+        [[nodiscard]] bool IsMainThread() const noexcept;
+
         // Thread-safe queue for work items
         mutable std::mutex m_QueueMutex;
         std::queue<std::function<void()>> m_WorkQueue;
+        
+        // Main thread ID for detection
+        std::thread::id m_MainThreadId;
 
         // Synchronous dispatch support
         struct SyncWorkItem

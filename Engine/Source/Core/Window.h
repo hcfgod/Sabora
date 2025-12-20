@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdint>
 #include "Result.h"
+#include "Renderer/Core/RendererTypes.h"
 
 // Forward declaration of SDL_Window
 struct SDL_Window;
@@ -22,6 +23,15 @@ namespace Sabora
         bool resizable = true;
         bool borderless = false;
         bool highDPI = true;
+        
+        /**
+         * @brief Preferred renderer API (optional).
+         * 
+         * If set, the window will be created with appropriate flags for the renderer.
+         * For example, OpenGL requires SDL_WINDOW_OPENGL flag.
+         * Set to RendererAPI::None to create a window without renderer-specific flags.
+         */
+        RendererAPI preferredRendererAPI = RendererAPI::None;
     };
 
     /**

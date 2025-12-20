@@ -10,6 +10,13 @@
 #include "Event.h"
 #include "MainThreadDispatcher.h"
 
+// Forward declarations
+namespace Sabora
+{
+    class Renderer;
+    class RendererManager;
+}
+
 namespace Sabora 
 {
     /**
@@ -94,6 +101,12 @@ namespace Sabora
          */
         [[nodiscard]] EventDispatcher& GetEventDispatcher() noexcept { return m_EventDispatcher; }
 
+        /**
+         * @brief Get the renderer instance.
+         * @return Pointer to the renderer, or nullptr if not initialized.
+         */
+        [[nodiscard]] Renderer* GetRenderer() const noexcept;
+
     protected:
         /**
          * @brief Called once per frame before event processing.
@@ -109,6 +122,14 @@ namespace Sabora
 
     private:
         void SetupEventHandlers();
+        
+        /**
+         * @brief Register renderer-specific asset loaders with AssetManager.
+         * 
+         * This registers ShaderLoader and TextureLoader after the renderer
+         * is successfully initialized.
+         */
+        void RegisterRendererLoaders();
 
         std::atomic<bool> m_Running{false};
         ApplicationConfig m_Config;

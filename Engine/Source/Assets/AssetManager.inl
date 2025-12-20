@@ -4,6 +4,7 @@
 #include "Core/EventManager.h"
 #include <future>
 #include <thread>
+#include <utility>
 
 namespace Sabora
 {
@@ -15,7 +16,14 @@ namespace Sabora
         std::type_index typeIndex = typeid(T);
         
         // Store the loader (type-erased using std::any)
-        m_Loaders[typeIndex] = std::move(loader);
+        // std::any requires copy-constructible types, so we convert unique_ptr to shared_ptr
+        // This allows us to store the loader in std::any while maintaining proper ownership
+        using LoaderPtrType = std::shared_ptr<IAssetLoader<T>>;
+        
+        // Convert unique_ptr to shared_ptr for storage in std::any
+        // std::shared_ptr is copy-constructible and compatible with std::any
+        LoaderPtrType sharedLoader = std::move(loader);
+        m_Loaders[typeIndex] = sharedLoader;
     }
 
     template<typename T>
@@ -73,9 +81,9 @@ namespace Sabora
         }
         
         // Get loader and start async load
-        // Extract loader from std::any
+        // Extract loader from std::any (stored as shared_ptr)
         std::any& loaderAny = loaderIt->second;
-        IAssetLoader<T>* loader = std::any_cast<std::unique_ptr<IAssetLoader<T>>&>(loaderAny).get();
+        IAssetLoader<T>* loader = std::any_cast<std::shared_ptr<IAssetLoader<T>>>(loaderAny).get();
         
         // Launch async load
         auto future = std::async(std::launch::async, [loader, normalizedPath, assetId, this]() -> Result<std::unique_ptr<T>> {

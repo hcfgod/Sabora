@@ -138,6 +138,11 @@ namespace Sabora
         GraphicsInvalidFormat           = 0x0308,
         GraphicsRenderPassFailed        = 0x0309,
         GraphicsCommandBufferError      = 0x030A,
+        GraphicsContextCreationFailed   = 0x030B,
+        GraphicsFramebufferCreationFailed = 0x030C,
+        GraphicsShaderLinkFailed        = 0x030D,
+        GraphicsInvalidOperation        = 0x030E,
+        GraphicsUnsupportedFeature      = 0x030F,
 
         // Audio Errors (0x04XX)
         AudioUnknown                    = 0x0400,
@@ -325,6 +330,11 @@ namespace Sabora
             case ErrorCode::GraphicsInvalidFormat:          return "GraphicsInvalidFormat";
             case ErrorCode::GraphicsRenderPassFailed:       return "GraphicsRenderPassFailed";
             case ErrorCode::GraphicsCommandBufferError:     return "GraphicsCommandBufferError";
+            case ErrorCode::GraphicsContextCreationFailed:  return "GraphicsContextCreationFailed";
+            case ErrorCode::GraphicsFramebufferCreationFailed: return "GraphicsFramebufferCreationFailed";
+            case ErrorCode::GraphicsShaderLinkFailed:       return "GraphicsShaderLinkFailed";
+            case ErrorCode::GraphicsInvalidOperation:       return "GraphicsInvalidOperation";
+            case ErrorCode::GraphicsUnsupportedFeature:    return "GraphicsUnsupportedFeature";
 
             // Audio
             case ErrorCode::AudioUnknown:                   return "AudioUnknown";

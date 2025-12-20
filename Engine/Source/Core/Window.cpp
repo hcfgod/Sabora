@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Window.h"
+#include "Renderer/Core/RendererTypes.h"
 #include "Log.h"
 #include <SDL3/SDL.h>
 
@@ -66,6 +67,17 @@ namespace Sabora
         {
             flags |= SDL_WINDOW_HIGH_PIXEL_DENSITY;
         }
+
+        // Add renderer-specific flags based on preferred API
+        if (config.preferredRendererAPI == RendererAPI::OpenGL)
+        {
+            flags |= SDL_WINDOW_OPENGL;
+        }
+        // Future: Add flags for Vulkan, DirectX, Metal as needed
+        // else if (config.preferredRendererAPI == RendererAPI::Vulkan)
+        // {
+        //     flags |= SDL_WINDOW_VULKAN;
+        // }
 
         // Create the SDL window
         SDL_Window* sdlWindow = SDL_CreateWindow(
