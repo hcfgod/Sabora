@@ -79,6 +79,18 @@ namespace Sabora
          * @return Pointer to the renderer, or nullptr if not initialized.
          * 
          * Thread Safety: This method is thread-safe.
+         * 
+         * Lifetime Requirements:
+         * - The returned pointer is valid as long as the RendererManager remains initialized
+         * - The renderer will not be destroyed while IsInitialized() returns true
+         * - Do NOT store this pointer long-term or across frames - call GetRenderer() each time you need it
+         * - The pointer becomes invalid after Shutdown() is called
+         * - If you need to ensure the renderer exists, check IsInitialized() before using the pointer
+         * 
+         * @warning The returned pointer is a raw pointer for performance reasons. The renderer
+         *          is managed by RendererManager and will be automatically destroyed during
+         *          Shutdown(). Storing this pointer beyond the immediate use may result in
+         *          undefined behavior if Shutdown() is called.
          */
         [[nodiscard]] Renderer* GetRenderer() const noexcept;
 

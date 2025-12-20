@@ -74,9 +74,10 @@ namespace Sabora
     {
         if (m_ShaderId != 0)
         {
-            // Queue deletion on main thread
+            // Clean up shader on main thread
+            // Use DispatchSync to ensure synchronous cleanup even during shutdown
             uint32_t shaderId = m_ShaderId;
-            MainThreadDispatcher::Get().Dispatch([shaderId]() {
+            MainThreadDispatcher::Get().DispatchSync([shaderId]() {
                 glDeleteShader(shaderId);
             });
             m_ShaderId = 0;
@@ -102,7 +103,7 @@ namespace Sabora
             if (m_ShaderId != 0)
             {
                 uint32_t shaderId = m_ShaderId;
-                MainThreadDispatcher::Get().Dispatch([shaderId]() {
+                MainThreadDispatcher::Get().DispatchSync([shaderId]() {
                     glDeleteShader(shaderId);
                 });
             }

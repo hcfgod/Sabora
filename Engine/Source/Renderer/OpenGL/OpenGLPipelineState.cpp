@@ -55,6 +55,10 @@ namespace Sabora
         std::string linkError;
 
         // Restructure: do the linking and get program ID
+        // Lambda capture safety: 
+        // - glVertexShader and glFragmentShader captured by value (safe, pointers remain valid)
+        // - linkedProgramId, linkSuccess, linkError captured by reference (safe because DispatchSync
+        //   executes synchronously, so the referenced variables remain in scope throughout execution)
         auto linkResult = [glVertexShader, glFragmentShader, &linkedProgramId, &linkSuccess, &linkError]() {
             linkedProgramId = glCreateProgram();
             if (linkedProgramId == 0)
@@ -142,6 +146,9 @@ namespace Sabora
         bool vaoCreated = false;
         std::string vaoError;
 
+        // Lambda capture safety:
+        // - vaoId, vaoCreated, vaoError captured by reference (safe because DispatchSync
+        //   executes synchronously, so the referenced variables remain in scope throughout execution)
         auto createVAOFunc = [&vaoId, &vaoCreated, &vaoError]() {
             glGenVertexArrays(1, &vaoId);
             GLenum error = glGetError();
@@ -197,10 +204,11 @@ namespace Sabora
     OpenGLPipelineState::~OpenGLPipelineState()
     {
         // Clean up VAO on main thread
+        // Use DispatchSync to ensure synchronous cleanup even during shutdown
         if (m_VAO != 0)
         {
             uint32_t vaoId = m_VAO;
-            MainThreadDispatcher::Get().Dispatch([vaoId]() {
+            MainThreadDispatcher::Get().DispatchSync([vaoId]() {
                 glDeleteVertexArrays(1, &vaoId);
             });
         }

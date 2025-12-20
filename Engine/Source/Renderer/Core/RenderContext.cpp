@@ -19,6 +19,16 @@ namespace Sabora
             );
         }
 
+        // Validate shareContext if provided
+        // shareContext can be nullptr (no sharing), but if provided, it must be valid
+        if (shareContext != nullptr && !shareContext->IsValid())
+        {
+            return Result<std::unique_ptr<RenderContext>>::Failure(
+                ErrorCode::CoreInvalidArgument,
+                "shareContext is provided but is not valid. A valid context is required for resource sharing."
+            );
+        }
+
         // Check if OpenGL is available and delegate to OpenGLContext
         // This provides a unified interface while maintaining the abstraction
         if (RendererManager::IsAPIAvailable(RendererAPI::OpenGL))

@@ -128,9 +128,10 @@ namespace Sabora
     {
         if (m_BufferId != 0)
         {
-            // Queue deletion on main thread
+            // Clean up buffer on main thread
+            // Use DispatchSync to ensure synchronous cleanup even during shutdown
             uint32_t bufferId = m_BufferId;
-            MainThreadDispatcher::Get().Dispatch([bufferId]() {
+            MainThreadDispatcher::Get().DispatchSync([bufferId]() {
                 glDeleteBuffers(1, &bufferId);
             });
             m_BufferId = 0;
@@ -157,7 +158,7 @@ namespace Sabora
             if (m_BufferId != 0)
             {
                 uint32_t bufferId = m_BufferId;
-                MainThreadDispatcher::Get().Dispatch([bufferId]() {
+                MainThreadDispatcher::Get().DispatchSync([bufferId]() {
                     glDeleteBuffers(1, &bufferId);
                 });
             }

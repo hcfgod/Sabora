@@ -5,6 +5,11 @@
 #include "Core/MainThreadDispatcher.h"
 #include <glad/gl.h>
 #include <algorithm>
+#include <cstdint>
+
+// Static assertion: OpenGL handles are always 32-bit, even on 64-bit systems
+// This ensures our casting from void* to uint32_t is safe
+static_assert(sizeof(uintptr_t) >= sizeof(uint32_t), "uintptr_t must be at least as large as uint32_t");
 
 namespace Sabora
 {
@@ -96,7 +101,21 @@ namespace Sabora
             {
                 Texture* texture = colorAttachments[i];
                 void* nativeHandle = texture->GetNativeHandle();
-                uint32_t textureId = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(nativeHandle));
+                if (!nativeHandle)
+                {
+                    SB_CORE_ERROR("Texture::GetNativeHandle() returned null for color attachment {}", i);
+                    continue;
+                }
+                
+                // OpenGL handles are always 32-bit, even on 64-bit systems
+                uintptr_t handleValue = reinterpret_cast<uintptr_t>(nativeHandle);
+                if (handleValue > UINT32_MAX)
+                {
+                    SB_CORE_ERROR("OpenGL texture handle value exceeds uint32_t maximum: {}", handleValue);
+                    continue;
+                }
+                
+                uint32_t textureId = static_cast<uint32_t>(handleValue);
 
                 // Determine texture target based on type
                 uint32_t target = GL_TEXTURE_2D;
@@ -143,7 +162,21 @@ namespace Sabora
             if (depthStencilAttachment)
             {
                 void* nativeHandle = depthStencilAttachment->GetNativeHandle();
-                uint32_t textureId = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(nativeHandle));
+                if (!nativeHandle)
+                {
+                    SB_CORE_ERROR("Texture::GetNativeHandle() returned null for depth/stencil attachment");
+                    return;
+                }
+                
+                // OpenGL handles are always 32-bit, even on 64-bit systems
+                uintptr_t handleValue = reinterpret_cast<uintptr_t>(nativeHandle);
+                if (handleValue > UINT32_MAX)
+                {
+                    SB_CORE_ERROR("OpenGL texture handle value exceeds uint32_t maximum: {}", handleValue);
+                    return;
+                }
+                
+                uint32_t textureId = static_cast<uint32_t>(handleValue);
 
                 uint32_t target = GL_TEXTURE_2D;
                 switch (depthStencilAttachment->GetType())
@@ -258,8 +291,10 @@ namespace Sabora
     {
         if (m_FramebufferId != 0)
         {
+            // Clean up framebuffer on main thread
+            // Use DispatchSync to ensure synchronous cleanup even during shutdown
             uint32_t framebufferId = m_FramebufferId;
-            MainThreadDispatcher::Get().Dispatch([framebufferId]() {
+            MainThreadDispatcher::Get().DispatchSync([framebufferId]() {
                 glDeleteFramebuffers(1, &framebufferId);
             });
             m_FramebufferId = 0;
@@ -286,7 +321,7 @@ namespace Sabora
             if (m_FramebufferId != 0)
             {
                 uint32_t framebufferId = m_FramebufferId;
-                MainThreadDispatcher::Get().Dispatch([framebufferId]() {
+                MainThreadDispatcher::Get().DispatchSync([framebufferId]() {
                     glDeleteFramebuffers(1, &framebufferId);
                 });
             }

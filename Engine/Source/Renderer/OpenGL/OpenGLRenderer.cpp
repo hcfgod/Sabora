@@ -11,9 +11,25 @@
 #include "Core/Log.h"
 #include "Core/MainThreadDispatcher.h"
 #include <glad/gl.h>
+#include <cassert>
+#include <cstdint>
+#include <climits>
+
+// Static assertion: OpenGL handles are always 32-bit, even on 64-bit systems
+// This ensures our casting from void* to uint32_t is safe
+static_assert(sizeof(uintptr_t) >= sizeof(uint32_t), "uintptr_t must be at least as large as uint32_t");
 
 namespace Sabora
 {
+    // OpenGL version constants for feature detection
+    namespace OpenGLVersionConstants
+    {
+        constexpr int32_t MIN_MAJOR_VERSION_FOR_COMPUTE = 4;
+        constexpr int32_t MIN_MINOR_VERSION_FOR_COMPUTE = 3;
+        constexpr int32_t MIN_MAJOR_VERSION_FOR_UNIFORM_BUFFERS = 3;
+        constexpr int32_t MIN_MINOR_VERSION_FOR_UNIFORM_BUFFERS = 1;
+    }
+
     OpenGLRenderer::OpenGLRenderer()
     {
     }
@@ -85,7 +101,12 @@ namespace Sabora
         if (m_Context)
         {
             auto releaseResult = m_Context->ReleaseCurrent();
-            (void)releaseResult; // Suppress unused warning
+            if (releaseResult.IsFailure())
+            {
+                SB_CORE_WARN("Failed to release OpenGL context during shutdown: {}", 
+                    releaseResult.GetError().ToString());
+                // Continue with shutdown even if context release fails
+            }
             m_Context.reset();
         }
 
@@ -492,6 +513,21 @@ namespace Sabora
         uint32_t stride = vertexLayout.GetStride();
         uint32_t vaoId = glPipeline->GetVAO();
 
+        // Validate offset calculations to prevent overflow
+        // Check each attribute offset to ensure offset + attr.offset doesn't overflow
+        for (const auto& attr : attributes)
+        {
+            // Check if offset + attr.offset would overflow size_t
+            if (offset > SIZE_MAX - static_cast<size_t>(attr.offset))
+            {
+                return Result<void>::Failure(
+                    ErrorCode::CoreInvalidArgument,
+                    fmt::format("Vertex buffer offset overflow: offset ({}) + attr.offset ({}) exceeds maximum size_t value",
+                        offset, attr.offset)
+                );
+            }
+        }
+
         // Bind the vertex buffer and set up vertex attributes
         auto bindFunc = [glBuffer, offset, attributes, stride, vaoId]() 
         {
@@ -503,7 +539,24 @@ namespace Sabora
             
             if (glBuffer)
             {
-                uint32_t bufferId = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(glBuffer->GetNativeHandle()));
+                // OpenGL handles are always 32-bit, even on 64-bit systems
+                // GetNativeHandle() returns a void* that contains a uint32_t value
+                void* nativeHandle = glBuffer->GetNativeHandle();
+                if (!nativeHandle)
+                {
+                    SB_CORE_ERROR("OpenGLBuffer::GetNativeHandle() returned null");
+                    return;
+                }
+                
+                uintptr_t handleValue = reinterpret_cast<uintptr_t>(nativeHandle);
+                // Validate that the handle value fits in uint32_t (should always be true for OpenGL)
+                if (handleValue > UINT32_MAX)
+                {
+                    SB_CORE_ERROR("OpenGL buffer handle value exceeds uint32_t maximum: {}", handleValue);
+                    return;
+                }
+                
+                uint32_t bufferId = static_cast<uint32_t>(handleValue);
                 glBindBuffer(GL_ARRAY_BUFFER, bufferId);
 
                 // Set up vertex attributes based on the vertex layout
@@ -602,7 +655,22 @@ namespace Sabora
         auto bindFunc = [glBuffer, offset]() {
             if (glBuffer)
             {
-                uint32_t bufferId = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(glBuffer->GetNativeHandle()));
+                // OpenGL handles are always 32-bit, even on 64-bit systems
+                void* nativeHandle = glBuffer->GetNativeHandle();
+                if (!nativeHandle)
+                {
+                    SB_CORE_ERROR("OpenGLBuffer::GetNativeHandle() returned null");
+                    return;
+                }
+                
+                uintptr_t handleValue = reinterpret_cast<uintptr_t>(nativeHandle);
+                if (handleValue > UINT32_MAX)
+                {
+                    SB_CORE_ERROR("OpenGL buffer handle value exceeds uint32_t maximum: {}", handleValue);
+                    return;
+                }
+                
+                uint32_t bufferId = static_cast<uint32_t>(handleValue);
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferId);
             }
             else
@@ -687,8 +755,21 @@ namespace Sabora
                 OpenGLBuffer* glBuffer = dynamic_cast<OpenGLBuffer*>(m_CurrentVertexBuffer);
                 if (glBuffer)
                 {
-                    uint32_t bufferId = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(glBuffer->GetNativeHandle()));
-                    glBindBuffer(GL_ARRAY_BUFFER, bufferId);
+                    // OpenGL handles are always 32-bit, even on 64-bit systems
+                    void* nativeHandle = glBuffer->GetNativeHandle();
+                    if (nativeHandle)
+                    {
+                        uintptr_t handleValue = reinterpret_cast<uintptr_t>(nativeHandle);
+                        if (handleValue <= UINT32_MAX)
+                        {
+                            uint32_t bufferId = static_cast<uint32_t>(handleValue);
+                            glBindBuffer(GL_ARRAY_BUFFER, bufferId);
+                        }
+                        else
+                        {
+                            SB_CORE_ERROR("OpenGL buffer handle value exceeds uint32_t maximum: {}", handleValue);
+                        }
+                    }
                 }
             }
 
@@ -781,6 +862,14 @@ namespace Sabora
             return Result<void>::Failure(
                 ErrorCode::GraphicsInvalidOperation,
                 "No pipeline state is bound. Call SetPipelineState() first."
+            );
+        }
+
+        if (m_CurrentIndexBuffer == nullptr)
+        {
+            return Result<void>::Failure(
+                ErrorCode::GraphicsInvalidOperation,
+                "No index buffer is bound. Call SetIndexBuffer() before DrawIndexed()."
             );
         }
 
@@ -912,7 +1001,10 @@ namespace Sabora
         m_Capabilities.supportsGeometryShaders = (value > 0);
         
         // Compute shaders (OpenGL 4.3+)
-        m_Capabilities.supportsComputeShaders = (m_Context->GetMajorVersion() >= 4 && m_Context->GetMinorVersion() >= 3);
+        m_Capabilities.supportsComputeShaders = (
+            m_Context->GetMajorVersion() >= OpenGLVersionConstants::MIN_MAJOR_VERSION_FOR_COMPUTE &&
+            m_Context->GetMinorVersion() >= OpenGLVersionConstants::MIN_MINOR_VERSION_FOR_COMPUTE
+        );
         
         // Instancing
         m_Capabilities.supportsInstancing = true; // Always available in OpenGL 3.3+
@@ -952,7 +1044,9 @@ namespace Sabora
         
         // Buffer limits (OpenGL 3.1+)
         // GL_MAX_UNIFORM_BLOCK_SIZE (0x8A30) is the same as GL_MAX_UNIFORM_BUFFER_SIZE
-        if (m_Context->GetMajorVersion() > 3 || (m_Context->GetMajorVersion() == 3 && m_Context->GetMinorVersion() >= 1))
+        if (m_Context->GetMajorVersion() > OpenGLVersionConstants::MIN_MAJOR_VERSION_FOR_UNIFORM_BUFFERS ||
+            (m_Context->GetMajorVersion() == OpenGLVersionConstants::MIN_MAJOR_VERSION_FOR_UNIFORM_BUFFERS &&
+             m_Context->GetMinorVersion() >= OpenGLVersionConstants::MIN_MINOR_VERSION_FOR_UNIFORM_BUFFERS))
         {
             glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &value);
             m_Capabilities.maxUniformBufferSize = static_cast<uint32_t>(value);

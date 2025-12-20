@@ -251,8 +251,10 @@ namespace Sabora
     {
         if (m_TextureId != 0)
         {
+            // Clean up texture on main thread
+            // Use DispatchSync to ensure synchronous cleanup even during shutdown
             uint32_t textureId = m_TextureId;
-            MainThreadDispatcher::Get().Dispatch([textureId]() {
+            MainThreadDispatcher::Get().DispatchSync([textureId]() {
                 glDeleteTextures(1, &textureId);
             });
             m_TextureId = 0;
@@ -282,7 +284,7 @@ namespace Sabora
             if (m_TextureId != 0)
             {
                 uint32_t textureId = m_TextureId;
-                MainThreadDispatcher::Get().Dispatch([textureId]() {
+                MainThreadDispatcher::Get().DispatchSync([textureId]() {
                     glDeleteTextures(1, &textureId);
                 });
             }
