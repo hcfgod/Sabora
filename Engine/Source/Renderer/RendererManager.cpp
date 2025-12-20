@@ -140,7 +140,7 @@ namespace Sabora
                 // This checks if the OpenGL library/driver is available without creating a context
                 // SDL_GL_GetProcAddress can work without a context on most platforms
                 // We check for glGetString which is a core OpenGL 1.0 function
-                void* procAddress = SDL_GL_GetProcAddress("glGetString");
+                SDL_FunctionPointer procAddress = SDL_GL_GetProcAddress("glGetString");
                 if (procAddress != nullptr)
                 {
                     SB_CORE_INFO("OpenGL proc address for 'glGetString' is available");
