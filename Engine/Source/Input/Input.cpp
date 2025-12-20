@@ -11,6 +11,7 @@ namespace Sabora
         {
             return false;
         }
+        std::lock_guard<std::mutex> lock(m_StateMutex);
         return m_KeyStates[scancode];
     }
 
@@ -20,6 +21,7 @@ namespace Sabora
         {
             return false;
         }
+        std::lock_guard<std::mutex> lock(m_StateMutex);
         return m_KeyDownThisFrame[scancode];
     }
 
@@ -29,6 +31,7 @@ namespace Sabora
         {
             return false;
         }
+        std::lock_guard<std::mutex> lock(m_StateMutex);
         return m_KeyUpThisFrame[scancode];
     }
 
@@ -84,6 +87,7 @@ namespace Sabora
         {
             return false;
         }
+        std::lock_guard<std::mutex> lock(m_StateMutex);
         return m_MouseButtonStates[buttonIndex];
     }
 
@@ -94,6 +98,7 @@ namespace Sabora
         {
             return false;
         }
+        std::lock_guard<std::mutex> lock(m_StateMutex);
         return m_MouseButtonDownThisFrame[buttonIndex];
     }
 
@@ -104,21 +109,25 @@ namespace Sabora
         {
             return false;
         }
+        std::lock_guard<std::mutex> lock(m_StateMutex);
         return m_MouseButtonUpThisFrame[buttonIndex];
     }
 
     std::pair<float, float> Input::GetMousePosition() const noexcept
     {
+        std::lock_guard<std::mutex> lock(m_StateMutex);
         return { m_MouseX, m_MouseY };
     }
 
     std::pair<float, float> Input::GetMouseDelta() const noexcept
     {
+        std::lock_guard<std::mutex> lock(m_StateMutex);
         return { m_MouseDeltaX, m_MouseDeltaY };
     }
 
     std::pair<float, float> Input::GetMouseScrollDelta() const noexcept
     {
+        std::lock_guard<std::mutex> lock(m_StateMutex);
         return { m_ScrollDeltaX, m_ScrollDeltaY };
     }
 
@@ -147,6 +156,8 @@ namespace Sabora
         
         if (keyboardState != nullptr && numKeys > 0)
         {
+            std::lock_guard<std::mutex> lock(m_StateMutex);
+            
             // Update our key states to match SDL's current state
             // This ensures we're in sync even if we miss events
             // Only update up to the minimum of numKeys and MAX_SCANCODES
@@ -165,6 +176,8 @@ namespace Sabora
 
     void Input::BeginFrame()
     {
+        std::lock_guard<std::mutex> lock(m_StateMutex);
+        
         // Reset frame-specific state
         m_KeyDownThisFrame.fill(false);
         m_KeyUpThisFrame.fill(false);
@@ -184,6 +197,8 @@ namespace Sabora
         {
             return;
         }
+
+        std::lock_guard<std::mutex> lock(m_StateMutex);
 
         // Check if this is a new press (key wasn't already pressed)
         bool wasAlreadyPressed = m_KeyStates[scancode];
@@ -214,6 +229,8 @@ namespace Sabora
         {
             return;
         }
+
+        std::lock_guard<std::mutex> lock(m_StateMutex);
 
         // Check if the key was actually pressed before marking it as released
         // This ensures IsKeyUp only triggers when a key that was pressed is released
@@ -246,6 +263,8 @@ namespace Sabora
             return;
         }
 
+        std::lock_guard<std::mutex> lock(m_StateMutex);
+
         // Only mark as down this frame if it wasn't already pressed
         if (!m_MouseButtonStates[buttonIndex])
         {
@@ -263,6 +282,8 @@ namespace Sabora
             return;
         }
 
+        std::lock_guard<std::mutex> lock(m_StateMutex);
+
         // Only mark as up this frame if it was previously pressed
         if (m_MouseButtonStates[buttonIndex])
         {
@@ -274,6 +295,8 @@ namespace Sabora
 
     void Input::OnMouseMoved(float x, float y, float deltaX, float deltaY)
     {
+        std::lock_guard<std::mutex> lock(m_StateMutex);
+        
         m_MouseX = x;
         m_MouseY = y;
         
@@ -284,6 +307,8 @@ namespace Sabora
 
     void Input::OnMouseScrolled(float scrollX, float scrollY)
     {
+        std::lock_guard<std::mutex> lock(m_StateMutex);
+        
         // Accumulate scroll deltas (in case multiple scroll events occur in one frame)
         m_ScrollDeltaX += scrollX;
         m_ScrollDeltaY += scrollY;

@@ -5,6 +5,8 @@
 #include <vector>
 #include <typeindex>
 #include <unordered_map>
+#include <mutex>
+#include <atomic>
 #include <cstdint>
 
 // Forward declaration of SDL types
@@ -179,7 +181,9 @@ namespace Sabora
             static_assert(std::is_base_of_v<Event, T>, "T must inherit from Event");
             
             auto typeIndex = std::type_index(typeid(T));
-            size_t id = m_NextSubscriptionId++;
+            
+            std::lock_guard<std::mutex> lock(m_SubscriptionsMutex);
+            size_t id = m_NextSubscriptionId.fetch_add(1, std::memory_order_relaxed);
             
             m_Subscriptions[typeIndex].push_back({
                 id,
@@ -198,6 +202,8 @@ namespace Sabora
          */
         void Unsubscribe(std::type_index typeIndex, size_t subscriptionId)
         {
+            std::lock_guard<std::mutex> lock(m_SubscriptionsMutex);
+            
             auto it = m_Subscriptions.find(typeIndex);
             if (it != m_Subscriptions.end())
             {
@@ -234,17 +240,25 @@ namespace Sabora
         bool Dispatch(Event& event)
         {
             auto typeIndex = std::type_index(typeid(event));
-            auto it = m_Subscriptions.find(typeIndex);
             
-            if (it != m_Subscriptions.end())
+            // Copy subscriptions to avoid holding lock during callback execution
+            std::vector<Subscription> subscriptions;
             {
-                for (const auto& subscription : it->second)
+                std::lock_guard<std::mutex> lock(m_SubscriptionsMutex);
+                auto it = m_Subscriptions.find(typeIndex);
+                if (it != m_Subscriptions.end())
                 {
-                    subscription.callback(event);
-                    if (event.IsHandled())
-                    {
-                        return true;
-                    }
+                    subscriptions = it->second; // Copy the vector
+                }
+            }
+            
+            // Execute callbacks outside the lock
+            for (const auto& subscription : subscriptions)
+            {
+                subscription.callback(event);
+                if (event.IsHandled())
+                {
+                    return true;
                 }
             }
             
@@ -272,8 +286,10 @@ namespace Sabora
             std::function<void(const Event&)> callback;
         };
 
+        // Thread safety: Subscriptions can be modified from multiple threads
+        mutable std::mutex m_SubscriptionsMutex;
         std::unordered_map<std::type_index, std::vector<Subscription>> m_Subscriptions;
-        size_t m_NextSubscriptionId = 1;
+        std::atomic<size_t> m_NextSubscriptionId{1};
     };
 
 } // namespace Sabora

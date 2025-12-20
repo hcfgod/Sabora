@@ -4,6 +4,8 @@
 #include "EventManager.h"
 #include "Input/Input.h"
 #include "GameTime.h"
+#include "MainThreadDispatcher.h"
+#include "Assets/AssetManager.h"
 #include "Log.h"
 #include <SDL3/SDL.h>
 
@@ -42,6 +44,9 @@ namespace Sabora
 
         // Setup EventManager with our dispatcher
         EventManager::Get().SetDispatcher(m_EventDispatcher);
+
+        // Initialize AssetManager with event dispatcher
+        AssetManager::Get().Initialize({}, &m_EventDispatcher);
 
         // Setup event handlers
         SetupEventHandlers();
@@ -82,6 +87,13 @@ namespace Sabora
             // Events correctly set both held state (IsKeyPressed) and frame-specific state (IsKeyDown/IsKeyUp)
             m_EventDispatcher.ProcessSDLEvents();
 
+            // Process main thread dispatcher queue (for renderer and other main-thread work)
+            // This allows other threads to queue work that must run on the main thread
+            MainThreadDispatcher::Get().ProcessQueue();
+
+            // Update AssetManager (process loading queue, check for hot reloads)
+            AssetManager::Get().Update();
+
             // Update application (still pass deltaTime for backward compatibility)
             // Users can also use Time::GetDeltaTime() or Time::GetUnscaledDeltaTime() inside OnUpdate
             OnUpdate(Time::GetDeltaTime());
@@ -115,6 +127,9 @@ namespace Sabora
     Application::~Application()
     {
         SB_CORE_INFO("Application shutting down...");
+
+        // Shutdown AssetManager
+        AssetManager::Get().Shutdown();
 
         // Window is automatically cleaned up via unique_ptr destructor
         m_Window.reset();

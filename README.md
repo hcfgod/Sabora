@@ -201,9 +201,32 @@ EventManager::Get().Dispatch(event);
 
 Events are automatically processed each frame. SDL events are converted to engine events transparently, so you work with a consistent interface regardless of platform.
 
+### Main Thread Dispatcher
+
+The engine provides a thread-safe dispatcher for executing work on the main thread. This is essential for graphics APIs like OpenGL, which require all operations to be performed on the thread that created the context.
+
+```cpp
+// From any thread, queue work for the main thread
+MainThreadDispatcher::Get().Dispatch([]() {
+    // This will run on the main thread
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+});
+
+// Synchronous dispatch (blocks until work is done)
+MainThreadDispatcher::Get().DispatchSync([]() {
+    // This will run on the main thread and block until complete
+    GLuint texture = 0;
+    glGenTextures(1, &texture);
+    return texture;
+});
+```
+
+The dispatcher is automatically processed each frame in the main loop, so queued work executes automatically.
+
 ### Time Management
 
-The engine provides a Unity-style Time class for convenient access to time-related information. Access time data from anywhere in your code.
+The engine provides a Unity-style Time class for convenient access to time-related information. Access time data from anywhere in your code. All Time methods are thread-safe.
 
 ```cpp
 // Get delta time (scaled by timeScale)
@@ -241,6 +264,138 @@ The Time class provides:
 - **GetTimeScale() / SetTimeScale()** - Control time speed (pause, slow-mo, etc.)
 - **GetSmoothDeltaTime()** - Smoothed delta time for UI animations
 
+### Asset System
+
+The engine provides a comprehensive, type-safe asset management system with async loading, progress tracking, reference counting, caching, and automatic hot reloading.
+
+**Key Features:**
+- Type-safe asset handles with automatic reference counting
+- Asynchronous loading with progress tracking
+- Automatic caching (same path = same asset)
+- Hot reloading (automatic file watching)
+- Event-driven architecture (subscribe to loading events)
+- Support for any asset type via loader interface
+
+**Basic Usage:**
+
+```cpp
+// 1. Register a loader for your asset type
+class ShaderLoader : public IAssetLoader<Shader> {
+public:
+    Result<std::unique_ptr<Shader>> Load(const std::filesystem::path& path) override {
+        // Read and compile shader file
+        auto shaderCode = AsyncIO::ReadTextFile(path);
+        if (shaderCode.IsFailure()) {
+            return Result<std::unique_ptr<Shader>>::Failure(shaderCode.GetError());
+        }
+        
+        // Create and return shader
+        return Result<std::unique_ptr<Shader>>::Success(
+            std::make_unique<Shader>(shaderCode.Value())
+        );
+    }
+    
+    std::string GetAssetTypeName() const override { return "Shader"; }
+    std::vector<std::string> GetSupportedExtensions() const override {
+        return {".glsl", ".vert", ".frag"};
+    }
+};
+
+// Register the loader
+AssetManager::Get().RegisterLoader<Shader>(std::make_unique<ShaderLoader>());
+
+// 2. Load assets asynchronously
+AssetHandle<Shader> shader = AssetManager::Get().LoadAsync<Shader>("Shaders/basic.glsl");
+
+// 3. Check if loaded (or subscribe to events)
+if (shader.IsLoaded()) {
+    auto* shaderPtr = shader.Get();
+    // Use shader...
+}
+
+// 4. Track loading progress
+float progress = AssetManager::Get().GetLoadingProgress();  // 0.0 to 1.0
+size_t loadingCount = AssetManager::Get().GetLoadingAssetCount();
+
+// 5. Listen for events
+EventManager::Get().Subscribe<AllAssetsLoadedEvent>([](const AllAssetsLoadedEvent& e) {
+    SB_CORE_INFO("All assets loaded! {} successful, {} failed", 
+                 e.GetSuccessfulAssets(), e.GetFailedAssets());
+});
+
+// 6. Hot reloading is automatic - modify shader file and it reloads automatically
+// (AssetReloadedEvent is dispatched when reload completes)
+```
+
+**Asset Handles:**
+
+Asset handles are lightweight, copyable, and automatically manage reference counting:
+
+```cpp
+AssetHandle<Shader> shader1 = AssetManager::Get().LoadAsync<Shader>("Shaders/basic.glsl");
+
+// Copying increments ref count
+AssetHandle<Shader> shader2 = shader1;  // Ref count now 2
+
+// Moving transfers ownership (no ref count change)
+AssetHandle<Shader> shader3 = std::move(shader1);  // Ref count still 2
+
+// When handles go out of scope, ref count decrements
+// Asset is unloaded when ref count reaches 0 (via UnloadUnusedAssets())
+```
+
+**Synchronous Loading:**
+
+For blocking loads (use sparingly):
+
+```cpp
+AssetHandle<Shader> shader = AssetManager::Get().LoadSync<Shader>("Shaders/basic.glsl");
+// Blocks until loaded or failed
+```
+
+**Path Resolution:**
+
+Asset paths can be relative (to asset root) or absolute:
+
+```cpp
+// Set asset root directory
+AssetManager::Get().SetAssetRoot("Assets");
+
+// Relative path (resolved to Assets/Shaders/basic.glsl)
+AssetHandle<Shader> shader1 = AssetManager::Get().LoadAsync<Shader>("Shaders/basic.glsl");
+
+// Absolute path (used as-is)
+AssetHandle<Shader> shader2 = AssetManager::Get().LoadAsync<Shader>("/full/path/to/shader.glsl");
+```
+
+**Hot Reloading:**
+
+Hot reloading is enabled by default and automatically watches all loaded assets:
+
+```cpp
+// Enable/disable hot reloading
+AssetManager::Get().EnableHotReloading(true);
+
+// Listen for reload events
+EventManager::Get().Subscribe<AssetReloadedEvent>([](const AssetReloadedEvent& e) {
+    if (e.IsSuccess()) {
+        SB_CORE_INFO("Asset reloaded: {}", e.GetFilePath().string());
+    }
+});
+```
+
+**Asset Cleanup:**
+
+Unload assets that are no longer referenced:
+
+```cpp
+// Remove assets with zero reference count
+AssetManager::Get().UnloadUnusedAssets();
+
+// Or clear everything (invalidates all handles)
+AssetManager::Get().ClearCache();
+```
+
 ### Configuration Management
 
 Configuration files use JSON with a layered system: default values merged with user overrides. Thread-safe and easy to use.
@@ -251,6 +406,38 @@ config.Initialize();
 config.SetValue("/window/width", 1920);
 auto merged = config.Get();
 ```
+
+## Core Systems
+
+**Asset Management:**
+- Type-safe asset handles with reference counting
+- Asynchronous loading with progress tracking
+- Automatic caching and hot reloading
+- Event-driven asset lifecycle
+
+**Time Management:**
+- Unity-style Time class (scaled/unscaled time, delta time, time scale)
+- Frame spike protection
+- Smooth delta time calculation
+- Thread-safe access
+
+**Input System:**
+- Polling-based input (keyboard, mouse)
+- Frame-specific state (IsKeyDown, IsKeyUp)
+- Layout-independent scancode support
+- Thread-safe queries
+
+**Event System:**
+- Type-safe event dispatching
+- Observer pattern implementation
+- SDL event integration
+- Thread-safe subscriptions
+
+**Main Thread Dispatcher:**
+- Queue work for main thread execution
+- Essential for graphics APIs (OpenGL/DirectX)
+- Async and sync dispatch modes
+- Thread-safe
 
 ## Integrated Libraries
 
@@ -307,6 +494,29 @@ Tests cover all core systems and library integrations. See the Tests directory f
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Deep dive into the engine's design and architecture
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guidelines for contributing to the project
 
+## Thread Safety
+
+The engine is designed with thread safety in mind:
+
+**Thread-Safe Systems:**
+- **Logging** - All logging operations are thread-safe (spdlog)
+- **Configuration** - ConfigurationManager uses mutex locks for thread-safe access
+- **Profiler** - All profiling operations are thread-safe
+- **Time** - All Time getter methods are thread-safe
+- **Input** - All Input query methods are thread-safe
+- **EventDispatcher** - Subscriptions and dispatch are thread-safe
+- **MainThreadDispatcher** - Thread-safe queue for main thread work
+
+**Main Thread Only:**
+- Window operations (SDL requires main thread)
+- Event processing (SDL events must be processed on main thread)
+- Rendering (graphics APIs require main thread)
+
+**Multi-Threading Support:**
+- Use `MainThreadDispatcher` to queue graphics operations from worker threads
+- AsyncIO system for non-blocking file operations
+- All query operations (Time, Input) are safe from any thread
+
 ## Development Philosophy
 
 Sabora follows a few core principles:
@@ -314,6 +524,8 @@ Sabora follows a few core principles:
 **Explicit over Implicit** - No hidden behavior or magic. If something happens, you can see why and how.
 
 **Performance by Design** - Zero-cost abstractions where possible. RAII ensures resources are managed efficiently without runtime overhead.
+
+**Thread Safety by Default** - Core systems are thread-safe, allowing safe multi-threaded access.
 
 **Developer Experience** - Clear APIs, comprehensive logging, and helpful error messages make development pleasant and productive.
 

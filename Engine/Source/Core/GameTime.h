@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <cmath>
+#include <mutex>
 
 namespace Sabora
 {
@@ -17,6 +18,8 @@ namespace Sabora
      * 
      * Provides static access to time data similar to Unity's Time class, making it
      * easy to access delta time, elapsed time, frame count, and time scale from anywhere.
+     * 
+     * @note Thread-safe - all getter methods can be called from any thread safely.
      * 
      * Usage:
      * @code
@@ -56,8 +59,10 @@ namespace Sabora
          * 
          * Example:
          *   position += velocity * Time::GetDeltaTime();
+         * 
+         * @note Thread-safe - can be called from any thread.
          */
-        [[nodiscard]] static float GetDeltaTime() noexcept { return s_DeltaTime; }
+        [[nodiscard]] static float GetDeltaTime() noexcept;
 
         /**
          * @brief Get the time in seconds it took to complete the last frame (unscaled).
@@ -66,8 +71,10 @@ namespace Sabora
          * This is the actual time between frames, unaffected by timeScale.
          * Use this for UI updates, input handling, or anything that should
          * run at real-time speed regardless of timeScale.
+         * 
+         * @note Thread-safe - can be called from any thread.
          */
-        [[nodiscard]] static float GetUnscaledDeltaTime() noexcept { return s_UnscaledDeltaTime; }
+        [[nodiscard]] static float GetUnscaledDeltaTime() noexcept;
 
         /**
          * @brief Get the time in seconds since the application started (scaled by timeScale).
@@ -75,8 +82,10 @@ namespace Sabora
          * 
          * This value is affected by timeScale. If timeScale is 0.5, this will
          * advance at half speed. If timeScale is 0, this will not advance.
+         * 
+         * @note Thread-safe - can be called from any thread.
          */
-        [[nodiscard]] static float GetTime() noexcept { return s_Time; }
+        [[nodiscard]] static float GetTime() noexcept;
 
         /**
          * @brief Get the time in seconds since the application started (unscaled).
@@ -84,8 +93,10 @@ namespace Sabora
          * 
          * This value is not affected by timeScale. It always represents the
          * actual real-world time since the application started.
+         * 
+         * @note Thread-safe - can be called from any thread.
          */
-        [[nodiscard]] static float GetUnscaledTime() noexcept { return s_UnscaledTime; }
+        [[nodiscard]] static float GetUnscaledTime() noexcept;
 
         /**
          * @brief Get the time in seconds since the application started (unscaled, high precision).
@@ -93,14 +104,18 @@ namespace Sabora
          * 
          * This is the same as GetUnscaledTime() but uses a high-precision clock.
          * Useful for profiling, benchmarking, or when you need maximum precision.
+         * 
+         * @note Thread-safe - can be called from any thread.
          */
-        [[nodiscard]] static float GetRealtimeSinceStartup() noexcept { return s_RealtimeSinceStartup; }
+        [[nodiscard]] static float GetRealtimeSinceStartup() noexcept;
 
         /**
          * @brief Get the current frame count.
          * @return The number of frames that have been processed since the application started.
+         * 
+         * @note Thread-safe - can be called from any thread.
          */
-        [[nodiscard]] static uint64_t GetFrameCount() noexcept { return s_FrameCount; }
+        [[nodiscard]] static uint64_t GetFrameCount() noexcept;
 
         /**
          * @brief Get the time scale factor.
@@ -108,8 +123,10 @@ namespace Sabora
          * 
          * The time scale affects GetDeltaTime() and GetTime(), but not
          * GetUnscaledDeltaTime() or GetUnscaledTime().
+         * 
+         * @note Thread-safe - can be called from any thread.
          */
-        [[nodiscard]] static float GetTimeScale() noexcept { return s_TimeScale; }
+        [[nodiscard]] static float GetTimeScale() noexcept;
 
         /**
          * @brief Set the time scale factor.
@@ -128,8 +145,10 @@ namespace Sabora
          * 
          * This is typically used for physics simulations that require a fixed timestep.
          * Default is 1/60 seconds (60 FPS).
+         * 
+         * @note Thread-safe - can be called from any thread.
          */
-        [[nodiscard]] static float GetFixedDeltaTime() noexcept { return s_FixedDeltaTime; }
+        [[nodiscard]] static float GetFixedDeltaTime() noexcept;
 
         /**
          * @brief Set the fixed delta time for physics updates.
@@ -151,8 +170,10 @@ namespace Sabora
          * If a frame takes longer than this, deltaTime will be clamped to this value.
          * This prevents large time jumps that can break physics or animations.
          * Default is 0.1 seconds (10 FPS minimum).
+         * 
+         * @note Thread-safe - can be called from any thread.
          */
-        [[nodiscard]] static float GetMaximumDeltaTime() noexcept { return s_MaximumDeltaTime; }
+        [[nodiscard]] static float GetMaximumDeltaTime() noexcept;
 
         /**
          * @brief Set the maximum delta time per frame.
@@ -171,8 +192,10 @@ namespace Sabora
          * 
          * This provides a smoothed version of deltaTime that reduces jitter
          * from frame time variations. Useful for UI animations or camera smoothing.
+         * 
+         * @note Thread-safe - can be called from any thread.
          */
-        [[nodiscard]] static float GetSmoothDeltaTime() noexcept { return s_SmoothDeltaTime; }
+        [[nodiscard]] static float GetSmoothDeltaTime() noexcept;
 
         /**
          * @brief Reset the Time system to initial state.
@@ -183,6 +206,10 @@ namespace Sabora
         static void Reset() noexcept;
 
     private:
+        // Thread safety: Time values are read from multiple threads
+        // We use a mutex to protect all state access
+        static std::mutex s_Mutex;
+
         // Scaled time values (affected by timeScale)
         static float s_DeltaTime;
         static float s_Time;

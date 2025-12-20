@@ -20,8 +20,11 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <queue>
 #include <string>
 #include <string_view>
+#include <thread>
+#include <condition_variable>
 #include <unordered_map>
 #include <vector>
 

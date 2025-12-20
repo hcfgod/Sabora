@@ -8,6 +8,7 @@
 #include "Result.h"
 #include "Window.h"
 #include "Event.h"
+#include "MainThreadDispatcher.h"
 
 namespace Sabora 
 {

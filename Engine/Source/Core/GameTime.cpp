@@ -4,6 +4,7 @@
 namespace Sabora
 {
     // Static member initialization
+    std::mutex Time::s_Mutex;
     float Time::s_DeltaTime = 0.0f;
     float Time::s_Time = 0.0f;
     float Time::s_UnscaledDeltaTime = 0.0f;
@@ -20,6 +21,8 @@ namespace Sabora
 
     void Time::Update(float unscaledDeltaTime)
     {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        
         // Clamp delta time to prevent frame spikes
         s_UnscaledDeltaTime = ClampDeltaTime(unscaledDeltaTime);
 
@@ -58,14 +61,76 @@ namespace Sabora
         s_FrameCount++;
     }
 
+    float Time::GetDeltaTime() noexcept
+    {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        return s_DeltaTime;
+    }
+
+    float Time::GetUnscaledDeltaTime() noexcept
+    {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        return s_UnscaledDeltaTime;
+    }
+
+    float Time::GetTime() noexcept
+    {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        return s_Time;
+    }
+
+    float Time::GetUnscaledTime() noexcept
+    {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        return s_UnscaledTime;
+    }
+
+    float Time::GetRealtimeSinceStartup() noexcept
+    {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        return s_RealtimeSinceStartup;
+    }
+
+    uint64_t Time::GetFrameCount() noexcept
+    {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        return s_FrameCount;
+    }
+
+    float Time::GetTimeScale() noexcept
+    {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        return s_TimeScale;
+    }
+
+    float Time::GetSmoothDeltaTime() noexcept
+    {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        return s_SmoothDeltaTime;
+    }
+
+    float Time::GetFixedDeltaTime() noexcept
+    {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        return s_FixedDeltaTime;
+    }
+
+    float Time::GetMaximumDeltaTime() noexcept
+    {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        return s_MaximumDeltaTime;
+    }
+
     void Time::SetTimeScale(float timeScale) noexcept
     {
+        std::lock_guard<std::mutex> lock(s_Mutex);
         // Clamp to non-negative values (negative time doesn't make sense)
         s_TimeScale = std::max(0.0f, timeScale);
     }
 
     void Time::SetFixedDeltaTime(float fixedDeltaTime) noexcept
     {
+        std::lock_guard<std::mutex> lock(s_Mutex);
         // Ensure positive value (minimum 1/1000 second)
         constexpr float MIN_FIXED_DELTA_TIME = 0.001f;
         s_FixedDeltaTime = std::max(MIN_FIXED_DELTA_TIME, fixedDeltaTime);
@@ -73,6 +138,7 @@ namespace Sabora
 
     void Time::SetMaximumDeltaTime(float maximumDeltaTime) noexcept
     {
+        std::lock_guard<std::mutex> lock(s_Mutex);
         // Ensure positive value (minimum 1/1000 second)
         constexpr float MIN_MAX_DELTA_TIME = 0.001f;
         s_MaximumDeltaTime = std::max(MIN_MAX_DELTA_TIME, maximumDeltaTime);
@@ -80,6 +146,8 @@ namespace Sabora
 
     void Time::Reset() noexcept
     {
+        std::lock_guard<std::mutex> lock(s_Mutex);
+        
         s_DeltaTime = 0.0f;
         s_Time = 0.0f;
         s_UnscaledDeltaTime = 0.0f;
@@ -101,6 +169,7 @@ namespace Sabora
 
     float Time::ClampDeltaTime(float deltaTime) noexcept
     {
+        // Note: This is called from Update() which already holds the lock
         // Clamp to maximum delta time to prevent frame spikes
         return std::min(deltaTime, s_MaximumDeltaTime);
     }

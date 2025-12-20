@@ -7,6 +7,10 @@
 #include "Core/Application.h"
 #include "Core/EventManager.h"
 #include "Core/GameTime.h"
+#include "Core/MainThreadDispatcher.h"
+#include "Assets/AssetManager.h"
+#include "Assets/AssetHandle.h"
+#include "Assets/IAssetLoader.h"
 #include "Input/KeyCode.h"
 #include "Input/Input.h"
 

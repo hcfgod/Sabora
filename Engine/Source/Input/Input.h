@@ -3,6 +3,8 @@
 #include "KeyCode.h"
 #include <array>
 #include <cstdint>
+#include <mutex>
+#include <atomic>
 
 // We use int for scancode parameters in the header to avoid requiring SDL headers.
 // Scancodes are just integer values, so using int is safe.
@@ -33,6 +35,8 @@ namespace Sabora
      * to query input state through polling. The engine automatically updates
      * the input state from SDL events, so applications can simply query the
      * current state at any time.
+     * 
+     * @note Thread-safe - all methods can be called from any thread safely.
      * 
      * Usage example:
      *   // Using KeyCode (recommended)
@@ -276,6 +280,12 @@ namespace Sabora
         Input& operator=(const Input&) = delete;
         Input(Input&&) = delete;
         Input& operator=(Input&&) = delete;
+
+        // Thread safety: Input state is accessed from multiple threads
+        // - Main thread: Reads state, updates from events
+        // - Other threads: May read state (e.g., for game logic)
+        // We use a mutex to protect all state access
+        mutable std::mutex m_StateMutex;
 
         // Keyboard state
         // We use a large array to track all possible scancodes
