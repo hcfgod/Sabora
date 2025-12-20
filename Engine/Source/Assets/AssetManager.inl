@@ -59,10 +59,7 @@ namespace Sabora
         metadata->progress = 0.0f;
         
         // Create loading task
-        LoadingTask task;
-        task.assetId = assetId;
-        task.filePath = normalizedPath;
-        task.typeIndex = typeIndex;
+        LoadingTask task(assetId, normalizedPath, typeIndex);
         
         // Start async load
         auto loaderIt = m_Loaders.find(typeIndex);

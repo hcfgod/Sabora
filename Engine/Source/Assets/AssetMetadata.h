@@ -140,13 +140,12 @@ namespace Sabora
             }
         }
 
-        // Non-copyable (managed by AssetManager)
+        // Non-copyable, non-moveable (managed by AssetManager)
+        // Cannot be moved because std::atomic is not moveable
         AssetMetadata(const AssetMetadata&) = delete;
         AssetMetadata& operator=(const AssetMetadata&) = delete;
-
-        // Moveable
-        AssetMetadata(AssetMetadata&&) = default;
-        AssetMetadata& operator=(AssetMetadata&&) = default;
+        AssetMetadata(AssetMetadata&&) = delete;
+        AssetMetadata& operator=(AssetMetadata&&) = delete;
     };
 
 } // namespace Sabora

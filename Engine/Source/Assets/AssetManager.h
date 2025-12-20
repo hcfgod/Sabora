@@ -236,11 +236,22 @@ namespace Sabora
         // Note: We use std::any to type-erase the future since we can't use std::unique_ptr<void>
         struct LoadingTask
         {
-            uint64_t assetId;
+            uint64_t assetId = 0;
             std::filesystem::path filePath;
-            std::type_index typeIndex;
+            std::type_index typeIndex = typeid(void);
             std::any future;  // Type-erased future - contains std::future<Result<std::unique_ptr<T>>>
             std::function<void(void*)> deleter;  // Function to delete the asset pointer
+            
+            // Default constructor
+            LoadingTask() = default;
+            
+            // Constructor with parameters
+            LoadingTask(uint64_t id, const std::filesystem::path& path, std::type_index type)
+                : assetId(id)
+                , filePath(path)
+                , typeIndex(type)
+            {
+            }
         };
 
         // Thread-safe state
