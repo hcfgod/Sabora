@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "Renderer/Core/RenderContext.h"
+#include "Renderer/RendererManager.h"
+#include "Renderer/OpenGL/OpenGLContext.h"
 #include "Core/Window.h"
 #include "Core/Log.h"
 
@@ -7,7 +9,7 @@ namespace Sabora
 {
     Result<std::unique_ptr<RenderContext>> RenderContext::Create(
         Window* window,
-        [[maybe_unused]] RenderContext* shareContext)
+        RenderContext* shareContext)
     {
         if (!window || !window->IsValid())
         {
@@ -17,13 +19,25 @@ namespace Sabora
             );
         }
 
-        // This is a factory method that will be implemented by specific API contexts
-        // For now, it's a placeholder - actual implementation will be in OpenGLContext, etc.
-        SB_CORE_ERROR("RenderContext::Create() called but no API implementation available. Use RendererManager to create a renderer.");
-        
+        // Check if OpenGL is available and delegate to OpenGLContext
+        // This provides a unified interface while maintaining the abstraction
+        if (RendererManager::IsAPIAvailable(RendererAPI::OpenGL))
+        {
+            auto contextResult = OpenGLContext::Create(window, shareContext);
+            if (contextResult.IsFailure())
+            {
+                return Result<std::unique_ptr<RenderContext>>::Failure(contextResult.GetError());
+            }
+
+            // Convert OpenGLContext to RenderContext (base class pointer)
+            std::unique_ptr<RenderContext> context = std::move(contextResult).Value();
+            return Result<std::unique_ptr<RenderContext>>::Success(std::move(context));
+        }
+
+        // No supported API available
         return Result<std::unique_ptr<RenderContext>>::Failure(
             ErrorCode::CoreNotImplemented,
-            "RenderContext::Create() must be called through RendererManager"
+            "No supported graphics API is available. OpenGL is not available on this system."
         );
     }
 

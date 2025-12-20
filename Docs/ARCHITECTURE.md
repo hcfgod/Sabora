@@ -177,6 +177,77 @@ The current architecture provides a solid foundation. Planned additions include:
 
 The modular design makes it straightforward to add these systems without disrupting existing code.
 
+## Future Performance Enhancements
+
+Several performance optimizations are planned for future versions:
+
+### OpenGL State Caching
+
+**Current State:** Viewport and scissor use a dirty flag system for lazy application.
+
+**Planned Enhancement:** Extend state caching to all OpenGL state:
+- Blend state (blend factors, equations, color masks)
+- Depth/stencil state (depth test, stencil operations)
+- Rasterizer state (culling, polygon mode, depth bias)
+- Texture binding state
+- Uniform buffer bindings
+
+**Benefits:**
+- Reduces redundant OpenGL state changes
+- Improves performance in scenes with many draw calls
+- Minimizes driver overhead from state queries
+
+**Implementation Notes:**
+- Track current OpenGL state in renderer
+- Compare requested state with current state before applying
+- Only call OpenGL functions when state actually changes
+- Use dirty flags for state groups to minimize comparisons
+
+### Buffer and Texture Pooling
+
+**Current State:** Buffers and textures are created and destroyed on demand.
+
+**Planned Enhancement:** Implement resource pools for frequently allocated objects:
+- Vertex buffer pool (reusable vertex buffers)
+- Index buffer pool (reusable index buffers)
+- Uniform buffer pool (for per-frame uniforms)
+- Texture pool (for temporary render targets)
+
+**Benefits:**
+- Reduces allocation overhead
+- Improves memory locality
+- Minimizes GPU memory fragmentation
+- Faster resource creation/destruction
+
+**Implementation Notes:**
+- Use object pools with configurable sizes
+- Implement LRU eviction for pool management
+- Provide pool statistics for tuning
+- Allow manual pool management for advanced users
+
+### Expanded Test Coverage
+
+**Current State:** Core systems have good test coverage, renderer tests are limited.
+
+**Planned Enhancement:** Expand test coverage to:
+- All renderer operations (buffer, texture, shader creation)
+- Error paths and edge cases
+- Performance regression tests
+- Integration tests for rendering pipeline
+- Multi-threaded scenarios
+
+**Benefits:**
+- Catches regressions early
+- Documents expected behavior
+- Enables confident refactoring
+- Provides examples for API usage
+
+**Implementation Notes:**
+- Use doctest framework (already integrated)
+- Mock OpenGL context for unit tests
+- Use headless rendering for integration tests
+- Add performance benchmarks for critical paths
+
 ## Performance Considerations
 
 Performance is considered at every level:

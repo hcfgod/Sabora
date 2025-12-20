@@ -60,7 +60,14 @@ namespace Sabora
 
     void MainThreadDispatcher::ProcessQueue()
     {
-        // Collect all async work items first (minimize lock time)
+        // Two-phase processing approach: collect work items, then execute outside locks.
+        // This minimizes lock contention and prevents callbacks from holding locks,
+        // which could cause deadlocks if callbacks try to dispatch more work.
+
+        // Phase 1: Collect all async work items (minimize lock time)
+        // We copy all work items into a local vector while holding the lock,
+        // then release the lock before executing any callbacks. This ensures
+        // that callbacks can safely dispatch more work without deadlocking.
         std::vector<std::function<void()>> asyncWork;
         {
             std::lock_guard<std::mutex> lock(m_QueueMutex);
@@ -73,12 +80,15 @@ namespace Sabora
         }
 
         // Execute async work outside the lock
+        // This allows callbacks to safely dispatch more work without deadlocking.
         for (auto& func : asyncWork)
         {
             func();
         }
 
-        // Collect all sync work items
+        // Phase 2: Collect all sync work items (same two-phase approach)
+        // Sync work items use shared_ptr so we can safely copy them and wait
+        // for completion from other threads using condition variables.
         std::vector<std::shared_ptr<SyncWorkItem>> syncWork;
         {
             std::lock_guard<std::mutex> lock(m_SyncQueueMutex);
@@ -91,16 +101,21 @@ namespace Sabora
         }
 
         // Execute sync work outside the lock
+        // After execution, we mark each work item as completed using atomic operations.
+        // The waiting threads will be notified via condition variable after all work is done.
         for (auto& workItem : syncWork)
         {
             // Execute the function
             workItem->func();
 
-            // Mark as completed
+            // Mark as completed using release semantics to ensure all writes
+            // in the callback are visible to waiting threads before they see completion.
             workItem->completed.store(true, std::memory_order_release);
         }
 
         // Notify all waiting threads after all work is done
+        // We only notify if there was sync work, and we do it while holding the lock
+        // to ensure proper synchronization with waiting threads.
         if (!syncWork.empty())
         {
             std::lock_guard<std::mutex> lock(m_SyncQueueMutex);

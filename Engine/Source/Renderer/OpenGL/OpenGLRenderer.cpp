@@ -47,7 +47,6 @@ namespace Sabora
         {
             return Result<void>::Failure(contextResult.GetError());
         }
-
         m_Context = std::move(contextResult).Value();
 
         // Make context current
@@ -111,13 +110,15 @@ namespace Sabora
             );
         }
 
-        auto contextResult = EnsureContextCurrent();
-        if (contextResult.IsFailure())
-        {
-            return contextResult;
-        }
+        SB_TRY_VOID(EnsureContextCurrent());
+
+        // Lazy state application: Viewport and scissor are marked as "dirty" when set,
+        // and only applied to OpenGL at the start of each frame. This reduces redundant
+        // OpenGL state changes when the same viewport/scissor is set multiple times.
+        // The dirty flag system ensures we only call glViewport/glScissor when necessary.
 
         // Apply viewport if dirty
+        // OpenGL viewport state persists until changed, so we only update it when needed.
         if (m_ViewportDirty)
         {
             glViewport(
@@ -126,11 +127,14 @@ namespace Sabora
                 static_cast<GLsizei>(m_CurrentViewport.width),
                 static_cast<GLsizei>(m_CurrentViewport.height)
             );
+            // glDepthRange sets the depth buffer range for the viewport
             glDepthRange(m_CurrentViewport.minDepth, m_CurrentViewport.maxDepth);
             m_ViewportDirty = false;
         }
 
         // Apply scissor if dirty
+        // Scissor test restricts rendering to a rectangular region. Like viewport,
+        // OpenGL scissor state persists, so we only update when changed.
         if (m_ScissorDirty)
         {
             glScissor(
@@ -169,6 +173,9 @@ namespace Sabora
             );
         }
 
+        // Store the viewport and mark it as dirty for lazy application in BeginFrame().
+        // This defers the actual OpenGL call until the next frame, reducing redundant
+        // state changes if SetViewport() is called multiple times per frame.
         m_CurrentViewport = viewport;
         m_ViewportDirty = true;
 
@@ -185,6 +192,8 @@ namespace Sabora
             );
         }
 
+        // Store the scissor rect and mark it as dirty for lazy application in BeginFrame().
+        // Similar to viewport, this defers OpenGL state changes to reduce overhead.
         m_CurrentScissor = scissor;
         m_ScissorDirty = true;
 
@@ -204,11 +213,7 @@ namespace Sabora
             );
         }
 
-        auto contextResult = EnsureContextCurrent();
-        if (contextResult.IsFailure())
-        {
-            return contextResult;
-        }
+        SB_TRY_VOID(EnsureContextCurrent());
 
         GLbitfield clearBits = 0;
 
@@ -349,11 +354,7 @@ namespace Sabora
             );
         }
 
-        auto contextResult = EnsureContextCurrent();
-        if (contextResult.IsFailure())
-        {
-            return contextResult;
-        }
+        SB_TRY_VOID(EnsureContextCurrent());
 
         bool success = false;
         std::string errorMessage;
@@ -421,11 +422,7 @@ namespace Sabora
             );
         }
 
-        auto contextResult = EnsureContextCurrent();
-        if (contextResult.IsFailure())
-        {
-            return contextResult;
-        }
+        SB_TRY_VOID(EnsureContextCurrent());
 
         // Cast to OpenGLPipelineState
         OpenGLPipelineState* glPipeline = dynamic_cast<OpenGLPipelineState*>(pipelineState);
@@ -458,11 +455,7 @@ namespace Sabora
             );
         }
 
-        auto contextResult = EnsureContextCurrent();
-        if (contextResult.IsFailure())
-        {
-            return contextResult;
-        }
+        SB_TRY_VOID(EnsureContextCurrent());
 
         // If no pipeline state is bound, we can't set vertex buffer
         if (m_CurrentPipelineState == nullptr)
@@ -592,11 +585,7 @@ namespace Sabora
             );
         }
 
-        auto contextResult = EnsureContextCurrent();
-        if (contextResult.IsFailure())
-        {
-            return contextResult;
-        }
+        SB_TRY_VOID(EnsureContextCurrent());
 
         // Cast to OpenGLBuffer
         OpenGLBuffer* glBuffer = buffer ? dynamic_cast<OpenGLBuffer*>(buffer) : nullptr;
@@ -652,11 +641,7 @@ namespace Sabora
             );
         }
 
-        auto contextResult = EnsureContextCurrent();
-        if (contextResult.IsFailure())
-        {
-            return contextResult;
-        }
+        SB_TRY_VOID(EnsureContextCurrent());
 
         // Get primitive type from pipeline
         OpenGLPipelineState* glPipeline = dynamic_cast<OpenGLPipelineState*>(m_CurrentPipelineState);
@@ -707,37 +692,29 @@ namespace Sabora
                 }
             }
 
-            // Get primitive type (this is a helper method we need to add)
-            // For now, we'll get it from the pipeline's topology
+            // Get primitive type from pipeline topology using helper function
+            // This eliminates code duplication between Draw() and DrawIndexed()
             PrimitiveTopology topology = glPipeline->GetTopology();
-            
-            // Map topology to OpenGL primitive type
-            switch (topology)
-            {
-                case PrimitiveTopology::Points:                primitiveType = GL_POINTS; break;
-                case PrimitiveTopology::Lines:                 primitiveType = GL_LINES; break;
-                case PrimitiveTopology::LineStrip:             primitiveType = GL_LINE_STRIP; break;
-                case PrimitiveTopology::Triangles:             primitiveType = GL_TRIANGLES; break;
-                case PrimitiveTopology::TriangleStrip:         primitiveType = GL_TRIANGLE_STRIP; break;
-                case PrimitiveTopology::TriangleFan:           primitiveType = GL_TRIANGLE_FAN; break;
-                case PrimitiveTopology::LinesAdjacency:        primitiveType = GL_LINES_ADJACENCY; break;
-                case PrimitiveTopology::LineStripAdjacency:    primitiveType = GL_LINE_STRIP_ADJACENCY; break;
-                case PrimitiveTopology::TrianglesAdjacency:    primitiveType = GL_TRIANGLES_ADJACENCY; break;
-                case PrimitiveTopology::TriangleStripAdjacency: primitiveType = GL_TRIANGLE_STRIP_ADJACENCY; break;
-                case PrimitiveTopology::Patches:               primitiveType = GL_PATCHES; break;
-                default:                                       primitiveType = GL_TRIANGLES; break;
-            }
+            primitiveType = GetGLPrimitiveType(topology);
 
-            // Execute draw call
+            // Execute draw call with optimization based on instance parameters
+            // OpenGL provides different draw functions optimized for different use cases:
+            // - glDrawArrays: Simple non-instanced drawing (most common case)
+            // - glDrawArraysInstanced: Instanced drawing starting from instance 0
+            // - glDrawArraysInstancedBaseInstance: Instanced drawing with base instance offset
+            // We choose the most efficient function based on the parameters to avoid
+            // unnecessary overhead from base instance calculations when not needed.
             if (instanceCount == 1)
             {
+                // Non-instanced draw: use the simplest and fastest path
                 glDrawArrays(primitiveType, static_cast<GLint>(firstVertex), static_cast<GLsizei>(vertexCount));
             }
             else
             {
-                // Use glDrawArraysInstanced if base instance is 0, otherwise use extension
+                // Instanced draw: choose function based on base instance
                 if (firstInstance == 0)
                 {
+                    // No base instance offset: use standard instanced function
                     glDrawArraysInstanced(
                         primitiveType,
                         static_cast<GLint>(firstVertex),
@@ -747,9 +724,9 @@ namespace Sabora
                 }
                 else
                 {
-                    // glDrawArraysInstancedBaseInstance requires GL 4.2+ or ARB_base_instance
-                    // For compatibility, we'll use the extension function if available
-                    // Note: This may need to be checked at runtime
+                    // Base instance offset required: use extended function
+                    // glDrawArraysInstancedBaseInstance requires GL 4.2+ or ARB_base_instance extension
+                    // This allows drawing a subset of instances from a larger instance buffer
                     glDrawArraysInstancedBaseInstance(
                         primitiveType,
                         static_cast<GLint>(firstVertex),
@@ -807,11 +784,7 @@ namespace Sabora
             );
         }
 
-        auto contextResult = EnsureContextCurrent();
-        if (contextResult.IsFailure())
-        {
-            return contextResult;
-        }
+        SB_TRY_VOID(EnsureContextCurrent());
 
         // Get primitive type from pipeline
         OpenGLPipelineState* glPipeline = dynamic_cast<OpenGLPipelineState*>(m_CurrentPipelineState);
@@ -829,24 +802,9 @@ namespace Sabora
 
         auto drawFunc = [this, glPipeline, &primitiveType, &success, &errorMessage,
                         indexCount, instanceCount, firstIndex, vertexOffset, firstInstance]() {
-            // Get primitive type from topology
+            // Get primitive type from pipeline topology using helper function
             PrimitiveTopology topology = glPipeline->GetTopology();
-            
-            switch (topology)
-            {
-                case PrimitiveTopology::Points:                primitiveType = GL_POINTS; break;
-                case PrimitiveTopology::Lines:                 primitiveType = GL_LINES; break;
-                case PrimitiveTopology::LineStrip:             primitiveType = GL_LINE_STRIP; break;
-                case PrimitiveTopology::Triangles:             primitiveType = GL_TRIANGLES; break;
-                case PrimitiveTopology::TriangleStrip:         primitiveType = GL_TRIANGLE_STRIP; break;
-                case PrimitiveTopology::TriangleFan:           primitiveType = GL_TRIANGLE_FAN; break;
-                case PrimitiveTopology::LinesAdjacency:        primitiveType = GL_LINES_ADJACENCY; break;
-                case PrimitiveTopology::LineStripAdjacency:    primitiveType = GL_LINE_STRIP_ADJACENCY; break;
-                case PrimitiveTopology::TrianglesAdjacency:    primitiveType = GL_TRIANGLES_ADJACENCY; break;
-                case PrimitiveTopology::TriangleStripAdjacency: primitiveType = GL_TRIANGLE_STRIP_ADJACENCY; break;
-                case PrimitiveTopology::Patches:               primitiveType = GL_PATCHES; break;
-                default:                                       primitiveType = GL_TRIANGLES; break;
-            }
+            primitiveType = GetGLPrimitiveType(topology);
 
             // Execute indexed draw call
             // Note: OpenGL 4.6 supports glDrawElementsBaseVertex and glDrawElementsInstancedBaseVertexBaseInstance
@@ -1011,6 +969,25 @@ namespace Sabora
         // Viewports
         glGetIntegerv(GL_MAX_VIEWPORTS, &value);
         m_Capabilities.maxViewports = static_cast<uint32_t>(value);
+    }
+
+    uint32_t OpenGLRenderer::GetGLPrimitiveType(PrimitiveTopology topology)
+    {
+        switch (topology)
+        {
+            case PrimitiveTopology::Points:                return GL_POINTS;
+            case PrimitiveTopology::Lines:                  return GL_LINES;
+            case PrimitiveTopology::LineStrip:              return GL_LINE_STRIP;
+            case PrimitiveTopology::Triangles:              return GL_TRIANGLES;
+            case PrimitiveTopology::TriangleStrip:          return GL_TRIANGLE_STRIP;
+            case PrimitiveTopology::TriangleFan:             return GL_TRIANGLE_FAN;
+            case PrimitiveTopology::LinesAdjacency:         return GL_LINES_ADJACENCY;
+            case PrimitiveTopology::LineStripAdjacency:     return GL_LINE_STRIP_ADJACENCY;
+            case PrimitiveTopology::TrianglesAdjacency:     return GL_TRIANGLES_ADJACENCY;
+            case PrimitiveTopology::TriangleStripAdjacency: return GL_TRIANGLE_STRIP_ADJACENCY;
+            case PrimitiveTopology::Patches:                return GL_PATCHES;
+            default:                                        return GL_TRIANGLES;
+        }
     }
 
     Result<void> OpenGLRenderer::EnsureContextCurrent()

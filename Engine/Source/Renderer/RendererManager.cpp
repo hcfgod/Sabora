@@ -2,7 +2,9 @@
 #include "Renderer/RendererManager.h"
 #include "Core/Window.h"
 #include "Core/Log.h"
+#include "Core/SDLManager.h"
 #include "Renderer/OpenGL/OpenGLRenderer.h"
+#include <SDL3/SDL.h>
 
 namespace Sabora
 {
@@ -127,20 +129,51 @@ namespace Sabora
         switch (api)
         {
             case RendererAPI::OpenGL:
-                // OpenGL is available if we can load GLAD
-                // For now, assume it's available (will be checked during context creation)
-                return true;
+            {
+                // Lightweight check: verify SDL is initialized (required for OpenGL)
+                if (!SDLManager::IsInitialized())
+                {
+                    return false;
+                }
+
+                // Try to get a proc address for a basic OpenGL function
+                // This checks if the OpenGL library/driver is available without creating a context
+                // SDL_GL_GetProcAddress can work without a context on most platforms
+                // We check for glGetString which is a core OpenGL 1.0 function
+                void* procAddress = SDL_GL_GetProcAddress("glGetString");
+                if (procAddress != nullptr)
+                {
+                    SB_CORE_INFO("OpenGL proc address for 'glGetString' is available");
+                    // OpenGL library is available and we can get function pointers
+                    return true;
+                }
+
+                // If we can't get a proc address, OpenGL might not be available
+                // However, on some platforms (especially with some drivers), proc addresses
+                // might only be available after creating a context. So we'll be lenient
+                // and still return true if SDL is initialized, letting context creation
+                // do the real validation.
+                SB_CORE_INFO("Could not get OpenGL proc address for 'glGetString' without a context. "
+                              "This may be normal on some platforms/drivers. Will attempt context creation.");
+                return true; // Assume available if SDL is initialized; real check in context creation
+            }
 
             case RendererAPI::Vulkan:
-                // TODO: Check for Vulkan availability
+                // @todo Check for Vulkan availability
+                // Requires: Vulkan SDK, vkGetInstanceProcAddr
+                // See FUTURE_RENDERERS.md for implementation details
                 return false;
 
             case RendererAPI::DirectX12:
-                // TODO: Check for DirectX 12 availability (Windows only)
+                // @todo Check for DirectX 12 availability (Windows only)
+                // Requires: Windows 10+, D3D12CreateDevice
+                // See FUTURE_RENDERERS.md for implementation details
                 return false;
 
             case RendererAPI::Metal:
-                // TODO: Check for Metal availability (macOS/iOS only)
+                // @todo Check for Metal availability (macOS/iOS only)
+                // Requires: macOS 10.11+, MTLCreateSystemDefaultDevice
+                // See FUTURE_RENDERERS.md for implementation details
                 return false;
 
             case RendererAPI::None:
@@ -159,21 +192,24 @@ namespace Sabora
                 );
 
             case RendererAPI::Vulkan:
-                // TODO: Implement Vulkan renderer
+                // @todo Implement Vulkan renderer
+                // See FUTURE_RENDERERS.md for implementation plan and requirements
                 return Result<std::unique_ptr<Renderer>>::Failure(
                     ErrorCode::CoreNotImplemented,
                     "Vulkan renderer not yet implemented"
                 );
 
             case RendererAPI::DirectX12:
-                // TODO: Implement DirectX 12 renderer
+                // @todo Implement DirectX 12 renderer
+                // See FUTURE_RENDERERS.md for implementation plan and requirements
                 return Result<std::unique_ptr<Renderer>>::Failure(
                     ErrorCode::CoreNotImplemented,
                     "DirectX 12 renderer not yet implemented"
                 );
 
             case RendererAPI::Metal:
-                // TODO: Implement Metal renderer
+                // @todo Implement Metal renderer
+                // See FUTURE_RENDERERS.md for implementation plan and requirements
                 return Result<std::unique_ptr<Renderer>>::Failure(
                     ErrorCode::CoreNotImplemented,
                     "Metal renderer not yet implemented"

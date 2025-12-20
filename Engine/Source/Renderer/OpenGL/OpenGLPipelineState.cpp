@@ -438,9 +438,16 @@ namespace Sabora
 
     void OpenGLPipelineState::SetupVertexAttributes() const
     {
-        // Vertex attributes are set up when binding vertex buffers
-        // This is a placeholder - actual setup happens in draw calls
-        // when vertex buffers are bound
+        // Vertex attributes are intentionally set up when binding vertex buffers,
+        // not during pipeline state binding. This is the correct OpenGL pattern:
+        // - Vertex attribute layout is defined by the pipeline state's VertexLayout
+        // - Actual attribute binding (glVertexAttribPointer) happens in OpenGLRenderer::SetVertexBuffer()
+        //   when a vertex buffer is bound, as it requires both the layout and the buffer
+        //
+        // This design allows the same pipeline state to work with different vertex buffers
+        // that may have different memory layouts, as long as they match the VertexLayout structure.
+        //
+        // See OpenGLRenderer::SetVertexBuffer() for the actual vertex attribute setup implementation.
     }
 
     //==========================================================================

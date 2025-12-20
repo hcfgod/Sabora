@@ -143,6 +143,16 @@ namespace Sabora
          */
         [[nodiscard]] const RendererCapabilities& GetCapabilities() const noexcept { return m_Capabilities; }
 
+        /**
+         * @brief Convert PrimitiveTopology enum to OpenGL primitive type.
+         * @param topology The primitive topology to convert.
+         * @return OpenGL primitive type constant (e.g., GL_TRIANGLES, GL_LINES).
+         * 
+         * This helper function eliminates code duplication between Draw() and DrawIndexed().
+         * Made public for unit testing purposes.
+         */
+        [[nodiscard]] static uint32_t GetGLPrimitiveType(PrimitiveTopology topology);
+
     private:
         /**
          * @brief Initialize renderer capabilities by querying OpenGL.

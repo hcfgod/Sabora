@@ -13,6 +13,18 @@
 using namespace Sabora;
 
 /**
+ * @brief Constants used by the Sandbox application.
+ */
+namespace SandboxConstants
+{
+    /**
+     * @brief Default clear color for the render target.
+     * Dark blue color: RGB(0.1, 0.1, 0.2) with full alpha.
+     */
+    constexpr ClearColor DefaultClearColor{0.1f, 0.1f, 0.2f, 1.0f};
+}
+
+/**
  * @brief Sandbox application for testing engine features.
  */
 class SandboxApp : public Application
@@ -21,11 +33,16 @@ public:
     SandboxApp() : Application({ "Sabora Sandbox", WindowConfig{ "Sabora Sandbox", 1280, 720, false, true, false, true } }), m_RenderingInitialized(false)
     {
         // Subscribe to events using EventManager singleton
+        // Note: EventManager::Subscribe requires const reference in callback signature,
+        // but the underlying event is non-const, so we use const_cast to match OnWindowClose signature.
+        // This is safe because Dispatch() passes a non-const event to the callback.
         [[maybe_unused]] auto closeSubId = EventManager::Get().Subscribe<WindowCloseEvent>
         (
             [this](const WindowCloseEvent& event) 
             {
-                OnWindowClose(const_cast<WindowCloseEvent&>(event));
+                // Safe const_cast: EventDispatcher::Dispatch passes non-const event to callbacks
+                WindowCloseEvent& mutableEvent = const_cast<WindowCloseEvent&>(event);
+                OnWindowClose(mutableEvent);
             }
         );
 
@@ -178,17 +195,18 @@ public:
 
         // Clear the screen with a dark blue color and depth buffer
         // Note: Viewport is automatically updated by the engine when window is resized
-        ClearColor clearColor;
-        clearColor.r = 0.1f;
-        clearColor.g = 0.1f;
-        clearColor.b = 0.2f;
-        clearColor.a = 1.0f;
+        ClearColor clearColor = SandboxConstants::DefaultClearColor;
         
         ClearDepthStencil clearDepthStencil;
         clearDepthStencil.depth = 1.0f;  // Clear depth to 1.0 (far plane)
         clearDepthStencil.stencil = 0;
         
-        renderer->Clear(ClearFlags::Color | ClearFlags::Depth, clearColor, clearDepthStencil);
+        auto clearResult = renderer->Clear(ClearFlags::Color | ClearFlags::Depth, clearColor, clearDepthStencil);
+        if (clearResult.IsFailure())
+        {
+            SB_CORE_ERROR("Failed to clear render target: {}", clearResult.GetError().ToString());
+            return;
+        }
 
         // Set pipeline state
         auto pipelineResult = renderer->SetPipelineState(m_PipelineState.get());

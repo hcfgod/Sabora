@@ -491,8 +491,10 @@ Tests cover all core systems and library integrations. See the Tests directory f
 
 ## Documentation
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Deep dive into the engine's design and architecture
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guidelines for contributing to the project
+- **[ARCHITECTURE.md](Docs/ARCHITECTURE.md)** - Deep dive into the engine's design and architecture
+- **[CONTRIBUTING.md](Docs/CONTRIBUTING.md)** - Guidelines for contributing to the project
+- **[BUILD_TROUBLESHOOTING.md](Docs/BUILD_TROUBLESHOOTING.md)** - Solutions to common build issues
+- **[FUTURE_RENDERERS.md](Docs/FUTURE_RENDERERS.md)** - Planned renderer implementations
 
 ## Thread Safety
 
